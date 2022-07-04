@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on Fri Jul  1 17:28:58 2022
@@ -18,6 +19,9 @@ import pyttsx3
 import random
 from pandastable import Table
 import cv2
+import pandas as pd
+import numpy as np
+import csv
 
 def advert():
     root_v1 = tk.Tk()
@@ -31,11 +35,15 @@ def advert():
     label1.pack()
     root_v1.after(3000, lambda: root_v1.destroy())
     root_v1.mainloop()
-advert()
+
 
 label_name = [f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}"]
 configruation_title = f"{None}"
 video_file = False
+available_formats = ["flv", "avi", "amv", "mp4"]
+length_movie = False
+df_checker = False
+
 
 class Application:
     def __init__(self):
@@ -122,10 +130,9 @@ class Application:
             pass
     
     def easy_open(self):
-        global video_file, available_formats
+        global video_file, available_formats, player
         video_file = easygui.fileopenbox(title="Select An Video", filetypes= ["*.gif", "*.flv", "*.avi", "*.amv", "*.mp4"])
         if video_file != None:
-            messagebox.showinfo("Information box", "Video uploaded")
             video_title = video_file.split("\\")
             video_format = video_title[-1].split(".")
             video_format = video_format[-1].lower()
@@ -134,6 +141,11 @@ class Application:
                 self.text = f"Current video: {video_title[-1]}"
                 self.current_video.configure(width = len(self.text))
                 self.current_video.insert(tk.INSERT, self.text)
+                messagebox.showinfo("Information box", "Video uploaded")
+                vlc_instance = vlc.Instance()
+                player = vlc_instance.media_player_new()
+                media = vlc_instance.media_new(video_file)
+                player.set_media(media)
             else:
                 messagebox.showerror("Error box", "Wrong format of video!")
                 messagebox.showinfo("Information box", f'Currently available formats: .flv, .avi, .amv, .mp4, \nformat of your video : {video_format}')
@@ -386,15 +398,11 @@ class Application:
         
         label_list = label_name
         messagebox.showinfo("Information box", "Labels updated")
-        
-        vlc_instance = vlc.Instance()
-        player = vlc_instance.media_player_new()
-        player.set_media(video_file)
         player.play()
-        sleep(0.1)
-        fps = player.get_fps()
+        sleep(0.2)
         length_movie = player.get_length()
         player.stop()
+        print(length_movie)
     def label_configurator_save(self):
         
         list_configuration = []
@@ -404,6 +412,7 @@ class Application:
         list_configuration.append(self.label_4_v1_text_box.get("1.0", "end-1c"))
         list_configuration.append(self.label_5_v1_text_box.get("1.0", "end-1c"))
         list_configuration.append(self.label_6_v1_text_box.get("1.0", "end-1c"))
+        
         list_configuration.append(self.label_7_v1_text_box.get("1.0", "end-1c"))
         list_configuration.append(self.label_8_v1_text_box.get("1.0", "end-1c"))
         list_configuration.append(self.label_9_v1_text_box.get("1.0", "end-1c"))
@@ -656,12 +665,44 @@ def start_vido1():
         cap = cv2.VideoCapture(video_file)
         tots = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         frame_duration = length_movie / tots
-        width = float(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = float(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        cv2.createTrackbar('frame', title_window, 0,int(tots)-1, getFrame)
-        cv2.createTrackbar('video size', title_window, 100, 200, rescale_frame)
-        cv2.createTrackbar('video spped', title_window, 0, 3, video_resolution)
-        slow_motion = 1
+        print(len(np.arange(0, length_movie, frame_duration)))
+        print(tots)
+        #cv2.createTrackbar('frame', title_window, 0,int(tots)-1, getFrame)
+        #cv2.createTrackbar('video size', title_window, 100, 200, rescale_frame)
+        #cv2.createTrackbar('video spped', title_window, 0, 3, video_resolution)
+        if df_checker == False:
+            if len(np.arange(0, length_movie, frame_duration)) == tots:
+                df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
+                df.index.name="Frame No."
+                df["Frame No."] = np.arange(0, length_movie+frame_duration, frame_duration)
+                df_checker = True
+            else:
+                df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
+                df.index.name="Frame No."
+                df["Frame No."] = np.arange(0, length_movie, frame_duration)
+                df_checker = True
+        else:
+            messagebox.showinfo("Information box", "Labels uploaded")
+            names_columns = df.columns.tolist()
+            names_columns[0:9]= label_list
+            df.columns = names_columns
+        
+
+def start_vido3():
+    global label_1_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, video_title
+    if video_file == None:
+        messagebox.showerror("Error box", "Upload the video first")
+    else:
+        cap = cv2.VideoCapture(video_file)
+        tots = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        video_title = video_file.split("\\")
+        video_title = video_title[-1].split(".")
+        save_file = None
+        save_file = easygui.diropenbox(msg = "Select folder for a save location", title = "Typical window")
+        if save_file == None:
+            messagebox.showerror("Error box", "Folder was not selected")
+        else:
+            messagebox.showinfo("Information box", "Folder added :):):)")
         if df_checker == False:
             df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 1))
             df.index.name="Frame No."
@@ -669,14 +710,18 @@ def start_vido1():
             df_checker = True
         else:
             messagebox.showinfo("Information box", "Labels uploaded")
-            names_columns = df.columns.tolist()
-            names_columns[0:9]= label_list
-            df.columns = names_columns
+        save_file_excel = save_file + "\\" + video_title[0] + ".xlsx"
+        df.to_excel(save_file_excel)
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        size = (frame_width, frame_height)
+        save_file = save_file + "\\" + video_title[0] + "_labeled.mp4"
+        out = cv2.VideoWriter(save_file, fourcc, 30.0, size)
         while(cap.isOpened()):
             ret, frame = cap.read()
             if ret == True:
                 current_frames = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-                
                 if current_frames in label_1_list and key_label_controler[0] == False:
                     draw_label(label_1_name, (10,20), (255,0,0))
                 if current_frames in label_2_list and key_label_controler[0] == False:
@@ -695,196 +740,51 @@ def start_vido1():
                     draw_label(label_8_name, (10,160), (153,153,0))
                 if current_frames in label_9_list and key_label_controler[0] == False:
                     draw_label(label_9_name, (10,180), (128,128,128))
-                elif (current_frames in label_1_list or current_frames in label_2_list or current_frames in label_3_list or current_frames in label_4_list or current_frames in label_5_list or current_frames in label_6_list or current_frames in label_7_list or current_frames in label_8_list or current_frames in label_9_list) and key_label_controler[0] == True:
-                    frame1 = cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
-                    cv2.imshow(title_window, frame1)
-                    cv2.waitKey(slow_motion)
-                    key_restart(False ,key_label_controler)
-                    
-                else:
-
-                    frame1 = cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
-                    cv2.imshow(title_window, frame1)
-                    cv2.waitKey(slow_motion)
-                frame1 = cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
-                cv2.imshow(title_window, frame1)
-                cv2.waitKey(slow_motion)
-                cv2.setTrackbarPos('frame',title_window, int(current_frames))
-                if cv2.waitKey(25) & 0xFF == ord('q'):
-                    cap.release()
-                    cv2.destroyAllWindows()
-                if keyboard.is_pressed('a'):
-                    key_restart(True ,key_label_controler)
-                    
-                    frame_changer(cap, "back", 1)
-                    key_restart(False,key_pressed_list)
-                 
-                if keyboard.is_pressed('d'):
-                    frame_changer(cap, "front", 1)
-                    key_restart(False,key_pressed_list)
-                    key_restart(False ,key_label_controler)
-                    
-                if keyboard.is_pressed("r"):
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                    cv2.setTrackbarPos('frame',title_window, 0)
-                    cv2.waitKey(-1)
-                    key_restart(False,key_pressed_list)
-                if keyboard.is_pressed('w'):
-                    cv2.waitKey(frameTime)
-                    key_restart(False,key_pressed_list)
-                if keyboard.is_pressed('e'):
-                    end_key(df, column)
-                
-                if label_1_name != "None":
-                    if keyboard.is_pressed('1'):
-                        previous_column = column
-                        column = 0
-                        step_mode(df, label_1_name, cap, key_pressed_list[0], column, previous_column, label_1_list)
-                        add_to_list(frame_to_list, label_1_list)
-                        if key_pressed_list[0] == False:
-                            key_restart(True,key_pressed_list)
-                        else:
-                            continue
-                
-                if label_2_name != "None":
-                    if keyboard.is_pressed('2'):
-                        previous_column = column
-                        column = 1
-                        step_mode(df, label_2_name, cap, key_pressed_list[1], column, previous_column, label_2_list)
-                        add_to_list(frame_to_list, label_2_list)
-                        if key_pressed_list[1] == False:
-                            key_restart(True,key_pressed_list)
-                        else:
-                            continue
-                
-                if label_3_name != "None":
-                    if keyboard.is_pressed('3'):
-                        previous_column = column
-                        column = 2
-                        step_mode(df, label_3_name, cap, key_pressed_list[2], column, previous_column, label_3_list)
-                        add_to_list(frame_to_list, label_3_list)
-                        if key_pressed_list[2] == False:
-                            key_restart(True,key_pressed_list)
-                        else:
-                            continue
-                        
-                if label_4_name != "None":
-                    if keyboard.is_pressed('4'):
-                        previous_column = column
-                        column = 3
-                        step_mode(df, label_4_name, cap, key_pressed_list[3], column, previous_column, label_4_list)
-                        add_to_list(frame_to_list, label_4_list)
-                        if key_pressed_list[3] == False:
-                            key_restart(True,key_pressed_list)
-                        else:
-                            continue
-                
-                if label_5_name != "None":
-                    if keyboard.is_pressed('5'):
-                        previous_column = column
-                        column = 4
-                        step_mode(df, label_5_name, cap, key_pressed_list[4], column, previous_column, label_5_list)
-                        add_to_list(frame_to_list, label_5_list)
-                        if key_pressed_list[4] == False:
-                            key_restart(True,key_pressed_list)
-                        else:
-                            continue
-                
-                if label_6_name != "None":
-                    if keyboard.is_pressed('6'):
-                        previous_column = column
-                        column = 5
-                        step_mode(df, label_6_name, cap, key_pressed_list[5], column, previous_column, label_6_list)
-                        add_to_list(frame_to_list, label_6_list)
-                        if key_pressed_list[5] == False:
-                            key_restart(True,key_pressed_list)
-                        else:
-                            continue
-                
-                if label_7_name != "None":
-                    if keyboard.is_pressed('7'):
-                        previous_column = column
-                        column = 6
-                        step_mode(df, label_7_name, cap, key_pressed_list[6], column, previous_column, label_7_list)
-                        add_to_list(frame_to_list, label_7_list)
-                        if key_pressed_list[6] == False:
-                            key_restart(True,key_pressed_list)
-                        else:
-                            continue
-                
-                if label_8_name != "None":
-                    if keyboard.is_pressed('8'):
-                        previous_column = column
-                        column = 7
-                        step_mode(df, label_8_name, cap, key_pressed_list[7], column, previous_column, label_8_list)
-                        add_to_list(frame_to_list, label_8_list)
-                        if key_pressed_list[7] == False:
-                            key_restart(True,key_pressed_list)
-                        else:
-                            continue
-                
-                if label_9_name != "None":
-                    if keyboard.is_pressed('9'):
-                        previous_column = column
-                        column = 8
-                        step_mode(df, label_9_name, cap, key_pressed_list[8], column, previous_column, label_9_list)
-                        add_to_list(frame_to_list, label_9_list)
-                        if key_pressed_list[7] == False:
-                            key_restart(True,key_pressed_list)
-                        else:
-                            continue
-                
-                if keyboard.is_pressed('g'):
-                    delete_mode(df, np.nan, column)
-                    key_restart(False,key_pressed_list)
-                if keyboard.is_pressed('h'):
-                    ctrl_alt_delet(df)
-                    key_restart(False,key_pressed_list)
-                if keyboard.is_pressed("z"):
-                    frame_changer(cap, "back", int(fps))
-                    key_restart(True ,key_label_controler)
-                if keyboard.is_pressed("c"):
-                    frame_changer(cap, "front", int(fps))
-                    key_restart(True ,key_label_controler)
+                out.write(frame)
             else:
-                print("koniec")
+                messagebox.showinfo("Information box", "Video and data were saved successfully :):):)")
                 xd = df
                 cap.release()
+                out.release()
                 cv2.destroyAllWindows()
-vlc_instance = vlc.Instance()
-player = vlc_instance.media_player_new()
-media = vlc_instance.media_new("C:\\Users\\malgo\\Desktop\python\\video_labeling_v2\\Raindrops_Videvo.mp4")
-player.set_media(media)
-player.play()
-sleep(0.1)
-fps = player.get_fps()
-length_movie = player.get_length()
-player.stop()
-back_in_time = 50
-while True:
-    if keyboard.read_key() == "1":
-        player.play()
-        length_movie = player.get_length()
-    if keyboard.read_key() == "space":
-        player.pause()
+
+def load_configuration_fun():
+    global df, label_1_name, label_2_name, label_3_name, label_4_name, label_5_name, label_6_name, label_7_name, label_8_name, label_9_name, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, df_checker,label_list 
+    configuration_labels_v1 = []
+    configuration_loaded = None
+    messagebox.showinfo("Information box", "Load configuration file (.txt)")
+    configuration_loaded = easygui.fileopenbox(title="Select a file", filetypes= ["*.txt"])
+    if configuration_loaded == None:
+            messagebox.showerror("Error box", "Configuration not loaded")
+    else:
+        with open (configuration_loaded) as content:
+            configuration_labels_v1 = content.readlines()
+            for i, j in enumerate(configuration_labels_v1):
+                configuration_labels_v1[i] = j.replace("\n", "")
         
-    if keyboard.read_key() == "d":
-        player.next_frame()    
-    if keyboard.read_key() == "4":
-        player.stop()
-        break
-    if keyboard.read_key() == "5":
-        x = player.get_time()
-    if keyboard.read_key() == "a":
-        back_one_frame = player.get_time()
-        time_12 = back_one_frame - back_in_time
-        current_state = str(player.get_state())
-        if current_state == "State.Playing":
-            player.set_time(time_12)
-            player.pause()
-        else:
-            player.set_time(time_12)
-    if keyboard.read_key() == "s":
-        print(type(str(player.get_state())))
+        if configuration_labels_v1[0] != "None":
+            label_1_name = configuration_labels_v1[0]
+        if configuration_labels_v1[1] != "None":
+            label_2_name = configuration_labels_v1[1]
+        if configuration_labels_v1[2] != "None":
+            label_3_name = configuration_labels_v1[2]
+        if configuration_labels_v1[3] != "None":
+            label_4_name = configuration_labels_v1[3]
+        if configuration_labels_v1[4] != "None":
+            label_5_name = configuration_labels_v1[4]
+        if configuration_labels_v1[5] != "None":
+            label_6_name = configuration_labels_v1[5]
+        if configuration_labels_v1[6] != "None":
+            label_7_name = configuration_labels_v1[6]
+        if configuration_labels_v1[7] != "None":
+            label_8_name = configuration_labels_v1[7]
+        if configuration_labels_v1[8] != "None":
+            label_9_name = configuration_labels_v1[8]
+        label_list = [label_1_name, label_2_name, label_3_name, label_4_name, label_5_name, label_6_name, label_7_name, label_8_name, label_9_name]
+        messagebox.showinfo("Information box", "Labels updated")
+
+
+
+advert()
 video_object = Application()
 video_object.root.mainloop()
