@@ -43,7 +43,7 @@ video_file = False
 available_formats = ["flv", "avi", "amv", "mp4"]
 length_movie = False
 df_checker = False
-
+current_label = "starter"
 
 class Application:
     def __init__(self):
@@ -402,7 +402,6 @@ class Application:
         sleep(0.2)
         length_movie = player.get_length()
         player.stop()
-        print(length_movie)
     def label_configurator_save(self):
         
         list_configuration = []
@@ -653,20 +652,18 @@ def load_machine_state_fun():
         else:
             messagebox.showerror("Error box", "Wrong file uploaded. Try again")
 def start_vido1():
-    global label_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, width, height, dim, slow_motion, length_movie
+    global label_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, length_movie, current_label
     if video_file == None:
         messagebox.showerror("Error box", "Upload the video first")
     elif label_list == None:
         messagebox.showerror("Error box", "Before you start labeling you have to submit any label first")
     else:
-        title_window = "Mnimalistic Player"
-        cv2.namedWindow(title_window)
-        cv2.moveWindow(title_window,750,150)
+        #title_window = "Mnimalistic Player"
+        #cv2.namedWindow(title_window)
+        #cv2.moveWindow(title_window,750,150)
         cap = cv2.VideoCapture(video_file)
         tots = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         frame_duration = length_movie / tots
-        print(len(np.arange(0, length_movie, frame_duration)))
-        print(tots)
         #cv2.createTrackbar('frame', title_window, 0,int(tots)-1, getFrame)
         #cv2.createTrackbar('video size', title_window, 100, 200, rescale_frame)
         #cv2.createTrackbar('video spped', title_window, 0, 3, video_resolution)
@@ -674,20 +671,47 @@ def start_vido1():
             if len(np.arange(0, length_movie, frame_duration)) == tots:
                 df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
                 df.index.name="Frame No."
-                df["Frame No."] = np.arange(0, length_movie+frame_duration, frame_duration)
+                df["Frame time [ms]."] = np.arange(0, length_movie+frame_duration, frame_duration)
                 df_checker = True
             else:
                 df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
                 df.index.name="Frame No."
-                df["Frame No."] = np.arange(0, length_movie, frame_duration)
+                df["Frame time [ms]."] = np.arange(0, length_movie, frame_duration)
                 df_checker = True
         else:
             messagebox.showinfo("Information box", "Labels uploaded")
             names_columns = df.columns.tolist()
             names_columns[0:9]= label_list
             df.columns = names_columns
-        
-
+        list_of_times = df["Frame time [ms]."].tolist()
+        stoper = True 
+        player.play()
+        while stoper:
+            if keyboard.read_key() == "d":
+                player.next_frame()
+            if keyboard.read_key() == "a":
+                back_one_frame = player.get_time()
+                time_12 = back_one_frame - round(frame_duration)
+                current_state = str(player.get_state())
+                if current_state == "State.Playing":
+                    player.set_time(time_12)
+                    player.pause()
+                else:
+                    player.set_time(time_12)
+            if keyboard.read_key() == "space":
+                player.pause()
+            if keyboard.read_key() == "q":
+                player.stop()
+                cv2.destroyAllWindows()
+                cap.release()
+                break
+            if keyboard.read_key() == "1":
+                current_label = label_name[0]
+                timestamp = player.get_time()
+                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+                print(closest_timestamp)
+                player.next_frame()
 def start_vido3():
     global label_1_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, video_title
     if video_file == None:
