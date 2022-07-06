@@ -44,6 +44,7 @@ available_formats = ["flv", "avi", "amv", "mp4"]
 length_movie = False
 df_checker = False
 current_label = "starter"
+start_frame_bool = False
 
 class Application:
     def __init__(self):
@@ -710,7 +711,54 @@ def start_vido1():
                 timestamp = player.get_time()
                 closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
                 df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                print(closest_timestamp)
+                player.next_frame()
+            if keyboard.read_key() == "2":
+                current_label = label_name[1]
+                timestamp = player.get_time()
+                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+                player.next_frame()
+            if keyboard.read_key() == "3":
+                current_label = label_name[2]
+                timestamp = player.get_time()
+                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+                player.next_frame()
+            if keyboard.read_key() == "4":
+                current_label = label_name[3]
+                timestamp = player.get_time()
+                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+                player.next_frame()
+            if keyboard.read_key() == "5":
+                current_label = label_name[4]
+                timestamp = player.get_time()
+                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+                player.next_frame()
+            if keyboard.read_key() == "6":
+                current_label = label_name[5]
+                timestamp = player.get_time()
+                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+                player.next_frame()
+            if keyboard.read_key() == "7":
+                current_label = label_name[6]
+                timestamp = player.get_time()
+                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+                player.next_frame()
+            if keyboard.read_key() == "8":
+                current_label = label_name[7]
+                timestamp = player.get_time()
+                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+                player.next_frame()
+            if keyboard.read_key() == "9":
+                current_label = label_name[8]
+                timestamp = player.get_time()
+                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
                 player.next_frame()
 def start_vido3():
     global label_1_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, video_title
