@@ -519,13 +519,14 @@ def end_key(data, column):
     else:
         messagebox.showerror("Error box", "First, set the beginning of range")
         
-def delete_mode(data, label, column):
-    global current_label_list, current_label
+def delete_mode(data, label, column_name):
     try:
-        current_frames = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-        df.iloc[current_frames-1, column] = label
-        current_label_list.remove(current_frames)
-        cv2.waitKey(-1)
+        timestamp_v1 = player.get_time()
+        closest_timestamp_stop_v1 = min(list_of_times, key=lambda x:abs(x-timestamp_v1))
+        
+        df.loc[df["Frame time [ms]."] == closest_timestamp_stop_v1, column_name] = label
+        messagebox.showinfo("Information box", "Label deleted")
+        player.pause()
     except ValueError:
         messagebox.showerror("Error box", f"Frame unlabeled or wrong label to delet (current label :{current_label})")
         
@@ -780,6 +781,7 @@ def start_vido1():
                 start_frame_bool = True 
             if keyboard.read_key() == "e":
                 end_key(df, current_label)
+            if keyboard.read_key() =
 def start_vido3():
     global label_1_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, video_title
     if video_file == None:
