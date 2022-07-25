@@ -662,6 +662,8 @@ def load_machine_state_fun():
                 messagebox.showerror("Error box", "Wrong file uploaded. Try again")
         else:
             messagebox.showerror("Error box", "Wrong file uploaded. Try again")
+
+
 def start_vido1():
     global label_name, cap, title_window, df, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, length_movie, current_label, closest_timestamp, start_frame_bool, list_of_times, timestamp
     if video_file == None:
