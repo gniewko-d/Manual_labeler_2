@@ -28,4 +28,5 @@ class Start_video:
         stoper = True
         self.player.play()
         while stoper:
-            cdfxxx23wxsdz
+            x = self.player.get_time()
+            print(x)

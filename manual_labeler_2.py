@@ -45,7 +45,7 @@ length_movie = False
 df_checker = False
 current_label = "starter"
 start_frame_bool = False
-
+label_list = None
 
 class Application:
     def __init__(self):
@@ -80,7 +80,7 @@ class Application:
         self.third_frame_v1.pack(side = tk.TOP)
         self.third_frame_v1.pack_propagate(0)
         
-        self.start_labeling = tk.Button(self.third_frame_v1, text="Start labeling", command = start_vido1, background="black", foreground="green", width = 15)
+        self.start_labeling = tk.Button(self.third_frame_v1, text="Start labeling", command = self.bridge_start_video, background="black", foreground="green", width = 15)
         self.start_labeling.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.show_df = tk.Button(self.third_frame_v1, text="Show data frame", command = self.draw_table, background="black", foreground="green")
@@ -445,7 +445,35 @@ class Application:
         self.tabel_frame.pack(fill='both', expand=True)
         pt = Table(self.tabel_frame, dataframe=df)
         pt.show()
-    
+        
+    def bridge_start_video(self):
+        global df_checker, df
+        if video_file == None:
+            messagebox.showerror("Error box", "Upload the video first")
+        elif label_list == None:
+            messagebox.showerror("Error box", "Before you start labeling you have to submit any label first")
+        else:
+            cap = cv2.VideoCapture(video_file)
+            tots = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            frame_duration = length_movie / tots
+            if df_checker == False:
+                if len(np.arange(0, length_movie, frame_duration)) == tots:
+                    df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
+                    df.index.name="Frame No."
+                    df["Frame time [ms]."] = np.arange(0, length_movie+frame_duration, frame_duration)
+                    df_checker = True
+                else:
+                    df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
+                    df.index.name="Frame No."
+                    df["Frame time [ms]."] = np.arange(0, length_movie, frame_duration)
+                    df_checker = True
+            else:
+                messagebox.showinfo("Information box", "Labels uploaded")
+                names_columns = df.columns.tolist()
+                names_columns[0:9]= label_list
+                df.columns = names_columns
+            self.newwindow = tk.Toplevel(self.root)
+            self.app = Start_video(self.newwindow)
 def disable_event():
     pass
 
@@ -671,15 +699,9 @@ def start_vido1():
     elif label_list == None:
         messagebox.showerror("Error box", "Before you start labeling you have to submit any label first")
     else:
-        #title_window = "Mnimalistic Player"
-        #cv2.namedWindow(title_window)
-        #cv2.moveWindow(title_window,750,150)
         cap = cv2.VideoCapture(video_file)
         tots = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         frame_duration = length_movie / tots
-        #cv2.createTrackbar('frame', title_window, 0,int(tots)-1, getFrame)
-        #cv2.createTrackbar('video size', title_window, 100, 200, rescale_frame)
-        #cv2.createTrackbar('video spped', title_window, 0, 3, video_resolution)
         if df_checker == False:
             if len(np.arange(0, length_movie, frame_duration)) == tots:
                 df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
@@ -783,7 +805,7 @@ def start_vido1():
                 start_frame_bool = True 
             if keyboard.read_key() == "e":
                 end_key(df, current_label)
-            if keyboard.read_key() =
+
 def start_vido3():
     global label_1_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, video_title
     if video_file == None:
@@ -879,6 +901,47 @@ def load_configuration_fun():
         label_list = [label_1_name, label_2_name, label_3_name, label_4_name, label_5_name, label_6_name, label_7_name, label_8_name, label_9_name]
         messagebox.showinfo("Information box", "Labels updated")
 
+class Start_video:
+
+    def __init__(self, master):
+        global video_file, frame_duration
+        self.master = master
+        self.videopanel = tk.Frame(self.master, background="#116562") # for video
+        self.canvas = tk.Canvas(self.videopanel).pack(fill=tk.BOTH, expand=1)
+        self.videopanel.pack(fill=tk.BOTH, expand=1)
+        
+        self.main_frame_v2 = tk.Frame(self.master, background="#116562") #for controls
+        self.main_frame_v2.pack(side= tk.RIGHT, fill=tk.BOTH, expand=1)
+        self.button_pause = tk.Button(self.main_frame_v2, text = "Pause", background="black", foreground="green", width = 17)
+        self.button_pause.bind("<Return>", self.button_pause_fun)
+        self.button_pause.pack(side=tk.RIGHT)
+        
+        self.Instance = vlc.Instance()
+        self.player = self.Instance.media_player_new()
+        media = self.Instance.media_new(video_file)
+        self.player.set_media(media)
+        self.player.set_hwnd(self.videopanel.winfo_id())
+        self.player.play()
+        list_of_times = df["Frame time [ms]."].tolist()
+        stoper = 2200
+        self.player.play()
+        #while stoper < 30000000:
+            #print("elo elo 3 5 0")
+            #stoper +=1
+            #if keyboard.read_key() == "d":
+                #self.player.next_frame()
+            #if keyboard.read_key() == "a":
+                #back_one_frame = player.get_time()
+                #time_12 = back_one_frame - round(frame_duration)
+                #current_state = str(player.get_state())
+                #if current_state == "State.Playing":
+                    #player.set_time(time_12)
+                    #player.pause()
+                #else:
+                    #player.set_time(time_12) 
+    def button_pause_fun(self, event):
+        return self.player.pause()
+            
 
 
 advert()
