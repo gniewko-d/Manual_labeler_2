@@ -124,13 +124,19 @@ class Application:
         self.engine.say(random.choice(self.list_of_voices))
         self.engine.runAndWait()
 
+
     def close_gate(self):
         msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to exit the application? Unsaved data will be lost',icon = 'warning')
         if msgbox == "yes":
             self.root.destroy()
         else:
             pass
-    
+    def close_gate2(self):
+        msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to exit the support window? Unsaved data will be lost',icon = 'warning')
+        if msgbox == "yes":
+            self.root_support.destroy()
+        else:
+            pass
     def easy_open(self):
         global video_file, available_formats, player
         video_file = easygui.fileopenbox(title="Select An Video", filetypes= ["*.gif", "*.flv", "*.avi", "*.amv", "*.mp4"])
@@ -535,8 +541,6 @@ def end_key(data, column):
             start_frame_bool = False
         elif closest_timestamp_stop >= closest_timestamp:
             data.loc[index_timestamp[0]:index_timestamp_stop[0]-1, column] = current_label
-            #x = [current_label_list.append(i) for i in range(start_frame, stop_frame) if i not in current_label_list]
-            #print(data.loc[data.loc[closest_timestamp:closest_timestamp_stop, "Frame time [ms]."], column])
             start_frame_bool = False
             player.pause()
         elif closest_timestamp_stop < closest_timestamp:
@@ -545,8 +549,9 @@ def end_key(data, column):
             start_frame_bool = False
             player.pause()
     else:
-        messagebox.showerror("Error box", "First, set the beginning of range")
-        
+        root_v2 = tk.Tk()
+        messagebox.showerror("Error box", "First, set the beginning of range", parent= root_v2)
+        root_v2.destroy()
 def delete_mode(data, label, column_name):
     try:
         timestamp_v1 = player.get_time()
@@ -694,6 +699,7 @@ def load_machine_state_fun():
 
 def start_vido1():
     global label_name, cap, title_window, df, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, length_movie, current_label, closest_timestamp, start_frame_bool, list_of_times, timestamp
+
     if video_file == None:
         messagebox.showerror("Error box", "Upload the video first")
     elif label_list == None:
@@ -805,7 +811,13 @@ def start_vido1():
                 start_frame_bool = True 
             if keyboard.read_key() == "e":
                 end_key(df, current_label)
+<<<<<<< Updated upstream
 
+=======
+            if keyboard.read_key() == "o":
+                
+            
+>>>>>>> Stashed changes
 def start_vido3():
     global label_1_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, video_title
     if video_file == None:
@@ -900,6 +912,7 @@ def load_configuration_fun():
             label_9_name = configuration_labels_v1[8]
         label_list = [label_1_name, label_2_name, label_3_name, label_4_name, label_5_name, label_6_name, label_7_name, label_8_name, label_9_name]
         messagebox.showinfo("Information box", "Labels updated")
+<<<<<<< Updated upstream
 
 class Start_video:
 
@@ -943,6 +956,9 @@ class Start_video:
         return self.player.pause()
             
 
+=======
+        
+>>>>>>> Stashed changes
 
 advert()
 video_object = Application()
