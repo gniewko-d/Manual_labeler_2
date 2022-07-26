@@ -811,13 +811,10 @@ def start_vido1():
                 start_frame_bool = True 
             if keyboard.read_key() == "e":
                 end_key(df, current_label)
-<<<<<<< Updated upstream
 
-=======
-            if keyboard.read_key() == "o":
-                
+
+
             
->>>>>>> Stashed changes
 def start_vido3():
     global label_1_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, video_title
     if video_file == None:
@@ -912,7 +909,7 @@ def load_configuration_fun():
             label_9_name = configuration_labels_v1[8]
         label_list = [label_1_name, label_2_name, label_3_name, label_4_name, label_5_name, label_6_name, label_7_name, label_8_name, label_9_name]
         messagebox.showinfo("Information box", "Labels updated")
-<<<<<<< Updated upstream
+
 
 class Start_video:
 
@@ -937,6 +934,7 @@ class Start_video:
         self.player.play()
         list_of_times = df["Frame time [ms]."].tolist()
         stoper = 2200
+        self.bindings()
         self.player.play()
         #while stoper < 30000000:
             #print("elo elo 3 5 0")
@@ -954,11 +952,9 @@ class Start_video:
                     #player.set_time(time_12) 
     def button_pause_fun(self, event):
         return self.player.pause()
-            
+    
 
-=======
-        
->>>>>>> Stashed changes
+
 
 advert()
 video_object = Application()
