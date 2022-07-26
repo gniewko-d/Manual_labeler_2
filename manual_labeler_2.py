@@ -453,7 +453,7 @@ class Application:
         pt.show()
         
     def bridge_start_video(self):
-        global df_checker, df
+        global df_checker, df, frame_duration
         if video_file == None:
             messagebox.showerror("Error box", "Upload the video first")
         elif label_list == None:
@@ -914,17 +914,39 @@ def load_configuration_fun():
 class Start_video:
 
     def __init__(self, master):
-        global video_file, frame_duration
+        global video_file, list_of_times
         self.master = master
+        self.master.bind("<space>", self.button_pause_fun)
+        self.master.bind("<a>", self.previous_frame)
+        self.master.bind("<d>", self.next_frame)
+        self.master.bind("1", lambda event, index = 0: self.step_mode(index))
+        self.master.bind("2", lambda event, index = 1: self.step_mode(index))
+        self.master.bind("3", lambda event, index = 2: self.step_mode(index))
+        self.master.bind("4", lambda event, index = 3: self.step_mode(index))
+        self.master.bind("5", lambda event, index = 4: self.step_mode(index))
+        self.master.bind("6", lambda event, index = 5: self.step_mode(index))
+        self.master.bind("7", lambda event, index = 6: self.step_mode(index))
+        self.master.bind("8", lambda event, index = 7: self.step_mode(index))
+        self.master.bind("9", lambda event, index = 8: self.step_mode(index))
+        
         self.videopanel = tk.Frame(self.master, background="#116562") # for video
         self.canvas = tk.Canvas(self.videopanel).pack(fill=tk.BOTH, expand=1)
         self.videopanel.pack(fill=tk.BOTH, expand=1)
         
         self.main_frame_v2 = tk.Frame(self.master, background="#116562") #for controls
         self.main_frame_v2.pack(side= tk.RIGHT, fill=tk.BOTH, expand=1)
-        self.button_pause = tk.Button(self.main_frame_v2, text = "Pause", background="black", foreground="green", width = 17)
-        self.button_pause.bind("<Return>", self.button_pause_fun)
-        self.button_pause.pack(side=tk.RIGHT)
+        
+        self.button_pause = tk.Button(self.main_frame_v2, text = "Pause/PLay", background="black", foreground="green", width = 17)
+        self.button_pause.bind("<Button-1>", self.button_pause_fun)
+        self.button_pause.pack(side=tk.LEFT)
+        
+        self.button_next = tk.Button(self.main_frame_v2, text = "Next Frame", background="black", foreground="green", width = 17)
+        self.button_next.bind("<Button-1>", self.next_frame)
+        self.button_next.pack(side=tk.LEFT)
+        
+        self.button_previous = tk.Button(self.main_frame_v2, text = "Prev. Frame", background="black", foreground="green", width = 17)
+        self.button_previous.bind("<Button-1>", self.previous_frame)
+        self.button_previous.pack(side=tk.LEFT)
         
         self.Instance = vlc.Instance()
         self.player = self.Instance.media_player_new()
@@ -933,28 +955,31 @@ class Start_video:
         self.player.set_hwnd(self.videopanel.winfo_id())
         self.player.play()
         list_of_times = df["Frame time [ms]."].tolist()
-        stoper = 2200
-        self.bindings()
-        self.player.play()
-        #while stoper < 30000000:
-            #print("elo elo 3 5 0")
-            #stoper +=1
-            #if keyboard.read_key() == "d":
-                #self.player.next_frame()
-            #if keyboard.read_key() == "a":
-                #back_one_frame = player.get_time()
-                #time_12 = back_one_frame - round(frame_duration)
-                #current_state = str(player.get_state())
-                #if current_state == "State.Playing":
-                    #player.set_time(time_12)
-                    #player.pause()
-                #else:
-                    #player.set_time(time_12) 
+        
     def button_pause_fun(self, event):
         return self.player.pause()
-    
-
-
+    def next_frame(self, event):
+        return self.player.next_frame()
+    def previous_frame(self, event):
+        global frame_duration
+        back_one_frame = self.player.get_time()
+       
+        time_12 = back_one_frame - round(frame_duration)
+       
+        current_state = str(self.player.get_state())
+        if current_state == "State.Playing":
+            self.player.set_time(time_12)
+            self.player.pause()
+        else:
+            self.player.set_time(time_12)
+    def step_mode(self, index):
+        global start_frame_bool
+        current_label = label_name[index]
+        timestamp = self.player.get_time()
+        closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+        df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+        self.player.next_frame()
+        start_frame_bool = True
 
 advert()
 video_object = Application()
