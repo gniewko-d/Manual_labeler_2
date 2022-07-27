@@ -928,7 +928,7 @@ class Start_video:
         self.master.bind("7", lambda event, index = 6: self.step_mode(index))
         self.master.bind("8", lambda event, index = 7: self.step_mode(index))
         self.master.bind("9", lambda event, index = 8: self.step_mode(index))
-        
+        self.master.bind("e", lambda event, data = df: self.end_key(data))
         self.videopanel = tk.Frame(self.master, background="#116562") # for video
         self.canvas = tk.Canvas(self.videopanel).pack(fill=tk.BOTH, expand=1)
         self.videopanel.pack(fill=tk.BOTH, expand=1)
@@ -958,20 +958,21 @@ class Start_video:
         
     def button_pause_fun(self, event):
         return self.player.pause()
+    
     def next_frame(self, event):
         return self.player.next_frame()
+    
     def previous_frame(self, event):
         global frame_duration
         back_one_frame = self.player.get_time()
-       
         time_12 = back_one_frame - round(frame_duration)
-       
         current_state = str(self.player.get_state())
         if current_state == "State.Playing":
             self.player.set_time(time_12)
             self.player.pause()
         else:
             self.player.set_time(time_12)
+    
     def step_mode(self, index):
         global start_frame_bool
         current_label = label_name[index]
@@ -980,7 +981,34 @@ class Start_video:
         df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
         self.player.next_frame()
         start_frame_bool = True
-
+    
+    def end_key(self, data):
+        global start_frame_bool, current_label
+        if start_frame_bool:
+            timestamp_stop = self.player.get_time()
+            closest_timestamp_stop = min(list_of_times, key=lambda x:abs(x-timestamp_stop))
+            range_timestamp = abs(closest_timestamp - closest_timestamp_stop)
+            
+            index_timestamp = data.index[df["Frame time [ms]."] == closest_timestamp].tolist()
+            index_timestamp_stop = data.index[df["Frame time [ms]."] == closest_timestamp_stop].tolist()
+            
+            print("START: ", closest_timestamp)
+            print("STOP: ", closest_timestamp_stop)
+            if range_timestamp < 10:
+                messagebox.showerror("Error box", "Your range is too short (at least 3 frames). Use step method")
+                start_frame_bool = False
+            elif closest_timestamp_stop >= closest_timestamp:
+                data.loc[index_timestamp[0]:index_timestamp_stop[0]-1, current_label] = current_label
+                start_frame_bool = False
+                player.pause()
+            elif closest_timestamp_stop < closest_timestamp:
+                data.loc[index_timestamp_stop[0]+1:index_timestamp[0], current_label] = current_label
+                start_frame_bool = False
+                player.pause()
+        else:
+            root_v2 = tk.Tk()
+            messagebox.showerror("Error box", "First, set the beginning of range", parent= root_v2)
+            root_v2.destroy()
 advert()
 video_object = Application()
 video_object.root.mainloop()
