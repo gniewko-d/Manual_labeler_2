@@ -6,6 +6,7 @@ Created on Fri Jul  1 17:28:58 2022
 @author: malgo
 """
 
+import math
 import keyboard
 import vlc
 from time import sleep
@@ -522,36 +523,6 @@ def step_mode(data, label, video, key_pressed, column, previous_column, list_of_
         frame_to_list = inital 
         cv2.waitKey(0)
 
-
-def end_key(data, column):
-    global start_frame_bool, current_label, current_label_list
-    
-    if start_frame_bool:
-        timestamp_stop = player.get_time()
-        closest_timestamp_stop = min(list_of_times, key=lambda x:abs(x-timestamp_stop))
-        range_timestamp = abs(closest_timestamp - closest_timestamp_stop)
-        
-        index_timestamp = data.index[df["Frame time [ms]."] == closest_timestamp].tolist()
-        index_timestamp_stop = data.index[df["Frame time [ms]."] == closest_timestamp_stop].tolist()
-        
-        print("START: ", closest_timestamp)
-        print("STOP: ", closest_timestamp_stop)
-        if range_timestamp < 10:
-            messagebox.showerror("Error box", "Your range is too short (at least 3 frames). Use step method")
-            start_frame_bool = False
-        elif closest_timestamp_stop >= closest_timestamp:
-            data.loc[index_timestamp[0]:index_timestamp_stop[0]-1, column] = current_label
-            start_frame_bool = False
-            player.pause()
-        elif closest_timestamp_stop < closest_timestamp:
-            data.loc[index_timestamp_stop[0]+1:index_timestamp[0], column] = current_label
-            #y = [current_label_list.append(i) for i in range(stop_frame+1, start_frame) if i not in current_label_list]
-            start_frame_bool = False
-            player.pause()
-    else:
-        root_v2 = tk.Tk()
-        messagebox.showerror("Error box", "First, set the beginning of range", parent= root_v2)
-        root_v2.destroy()
 def delete_mode(data, label, column_name):
     try:
         timestamp_v1 = player.get_time()
@@ -809,12 +780,7 @@ def start_vido1():
                 df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
                 player.next_frame()
                 start_frame_bool = True 
-            if keyboard.read_key() == "e":
-                end_key(df, current_label)
 
-
-
-            
 def start_vido3():
     global label_1_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, video_title
     if video_file == None:
@@ -929,6 +895,7 @@ class Start_video:
         self.master.bind("8", lambda event, index = 7: self.step_mode(index))
         self.master.bind("9", lambda event, index = 8: self.step_mode(index))
         self.master.bind("e", lambda event, data = df: self.end_key(data))
+        self.master.bind("g", lambda event, data = df, label = np.nan: self.delete_mode(data, label))
         self.videopanel = tk.Frame(self.master, background="#116562") # for video
         self.canvas = tk.Canvas(self.videopanel).pack(fill=tk.BOTH, expand=1)
         self.videopanel.pack(fill=tk.BOTH, expand=1)
@@ -974,7 +941,7 @@ class Start_video:
             self.player.set_time(time_12)
     
     def step_mode(self, index):
-        global start_frame_bool
+        global start_frame_bool, closest_timestamp, current_label
         current_label = label_name[index]
         timestamp = self.player.get_time()
         closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
@@ -1000,15 +967,31 @@ class Start_video:
             elif closest_timestamp_stop >= closest_timestamp:
                 data.loc[index_timestamp[0]:index_timestamp_stop[0]-1, current_label] = current_label
                 start_frame_bool = False
-                player.pause()
+                self.player.pause()
             elif closest_timestamp_stop < closest_timestamp:
                 data.loc[index_timestamp_stop[0]+1:index_timestamp[0], current_label] = current_label
                 start_frame_bool = False
-                player.pause()
+                self.player.pause()
         else:
             root_v2 = tk.Tk()
             messagebox.showerror("Error box", "First, set the beginning of range", parent= root_v2)
             root_v2.destroy()
+    
+    def delete_mode(self, data, label):
+        global current_label
+        timestamp_v1 = self.player.get_time()
+        closest_timestamp_stop_v1 = min(list_of_times, key=lambda x:abs(x-timestamp_v1))
+        checker = data.loc[df["Frame time [ms]."] == closest_timestamp_stop_v1, current_label].tolist()
+        if str(checker[0]) ==  "nan":
+            messagebox.showerror("Error box", f"Frame unlabeled or wrong label to delet (current label :{current_label})")
+            self.player.pause()
+        else:
+            data.loc[df["Frame time [ms]."] == closest_timestamp_stop_v1, current_label] = label
+            messagebox.showinfo("Information box", "Label deleted")
+            self.player.pause()
+        #except ValueError:
+            #messagebox.showerror("Error box", f"Frame unlabeled or wrong label to delet (current label :{current_label})")
+
 advert()
 video_object = Application()
 video_object.root.mainloop()
