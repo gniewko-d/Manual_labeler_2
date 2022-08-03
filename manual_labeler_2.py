@@ -877,12 +877,15 @@ def load_configuration_fun():
         label_list = [label_1_name, label_2_name, label_3_name, label_4_name, label_5_name, label_6_name, label_7_name, label_8_name, label_9_name]
         messagebox.showinfo("Information box", "Labels updated")
 
-
 class Start_video:
 
     def __init__(self, master):
-        global video_file, list_of_times, first_time, current_label, text
+        global video_file, list_of_times, first_time, current_label, text, track_bar_panel, trackbar_name, label_panel_v1_text
         self.master = master
+        track_bar_panel = "Track bar"
+        trackbar_name = "Time in ms:"
+        cv2.namedWindow(track_bar_panel)
+        cv2.createTrackbar(trackbar_name, track_bar_panel, 0, length_movie, self.slider_fun)
         self.master.bind("<space>", self.button_pause_fun)
         self.master.bind("<a>", self.previous_frame)
         self.master.bind("<d>", self.next_frame)
@@ -899,12 +902,14 @@ class Start_video:
         self.master.bind("g", lambda event, data = df, label = np.nan: self.delete_mode(data, label))
         self.master.bind("h", lambda event, data = df: self.ctrl_alt_delet(data))
         
+        self.labelspanel = tk.Frame(self.master, background="#116562")
+        self.labelspanel.pack(side= tk.LEFT, fill=tk.BOTH, expand=1)
+        
         self.videopanel = tk.Frame(self.master, background="#116562") # for video
         self.canvas = tk.Canvas(self.videopanel).pack(fill=tk.BOTH, expand=1)
-        self.videopanel.pack(fill=tk.BOTH, expand=1, side = tk.LEFT)
+        self.videopanel.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
         
-        self.labelspanel = tk.Frame(self.master, background="#116562")
-        self.labelspanel.pack(side= tk.TOP, fill=tk.BOTH, expand=1)
+        
         
         self.main_frame_v2 = tk.Frame(self.master, background="#116562") #for controls
         self.main_frame_v2.pack(side= tk.BOTTOM, fill=tk.BOTH, expand=1)
@@ -927,48 +932,48 @@ class Start_video:
         
         label_panel_v1_text = tk.StringVar()
         label_panel_v1_text.set("Label 1: None")
-        self.label_panel_v1 = tk.Label( self.labelspanel, textvariable = label_panel_v1_text, background="black", foreground="green", width = 17)
-        self.label_panel_v1.grid(row = 0, column = 0)
+        self.label_panel_v1 = tk.Label( self.labelspanel, textvariable = label_panel_v1_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v1.grid(row = 0, column = 0, padx=1, pady=1)
         
         label_panel_v2_text = tk.StringVar()
         label_panel_v2_text.set("Label 2: None")
-        self.label_panel_v2 = tk.Label( self.labelspanel, textvariable = label_panel_v2_text, background="black", foreground="green", width = 17)
-        self.label_panel_v2.grid(row = 0, column = 1)
+        self.label_panel_v2 = tk.Label( self.labelspanel, textvariable = label_panel_v2_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v2.grid(row = 0, column = 1, padx=1, pady=1)
         
         label_panel_v3_text = tk.StringVar()
         label_panel_v3_text.set("Label 3: None")
-        self.label_panel_v3 = tk.Label( self.labelspanel, textvariable = label_panel_v3_text, background="black", foreground="green", width = 17)
-        self.label_panel_v3.grid(row = 0, column = 2)
+        self.label_panel_v3 = tk.Label( self.labelspanel, textvariable = label_panel_v3_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v3.grid(row = 0, column = 2, padx=1, pady=1)
         
         label_panel_v4_text = tk.StringVar()
         label_panel_v4_text.set("Label 4: None")
-        self.label_panel_v4 = tk.Label( self.labelspanel, textvariable = label_panel_v4_text, background="black", foreground="green", width = 17)
-        self.label_panel_v4.grid(row = 1, column = 0)
+        self.label_panel_v4 = tk.Label( self.labelspanel, textvariable = label_panel_v4_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v4.grid(row = 1, column = 0, padx=1, pady=1)
         
         label_panel_v5_text = tk.StringVar()
         label_panel_v5_text.set("Label 5: None")
-        self.label_panel_v5 = tk.Label( self.labelspanel, textvariable = label_panel_v5_text, background="black", foreground="green", width = 17)
-        self.label_panel_v5.grid(row = 1, column = 1)
+        self.label_panel_v5 = tk.Label( self.labelspanel, textvariable = label_panel_v5_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v5.grid(row = 1, column = 1, padx=1, pady=1)
         
         label_panel_v6_text = tk.StringVar()
         label_panel_v6_text.set("Label 6: None")
-        self.label_panel_v6 = tk.Label( self.labelspanel, textvariable = label_panel_v6_text, background="black", foreground="green", width = 17)
-        self.label_panel_v6.grid(row = 1, column = 2)
+        self.label_panel_v6 = tk.Label( self.labelspanel, textvariable = label_panel_v6_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v6.grid(row = 1, column = 2, padx=1, pady=1)
         
         label_panel_v7_text = tk.StringVar()
         label_panel_v7_text.set("Label 7: None")
-        self.label_panel_v7 = tk.Label( self.labelspanel, textvariable = label_panel_v7_text, background="black", foreground="green", width = 17)
-        self.label_panel_v7.grid(row = 2, column = 0)
+        self.label_panel_v7 = tk.Label( self.labelspanel, textvariable = label_panel_v7_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v7.grid(row = 2, column = 0, padx=1, pady=1)
         
         label_panel_v8_text = tk.StringVar()
         label_panel_v8_text.set("Label 8: None")
-        self.label_panel_v8 = tk.Label( self.labelspanel, textvariable = label_panel_v8_text, background="black", foreground="green", width = 17)
-        self.label_panel_v8.grid(row = 2, column = 1)
+        self.label_panel_v8 = tk.Label( self.labelspanel, textvariable = label_panel_v8_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v8.grid(row = 2, column = 1, padx=1, pady=1)
         
         label_panel_v9_text = tk.StringVar()
         label_panel_v9_text.set("Label 9: None")
-        self.label_panel_v9 = tk.Label( self.labelspanel, textvariable = label_panel_v9_text, background="black", foreground="green", width = 17)
-        self.label_panel_v9.grid(row = 2, column = 2)
+        self.label_panel_v9 = tk.Label( self.labelspanel, textvariable = label_panel_v9_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v9.grid(row = 2, column = 2, padx=1, pady=1)
         
         text = tk.StringVar()
         text.set(f"Active label: {current_label}")
@@ -1100,6 +1105,17 @@ class Start_video:
         sleep(0.2)
         self.player.set_time(back_up_v2)
         messagebox.showinfo("Information box", "Thank you for your contribution")
+    
+    def slider_fun(self, unused):
+        global df
+        timestamp_track = cv2.getTrackbarPos(trackbar_name, track_bar_panel)
+        closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp_track))
+        checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[0]].tolist()
+        if checker[0] is label_list[0]:
+            label_panel_v1_text.set(f"Label 1: {label_list[0]}")
+        else:
+            label_panel_v1_text.set("Label 1: unlabel")
+        self.player.set_time(timestamp_track)
 advert()
 video_object = Application()
 video_object.root.mainloop()
