@@ -106,7 +106,7 @@ class Application:
         self.create_configuration = tk.Button(self.sixth_frame, text = "Create configuration", command = self.creat_configuration_fun, background="black", foreground="green", width = 19)
         self.create_configuration.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.load_configuration = tk.Button(self.sixth_frame, text = "Load configuration", command = lambda:[load_configuration_fun(), self.label_changer()], background="black", foreground="green", width = 17)
+        self.load_configuration = tk.Button(self.sixth_frame, text = "Load configuration", command = lambda:[load_configuration_fun(), self.label_changer_2()], background="black", foreground="green", width = 17)
         self.load_configuration.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.fourth_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 30)
@@ -412,6 +412,23 @@ class Application:
         sleep(0.2)
         length_movie = player.get_length()
         player.stop()
+    
+    def label_changer_2(self):
+        global label_name, label_list, length_movie
+        
+        self.label_1_text_box.insert(tk.INSERT, label_name[0])
+        self.label_2_text_box.insert(tk.INSERT, label_name[1])
+        self.label_3_text_box.insert(tk.INSERT, label_name[2])
+        self.label_4_text_box.insert(tk.INSERT, label_name[3])
+        self.label_5_text_box.insert(tk.INSERT, label_name[4])
+        self.label_6_text_box.insert(tk.INSERT, label_name[5])
+        self.label_7_text_box.insert(tk.INSERT, label_name[6])
+        self.label_8_text_box.insert(tk.INSERT, label_name[7])
+        self.label_9_text_box.insert(tk.INSERT, label_name[8])
+        label_list = label_name
+        messagebox.showinfo("Information box", "Labels updated, before start labeling you have to submit them (go to labels settings window")
+        
+        
     def label_configurator_save(self):
         
         list_configuration = []
@@ -843,7 +860,7 @@ def start_vido3():
                 cv2.destroyAllWindows()
 
 def load_configuration_fun():
-    global df, label_1_name, label_2_name, label_3_name, label_4_name, label_5_name, label_6_name, label_7_name, label_8_name, label_9_name, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, df_checker,label_list 
+    global df, df_checker,label_list 
     configuration_labels_v1 = []
     configuration_loaded = None
     messagebox.showinfo("Information box", "Load configuration file (.txt)")
@@ -857,26 +874,26 @@ def load_configuration_fun():
                 configuration_labels_v1[i] = j.replace("\n", "")
         
         if configuration_labels_v1[0] != "None":
-            label_1_name = configuration_labels_v1[0]
+            label_name[0] = configuration_labels_v1[0]
         if configuration_labels_v1[1] != "None":
-            label_2_name = configuration_labels_v1[1]
+            label_name[1] = configuration_labels_v1[1]
         if configuration_labels_v1[2] != "None":
-            label_3_name = configuration_labels_v1[2]
+            label_name[2] = configuration_labels_v1[2]
         if configuration_labels_v1[3] != "None":
-            label_4_name = configuration_labels_v1[3]
+            label_name[3] = configuration_labels_v1[3]
         if configuration_labels_v1[4] != "None":
-            label_5_name = configuration_labels_v1[4]
+            label_name[4] = configuration_labels_v1[4]
         if configuration_labels_v1[5] != "None":
-            label_6_name = configuration_labels_v1[5]
+            label_name[5] = configuration_labels_v1[5]
         if configuration_labels_v1[6] != "None":
-            label_7_name = configuration_labels_v1[6]
+            label_name[6] = configuration_labels_v1[6]
         if configuration_labels_v1[7] != "None":
-            label_8_name = configuration_labels_v1[7]
+            label_name[7] = configuration_labels_v1[7]
         if configuration_labels_v1[8] != "None":
-            label_9_name = configuration_labels_v1[8]
-        label_list = [label_1_name, label_2_name, label_3_name, label_4_name, label_5_name, label_6_name, label_7_name, label_8_name, label_9_name]
+            label_name[8] = configuration_labels_v1[8]
+        label_list = label_name
         messagebox.showinfo("Information box", "Labels updated")
-
+        
 class Start_video:
 
     def __init__(self, master):
@@ -884,7 +901,7 @@ class Start_video:
         self.master = master
         track_bar_panel = "Track bar"
         trackbar_name = "Time in ms:"
-        cv2.namedWindow(track_bar_panel)
+        cv2.namedWindow(track_bar_panel, cv2.WINDOW_NORMAL)
         cv2.createTrackbar(trackbar_name, track_bar_panel, 0, length_movie, self.slider_fun)
         self.master.bind("<space>", self.button_pause_fun)
         self.master.bind("<a>", self.previous_frame)
@@ -1110,11 +1127,26 @@ class Start_video:
         global df
         timestamp_track = cv2.getTrackbarPos(trackbar_name, track_bar_panel)
         closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp_track))
-        checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[0]].tolist()
-        if checker[0] is label_list[0]:
-            label_panel_v1_text.set(f"Label 1: {label_list[0]}")
+        
+        #checker_v2 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[1]].tolist()
+        #checker_v3 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[2]].tolist()
+        #checker_v4 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[3]].tolist()
+        #checker_v5 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[4]].tolist()
+        #checker_v6 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[5]].tolist()
+        #checker_v7 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[6]].tolist()
+        #checker_v8 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[7]].tolist()
+        #checker_v9 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[8]].tolist()
+        if label_list[0] == "None":
+            label_panel_v1_text.set("Label 1: unused")
         else:
-            label_panel_v1_text.set("Label 1: unlabel")
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[0]].tolist()
+            if checker[0] is label_list[0]:
+                label_panel_v1_text.set(f"Label 1: {label_list[0]}")
+                self.label_panel_v1.config(bg = "blue")
+            else:
+                label_panel_v1_text.set("Label 1: unlabel")
+                self.label_panel_v1.config(bg = "black")
+        
         self.player.set_time(timestamp_track)
 advert()
 video_object = Application()
