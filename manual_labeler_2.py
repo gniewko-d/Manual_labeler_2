@@ -23,6 +23,7 @@ import cv2
 import pandas as pd
 import numpy as np
 import csv
+from datetime import date
 
 def advert():
     root_v1 = tk.Tk()
@@ -40,7 +41,7 @@ def advert():
 
 label_name = [f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}"]
 configruation_title = f"{None}"
-video_file = False
+video_file = None
 available_formats = ["flv", "avi", "amv", "mp4"]
 length_movie = False
 df_checker = False
@@ -61,7 +62,7 @@ class Application:
         
         self.open_file = tk.Button(self.first_frame, text = "Load video", command = self.easy_open, background="black", foreground="green", width = 26)
         self.open_file.pack(side= tk.LEFT, padx=1, pady=1, expand=True, fill='both')
-        self.text = f"Current video: {None}"
+        self.text = f"Video: {None}"
         self.current_video = tk.Text(self.first_frame, height = 1, width = 16, background="black", foreground="green", insertbackground = "white")
         self.current_video.insert(tk.INSERT, self.text)
         self.desired_font = tk.font.Font(size = 14)
@@ -96,7 +97,7 @@ class Application:
         self.save_machine_state = tk.Button(self.fifth_frame_v1, text = "Save current state", command = run_save_machine_state, background="black", foreground="green", width = 17)
         self.save_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.load_machine_state = tk.Button(self.fifth_frame_v1, text = "Load state from file", command = load_machine_state_fun, background="black", foreground="green")
+        self.load_machine_state = tk.Button(self.fifth_frame_v1, text = "Load state from file", command = lambda:[load_machine_state_fun(), self.label_changer_2()], background="black", foreground="green")
         self.load_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.sixth_frame = tk.Frame(self.root, background="#116562", width=400, height = 30)
@@ -148,7 +149,7 @@ class Application:
             video_format = video_format[-1].lower()
             if video_format in available_formats:
                 self.current_video.delete("1.0","end")
-                self.text = f"Current video: {video_title[-1]}"
+                self.text = f"Video: {video_title[-1]}"
                 self.current_video.configure(width = len(self.text))
                 self.current_video.insert(tk.INSERT, self.text)
                 messagebox.showinfo("Information box", "Video uploaded")
@@ -395,23 +396,25 @@ class Application:
 
     def label_changer(self):
         global label_name, label_list, key_unlocker, video_file, length_movie
+        if video_file:
+            label_name[0] = self.label_1_text_box.get("1.0", "end-1c")
+            label_name[1] = self.label_2_text_box.get("1.0", "end-1c")
+            label_name[2] = self.label_3_text_box.get("1.0", "end-1c")
+            label_name[3] = self.label_4_text_box.get("1.0", "end-1c")
+            label_name[4] = self.label_5_text_box.get("1.0", "end-1c")
+            label_name[5] = self.label_6_text_box.get("1.0", "end-1c")
+            label_name[6] = self.label_7_text_box.get("1.0", "end-1c")
+            label_name[7] = self.label_8_text_box.get("1.0", "end-1c")
+            label_name[8] = self.label_9_text_box.get("1.0", "end-1c")
         
-        label_name[0] = self.label_1_text_box.get("1.0", "end-1c")
-        label_name[1] = self.label_2_text_box.get("1.0", "end-1c")
-        label_name[2] = self.label_3_text_box.get("1.0", "end-1c")
-        label_name[3] = self.label_4_text_box.get("1.0", "end-1c")
-        label_name[4] = self.label_5_text_box.get("1.0", "end-1c")
-        label_name[5] = self.label_6_text_box.get("1.0", "end-1c")
-        label_name[6] = self.label_7_text_box.get("1.0", "end-1c")
-        label_name[7] = self.label_8_text_box.get("1.0", "end-1c")
-        label_name[8] = self.label_9_text_box.get("1.0", "end-1c")
-        
-        label_list = label_name
-        messagebox.showinfo("Information box", "Labels updated")
-        player.play()
-        sleep(0.2)
-        length_movie = player.get_length()
-        player.stop()
+            label_list = label_name
+            messagebox.showinfo("Information box", "Labels updated")
+            player.play()
+            sleep(0.2)
+            length_movie = player.get_length()
+            player.stop()
+        else:
+            messagebox.showerror("Error box", "Before you submit labels, upload the video first")
     
     def label_changer_2(self):
         global label_name, label_list, length_movie
@@ -426,7 +429,7 @@ class Application:
         self.label_8_text_box.insert(tk.INSERT, label_name[7])
         self.label_9_text_box.insert(tk.INSERT, label_name[8])
         label_list = label_name
-        messagebox.showinfo("Information box", "Labels updated, before start labeling you have to submit them (go to labels settings window")
+        
         
         
     def label_configurator_save(self):
@@ -553,7 +556,7 @@ def delete_mode(data, label, column_name):
         messagebox.showerror("Error box", f"Frame unlabeled or wrong label to delet (current label :{current_label})")
         
 def ctrl_alt_delet(data):
-    global stop_frame, start_frame_freezed, current_label_list
+    global stop_frame, start_frame_freezed, current_label_list, column
     try:
         if stop_frame >= start_frame_freezed:
             data.iloc[start_frame_freezed-2:stop_frame, column] = np.nan
@@ -586,37 +589,27 @@ def run_save_machine_state():
         else:
             messagebox.showinfo("Information box", "Folder added :):):)")
             messagebox.showinfo("Information box", "Do not change the content of created files")
+            today = str(date.today()).replace("-", "_")
             video_title = video_file.split("\\")
             video_title = video_title[-1].split(".")
-            save_mother_df = save_file1 + "\\" + video_title[0] + "_mother_A.xlsx"
+            save_mother_df = save_file1 + "\\" + video_title[0] + "_" + today + ".xlsx"
             mother_df.to_excel(save_mother_df)
-            mother_list = save_machine_state_fun(mother_list, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list)
-            with open(save_file1 + "\\" + video_title[0] + "_mother_B.csv", "w", newline = "") as f:
-                mother_list_writer = csv.writer(f)
-                mother_list_writer.writerows(mother_list)
- 
+            
 def load_machine_state_fun():
-    global df, label_1_name, label_2_name, label_3_name, label_4_name, label_5_name, label_6_name, label_7_name, label_8_name, label_9_name, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, df_checker, label_list
+    global df, df_checker, label_list, label_name
     if video_file == None:
         messagebox.showerror("Error box", "Before you load state from file: Upload the video first")
     else:
         video_title = video_file.split("\\")
         video_title = video_title[-1].split(".")
-        messagebox.showinfo("Information box", f"Load file named: {video_title[0]}_mother_A")
+        video_title_first, format_type = video_title
+        messagebox.showinfo("Information box", f"Load file for video named: {video_title[0]}")
         df_loaded = easygui.fileopenbox(title="Select a file", filetypes= ["*.gif", "*.flv", "*.avi", "*.amv", "*.mp4"])
-        
         df_loaded_checker = df_loaded.split("\\")
-        df_loaded_checker = df_loaded_checker[-1].split(".")
-        
-
-        
-        df_loaded = pd.read_excel(df_loaded)
-        df_loaded = df_loaded.set_index("Frame No.")
-        cap2 = cv2.VideoCapture(video_file)
-        tots2 = int(cap2.get(cv2.CAP_PROP_FRAME_COUNT))
-        cap2.release()
-        if df_loaded_checker[0] == f"{video_title[0]}_mother_A" and tots2 == len(df_loaded):
-            
+        df_loaded_checker, _ = df_loaded_checker[-1].split(".")
+        if video_title_first in df_loaded_checker:
+            df_loaded = pd.read_excel(df_loaded)
+            df_loaded = df_loaded.set_index("Frame No.")
             df = df_loaded
             list_of_columns = list(df.columns)
             list_of_columns = ["None" if "None" in i else i for i in list_of_columns]
@@ -624,67 +617,23 @@ def load_machine_state_fun():
             df.columns = list_of_columns
             list_of_columns = list(df.columns)
             df_checker = True
-            if list_of_columns[0] != "None":
-                label_1_name = list_of_columns[0]
-            if list_of_columns[1] != "None":
-                label_2_name = list_of_columns[1]
-            if list_of_columns[2] != "None":
-                label_3_name = list_of_columns[2]
-            if list_of_columns[3] != "None":
-                label_4_name = list_of_columns[3]
-            if list_of_columns[4] != "None":
-                label_5_name = list_of_columns[4]
-            if list_of_columns[5] != "None":
-                label_6_name = list_of_columns[5]
-            if list_of_columns[6] != "None":
-                label_7_name = list_of_columns[6]
-            if list_of_columns[7] != "None":
-                label_8_name = list_of_columns[7]
-            if list_of_columns[8] != "None":
-                label_9_name = list_of_columns[8]
-        
-            label_list = label_name
-            messagebox.showinfo("Information box", f"Next, load file named: {video_title[0]}_mother_B")
-            csv_label_list = easygui.fileopenbox(title="Select a file", filetypes= ["*.gif", "*.flv", "*.avi", "*.amv", "*.mp4"])
-            csv_label_list_split = csv_label_list.split("\\")
-            csv_label_list_split = csv_label_list_split[-1].split(".")
-            if csv_label_list_split[0] == f"{video_title[0]}_mother_B":
-                with open (csv_label_list) as csv_file_mother_b:
-                    csv_reader = csv.reader(csv_file_mother_b, delimiter=',')
-                    for i,j in enumerate(csv_reader):
-                        if i == 0 and j[0] != "exist":
-                            j = [int(d) for d in j]
-                            label_1_list = j
-                        elif i == 1 and j[0] != "exist":
-                            j = [int(d) for d in j]
-                            label_2_list = j
-                        elif i == 2 and j[0] != "exist":
-                            j = [int(d) for d in j]
-                            label_3_list = j
-                        elif i == 3 and j[0] != "exist":
-                            j = [int(d) for d in j]
-                            label_4_list = j
-                        elif i == 4 and j[0] != "exist":
-                            j = [int(d) for d in j]
-                            label_5_list = j
-                        elif i == 5 and j[0] != "exist":
-                            j = [int(d) for d in j]
-                            label_6_list = j
-                        elif i == 6 and j[0] != "exist":
-                            j = [int(d) for d in j]
-                            label_7_list = j
-                        elif i == 7 and j[0] != "exist":
-                            j = [int(d) for d in j]
-                            label_8_list = j
-                        elif i == 8 and j[0] != "exist":
-                            j = [int(d) for d in j]
-                            label_9_list = j
-                messagebox.showinfo("Information box", "Data and labels loaded")
-            else:
-                messagebox.showerror("Error box", "Wrong file uploaded. Try again")
+            label_name = list_of_columns[0:9]
+            label_list=label_name
+            df = dtype_checker(df, label_name)
+            messagebox.showinfo("Information box", "Data and labels loaded. Continue labeling")
         else:
             messagebox.showerror("Error box", "Wrong file uploaded. Try again")
 
+def dtype_checker(data, list_of_columns):
+    
+    name_checker = [x for x in list_of_columns if x != "None"]
+    dict_convert = {item: str for item in name_checker if not data[item].dtypes.name == "object"}
+    if dict_convert:
+        data = data.astype(dict_convert)
+    for i in name_checker:
+        data.loc[data[i] != "nan", i] = i
+        data.loc[data[i] == "nan", i] = np.nan
+    return data
 
 def start_vido1():
     global label_name, cap, title_window, df, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, length_movie, current_label, closest_timestamp, start_frame_bool, list_of_times, timestamp
@@ -800,12 +749,10 @@ def start_vido1():
                 start_frame_bool = True 
 
 def start_vido3():
-    global label_1_name, xd, cap, title_window, frameTime, df, fps, key_pressed_list, previous_column, column, frame, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, video_title
-    if video_file == None:
-        messagebox.showerror("Error box", "Upload the video first")
+    global df, df_checker, video_title
+    if video_file == None or label_list == None or df_checker == False:
+        messagebox.showerror("Error box", "Before save current state:\n 1. Upload the video \n 2. Submit any label \n 3. Label something")
     else:
-        cap = cv2.VideoCapture(video_file)
-        tots = cap.get(cv2.CAP_PROP_FRAME_COUNT)
         video_title = video_file.split("\\")
         video_title = video_title[-1].split(".")
         save_file = None
@@ -814,50 +761,10 @@ def start_vido3():
             messagebox.showerror("Error box", "Folder was not selected")
         else:
             messagebox.showinfo("Information box", "Folder added :):):)")
-        if df_checker == False:
-            df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 1))
-            df.index.name="Frame No."
-            df["Frame No."] = range(1, int(tots) + 1)
-            df_checker = True
-        else:
-            messagebox.showinfo("Information box", "Labels uploaded")
         save_file_excel = save_file + "\\" + video_title[0] + ".xlsx"
         df.to_excel(save_file_excel)
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        size = (frame_width, frame_height)
-        save_file = save_file + "\\" + video_title[0] + "_labeled.mp4"
-        out = cv2.VideoWriter(save_file, fourcc, 30.0, size)
-        while(cap.isOpened()):
-            ret, frame = cap.read()
-            if ret == True:
-                current_frames = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-                if current_frames in label_1_list and key_label_controler[0] == False:
-                    draw_label(label_1_name, (10,20), (255,0,0))
-                if current_frames in label_2_list and key_label_controler[0] == False:
-                    draw_label(label_2_name, (10,40), (0,0,255))
-                if current_frames in label_3_list and key_label_controler[0] == False:
-                    draw_label(label_3_name, (10,60), (0,102,0))
-                if current_frames in label_4_list and key_label_controler[0] == False:
-                    draw_label(label_4_name, (10,80), (204,0,102))
-                if current_frames in label_5_list and key_label_controler[0] == False:
-                    draw_label(label_5_name, (10,100), (153,153,255))
-                if current_frames in label_6_list and key_label_controler[0] == False:
-                    draw_label(label_6_name, (10,120), (255,255,153))
-                if current_frames in label_7_list and key_label_controler[0] == False:
-                    draw_label(label_7_name, (10,140), (0,128,255))
-                if current_frames in label_8_list and key_label_controler[0] == False:
-                    draw_label(label_8_name, (10,160), (153,153,0))
-                if current_frames in label_9_list and key_label_controler[0] == False:
-                    draw_label(label_9_name, (10,180), (128,128,128))
-                out.write(frame)
-            else:
-                messagebox.showinfo("Information box", "Video and data were saved successfully :):):)")
-                xd = df
-                cap.release()
-                out.release()
-                cv2.destroyAllWindows()
+        messagebox.showinfo("Information box", "Data saved successfully :):):)")
+
 
 def load_configuration_fun():
     global df, df_checker,label_list 
@@ -892,16 +799,20 @@ def load_configuration_fun():
         if configuration_labels_v1[8] != "None":
             label_name[8] = configuration_labels_v1[8]
         label_list = label_name
-        messagebox.showinfo("Information box", "Labels updated")
-        
+        messagebox.showinfo("Information box", "Labels updated, before start labeling you have to submit them (go to labels settings window)")
+
+
+
 class Start_video:
 
     def __init__(self, master):
-        global video_file, list_of_times, first_time, current_label, text, track_bar_panel, trackbar_name, label_panel_v1_text
+        global video_file, list_of_times, first_time, current_label, text, track_bar_panel, trackbar_name, label_panel_v1_text, label_panel_v2_text, length_movie, label_panel_v3_text, label_panel_v4_text, label_panel_v5_text, label_panel_v6_text, label_panel_v7_text, label_panel_v8_text, label_panel_v9_text, df
         self.master = master
         track_bar_panel = "Track bar"
         trackbar_name = "Time in ms:"
         cv2.namedWindow(track_bar_panel, cv2.WINDOW_NORMAL)
+        if not length_movie:
+            length_movie = int(df.iloc[-1, 9])
         cv2.createTrackbar(trackbar_name, track_bar_panel, 0, length_movie, self.slider_fun)
         self.master.bind("<space>", self.button_pause_fun)
         self.master.bind("<a>", self.previous_frame)
@@ -926,26 +837,24 @@ class Start_video:
         self.canvas = tk.Canvas(self.videopanel).pack(fill=tk.BOTH, expand=1)
         self.videopanel.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
         
-        
-        
         self.main_frame_v2 = tk.Frame(self.master, background="#116562") #for controls
         self.main_frame_v2.pack(side= tk.BOTTOM, fill=tk.BOTH, expand=1)
         
         self.button_pause = tk.Button(self.main_frame_v2, text = "Pause/PLay", background="black", foreground="green", width = 17)
         self.button_pause.bind("<Button-1>", self.button_pause_fun)
-        self.button_pause.pack(side=tk.LEFT)
+        self.button_pause.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         
         self.button_next = tk.Button(self.main_frame_v2, text = "Next Frame", background="black", foreground="green", width = 17)
         self.button_next.bind("<Button-1>", self.next_frame)
-        self.button_next.pack(side=tk.LEFT)
+        self.button_next.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         
         self.button_previous = tk.Button(self.main_frame_v2, text = "Prev. Frame", background="black", foreground="green", width = 17)
         self.button_previous.bind("<Button-1>", self.previous_frame)
-        self.button_previous.pack(side=tk.LEFT)
+        self.button_previous.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         
         self.button_calibration = tk.Button(self.main_frame_v2, text = "Calibration", background="black", foreground="green", width = 17)
         self.button_calibration.bind("<Button-1>", self.calibration)
-        self.button_calibration.pack(side=tk.LEFT)
+        self.button_calibration.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         
         label_panel_v1_text = tk.StringVar()
         label_panel_v1_text.set("Label 1: None")
@@ -995,7 +904,14 @@ class Start_video:
         text = tk.StringVar()
         text.set(f"Active label: {current_label}")
         self.current_label_widget = tk.Label(self.main_frame_v2, textvariable = text, background="black", foreground="green", width = 17)
-        self.current_label_widget.pack(side=tk.LEFT)
+        self.current_label_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        
+        self.button_set_time = tk.Button(self.main_frame_v2, text = "Set time [click me] of video [ms]:", background="black", foreground="green", width = 24)
+        self.button_set_time.bind("<Button-1>", self.set_time_manually)
+        self.button_set_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        
+        self.box_for_time = tk.Entry(self.main_frame_v2,  width = 16, background="black", foreground="green", insertbackground = "white")
+        self.box_for_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         
         self.Instance = vlc.Instance()
         self.player = self.Instance.media_player_new()
@@ -1011,6 +927,19 @@ class Start_video:
     
     def next_frame(self, event):
         return self.player.next_frame()
+    
+    def set_time_manually(self, event):
+        try:
+            answer_int = int(self.box_for_time.get())
+            self.player.set_time(answer_int)
+            cv2.setTrackbarPos(trackbar_name, track_bar_panel, answer_int)
+            current_state = str(self.player.get_state())
+            if current_state == "State.Playing":
+                self.player.pause()
+            else:
+                pass
+        except ValueError:
+            messagebox.showerror("Error box", "You inserted wrong value try using integers")
     
     def previous_frame(self, event):
         global frame_duration, time_jump
@@ -1071,11 +1000,14 @@ class Start_video:
                 start_frame_bool = False
                 start_frame_bool_v2 = True
                 self.player.pause()
+                messagebox.showinfo("Information box", f"Frames from {index_timestamp[0]} to {index_timestamp_stop[0]-1} were labeled")
+                
             elif closest_timestamp_stop < closest_timestamp:
                 data.loc[index_timestamp_stop[0]+1:index_timestamp[0], current_label] = current_label
                 start_frame_bool = False
                 start_frame_bool_v2 = True
                 self.player.pause()
+                messagebox.showinfo("Information box", f"Frames from {index_timestamp[0]+1} to {index_timestamp[0]} were labeled")
         else:
             root_v2 = tk.Tk()
             messagebox.showerror("Error box", "First, set the beginning of range", parent= root_v2)
@@ -1087,12 +1019,22 @@ class Start_video:
         closest_timestamp_stop_v1 = min(list_of_times, key=lambda x:abs(x-timestamp_v1))
         checker = data.loc[df["Frame time [ms]."] == closest_timestamp_stop_v1, current_label].tolist()
         if str(checker[0]) == "nan":
+            current_state = str(self.player.get_state())
+            if current_state == "State.Playing":
+                self.player.pause()
+            else:
+                pass
             messagebox.showerror("Error box", f"Frame unlabeled or wrong label to delet (current label :{current_label})")
-            self.player.pause()
+        
         else:
             data.loc[df["Frame time [ms]."] == closest_timestamp_stop_v1, current_label] = label
+            current_state = str(self.player.get_state())
+            if current_state == "State.Playing":
+                self.player.pause()
+            else:
+                pass
             messagebox.showinfo("Information box", "Label deleted")
-            self.player.pause()
+            
     
     def ctrl_alt_delet(self, data):
         
@@ -1128,25 +1070,105 @@ class Start_video:
         timestamp_track = cv2.getTrackbarPos(trackbar_name, track_bar_panel)
         closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp_track))
         
-        #checker_v2 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[1]].tolist()
-        #checker_v3 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[2]].tolist()
-        #checker_v4 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[3]].tolist()
-        #checker_v5 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[4]].tolist()
-        #checker_v6 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[5]].tolist()
-        #checker_v7 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[6]].tolist()
-        #checker_v8 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[7]].tolist()
-        #checker_v9 = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[8]].tolist()
+
         if label_list[0] == "None":
             label_panel_v1_text.set("Label 1: unused")
         else:
             checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[0]].tolist()
-            if checker[0] is label_list[0]:
+            if checker[0] == label_list[0]:
                 label_panel_v1_text.set(f"Label 1: {label_list[0]}")
                 self.label_panel_v1.config(bg = "blue")
             else:
                 label_panel_v1_text.set("Label 1: unlabel")
                 self.label_panel_v1.config(bg = "black")
         
+        if label_list[1] == "None":
+            label_panel_v2_text.set("Label 2: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[1]].tolist()
+            if checker[0] == label_list[1]:
+                label_panel_v2_text.set(f"Label 2: {label_list[1]}")
+                self.label_panel_v2.config(bg = "red")
+            else:
+                label_panel_v2_text.set("Label 2: unlabel")
+                self.label_panel_v2.config(bg = "black")
+        
+        if label_list[2] == "None":
+            label_panel_v3_text.set("Label 3: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[2]].tolist()
+            if checker[0] == label_list[2]:
+                label_panel_v3_text.set(f"Label 3: {label_list[2]}")
+                self.label_panel_v3.config(bg = "cyan")
+            else:
+                label_panel_v3_text.set("Label 3: unlabel")
+                self.label_panel_v3.config(bg = "black")
+        
+        if label_list[3] == "None":
+            label_panel_v4_text.set("Label 4: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[3]].tolist()
+            if checker[0] == label_list[3]:
+                label_panel_v4_text.set(f"Label 4: {label_list[3]}")
+                self.label_panel_v4.config(bg = "yellow")
+            else:
+                label_panel_v4_text.set("Label 4: unlabel")
+                self.label_panel_v4.config(bg = "black")
+        
+        if label_list[4] == "None":
+            label_panel_v5_text.set("Label 5: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[4]].tolist()
+            if checker[0] == label_list[4]:
+                label_panel_v5_text.set(f"Label 5: {label_list[4]}")
+                self.label_panel_v5.config(bg = "magenta")
+            else:
+                label_panel_v5_text.set("Label 5: unlabel")
+                self.label_panel_v5.config(bg = "black")
+        
+        if label_list[5] == "None":
+            label_panel_v6_text.set("Label 6: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[5]].tolist()
+            if checker[0] == label_list[5]:
+                label_panel_v6_text.set(f"Label 6: {label_list[5]}")
+                self.label_panel_v6.config(bg = "#8B8B23")
+            else:
+                label_panel_v6_text.set("Label 6: unlabel")
+                self.label_panel_v6.config(bg = "black")
+        
+        if label_list[6] == "None":
+            label_panel_v7_text.set("Label 7: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[6]].tolist()
+            if checker[0] == label_list[6]:
+                label_panel_v7_text.set(f"Label 7: {label_list[6]}")
+                self.label_panel_v7.config(bg = "#BCBC8F")
+            else:
+                label_panel_v7_text.set("Label 7: unlabel")
+                self.label_panel_v7.config(bg = "black")
+        
+        if label_list[7] == "None":
+            label_panel_v8_text.set("Label 8: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[7]].tolist()
+            if checker[0] == label_list[7]:
+                label_panel_v8_text.set(f"Label 8: {label_list[7]}")
+                self.label_panel_v8.config(bg = "#3A3A5F")
+            else:
+                label_panel_v8_text.set("Label 8: unlabel")
+                self.label_panel_v8.config(bg = "black")
+        
+        if label_list[8] == "None":
+            label_panel_v9_text.set("Label 9: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp, label_list[8]].tolist()
+            if checker[0] == label_list[8]:
+                label_panel_v9_text.set(f"Label 9: {label_list[8]}")
+                self.label_panel_v9.config(bg = "#CDCDB3")
+            else:
+                label_panel_v9_text.set("Label 9: unlabel")
+                self.label_panel_v9.config(bg = "black")
         self.player.set_time(timestamp_track)
 advert()
 video_object = Application()
