@@ -16,6 +16,7 @@ from PIL import Image, ImageTk
 from io import BytesIO
 from tkinter import messagebox
 import easygui
+
 import pyttsx3
 import random
 from pandastable import Table
@@ -24,7 +25,6 @@ import pandas as pd
 import numpy as np
 import csv
 from datetime import date
-
 def advert():
     root_v1 = tk.Tk()
     root_v1.title("Ad")
@@ -719,7 +719,7 @@ class Start_video:
         label_panel_v2_text = tk.StringVar()
         label_panel_v2_text.set("Label 2: None")
         self.label_panel_v2 = tk.Label( self.labelspanel, textvariable = label_panel_v2_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
-        self.label_panel_v2.grid(row = 0, column = 1, padx=1, pady=1)
+        self.label_panel_v2.grid(row = 0, column = 1, padx=1, pady=1, sticky = tk.NE)
         
         label_panel_v3_text = tk.StringVar()
         label_panel_v3_text.set("Label 3: None")
@@ -828,13 +828,15 @@ class Start_video:
     def step_mode(self, index):
         global start_frame_bool, closest_timestamp, current_label, text
         current_label = label_name[index]
-        timestamp = self.player.get_time()
-        closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-        df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-        self.player.next_frame()
-        start_frame_bool = True
-        text.set(f"Active label: {current_label}")
-        
+        if current_label != "None":
+            timestamp = self.player.get_time()
+            closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
+            df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
+            self.player.next_frame()
+            start_frame_bool = True
+            text.set(f"Active label: {current_label}")
+        else:
+            messagebox.showinfo("Information box", "This key is disable, change label name If you want to use it")
     def end_key(self, data):
         global start_frame_bool, current_label, index_timestamp, index_timestamp_stop, closest_timestamp_stop, start_frame_bool_v2
         if start_frame_bool:
