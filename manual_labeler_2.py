@@ -49,6 +49,7 @@ current_label = "starter"
 start_frame_bool = False
 label_list = None
 time_jump = 0
+video_rate = 1.0
 start_frame_bool_v2 = False
 class Application:
     def __init__(self):
@@ -57,7 +58,7 @@ class Application:
         self.root.protocol("WM_DELETE_WINDOW", disable_event)
     
         self.first_frame = tk.Frame(self.root, background="#116562", width=400, height = 30)
-        self.first_frame.pack()
+        self.first_frame.pack(expand=True, fill='both')
         self.first_frame.pack_propagate(0)
         
         self.open_file = tk.Button(self.first_frame, text = "Load video", command = self.easy_open, background="black", foreground="green", width = 26)
@@ -70,7 +71,7 @@ class Application:
         self.current_video.pack(side=tk.RIGHT, padx=1, pady=1, expand=True, fill='both')
         
         self.second_frame = tk.Frame(self.root, background="#116562", width=400, height = 30)
-        self.second_frame.pack(side = tk.TOP)
+        self.second_frame.pack(side = tk.TOP, expand=True, fill='both')
         self.second_frame.pack_propagate(0)
         
         self.keyboard = tk.Button(self.second_frame, text="Keyboard settings", command = self.keyboard_settings, background="black", foreground="green", width = 13)
@@ -80,7 +81,7 @@ class Application:
         self.label_1_9.pack(side=tk.RIGHT, padx=1, pady=1, expand=True, fill='both')
         
         self.third_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 30)
-        self.third_frame_v1.pack(side = tk.TOP)
+        self.third_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.third_frame_v1.pack_propagate(0)
         
         self.start_labeling = tk.Button(self.third_frame_v1, text="Start labeling", command = self.bridge_start_video, background="black", foreground="green", width = 15)
@@ -91,7 +92,7 @@ class Application:
         
     
         self.fifth_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 30)
-        self.fifth_frame_v1.pack(side = tk.TOP)
+        self.fifth_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.fifth_frame_v1.pack_propagate(0)
     
         self.save_machine_state = tk.Button(self.fifth_frame_v1, text = "Save current state", command = run_save_machine_state, background="black", foreground="green", width = 17)
@@ -101,7 +102,7 @@ class Application:
         self.load_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.sixth_frame = tk.Frame(self.root, background="#116562", width=400, height = 30)
-        self.sixth_frame.pack(side = tk.TOP)
+        self.sixth_frame.pack(side = tk.TOP, expand=True, fill='both')
         self.sixth_frame.pack_propagate(0)
         
         self.create_configuration = tk.Button(self.sixth_frame, text = "Create configuration", command = self.creat_configuration_fun, background="black", foreground="green", width = 19)
@@ -111,7 +112,7 @@ class Application:
         self.load_configuration.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.fourth_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 30)
-        self.fourth_frame_v1.pack(side = tk.TOP)
+        self.fourth_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.fourth_frame_v1.pack_propagate(0)
         
         self.save_labeled_video = tk.Button(self.fourth_frame_v1, text= "Save data", command = start_vido3, background="black", foreground="green", width = 5)
@@ -122,6 +123,7 @@ class Application:
         
         self.engine = pyttsx3.init()
         self.list_of_voices = ['Hello World', "welcome to the Labeling world", "hello friend", "I wish you fruitful work", "hello user", "I will try my best to help you work", "What a nice day to label something", "Thank your for your contribution", "Verifying ID"]
+        self.list_of_voices_2 = ["Have a nice day", "Have a pleasant journey", "Time to say goodbye ", "It was nice to see you again", "Peace"]
         voices = self.engine.getProperty('voices')
         self.engine.setProperty('voice', voices[1].id)
         self.engine.say(random.choice(self.list_of_voices))
@@ -131,6 +133,8 @@ class Application:
     def close_gate(self):
         msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to exit the application? Unsaved data will be lost',icon = 'warning')
         if msgbox == "yes":
+            self.engine.say(random.choice(self.list_of_voices_2))
+            self.engine.runAndWait()
             self.root.destroy()
         else:
             pass
@@ -171,7 +175,7 @@ class Application:
         self.first_frame_v1 = tk.Frame(self.new_root, background="black")
         self.first_frame_v1.pack(expand=True, fill='both')
         self.instruction = tk.Text(self.first_frame_v1, height = 23, width = 70)
-        self.text_v1 = "Press on your keyboard:\n a = move one frame backward\n d = move one frame forward\n q = escape from video and save markers\n space = pause the video\n r = restart the video (keep the markers applied)\n w = slow down video (have to be pressed constantly)\n e = frame to which (without it) all the preceding ones will\n\t be appropriately marked (depends on labels name set by user).\n\t Start point is set by key 1-9\n key 1-9 = label current frame and jumpt to next one or\n\t set the beginning of the range.\n\t Next you can move to whatever frame (backward or forward)\n\t and there set the end of the range by key e.\n\t All frames within that range will be labeled\n g = delete last used label from current frame\n h = removes the last labelled range\n z = move x (default = 5) frames backward\n c = move x (default = 5) frames forward\n"
+        self.text_v1 = "Press on your keyboard:\n a = move one frame backward\n d = move one frame forward\n space = pause/resume the video\n z = slow down the video\n c = speed up the video\n x = video speed back to normal\n e = frame to which (without it) all the preceding ones will\n\t be appropriately marked (depends on labels name set by user).\n\t Start point is set by key 1-9\n key 1-9 = label current frame and jumpt to next one or\n\t set the beginning of the range.\n\t Next you can move to whatever frame (backward or forward)\n\t and there set the end of the range by key e.\n\t All frames within that range will be labeled\n g = delete last used label (Check active label) from current frame\n h = removes the last labelled range\n"
         conteiner = ["~"*70, "~"*70, self.text_v1, "="*70, "="*70]
         
         for i in range(len(conteiner)):
@@ -505,45 +509,6 @@ class Application:
 def disable_event():
     pass
 
-def step_mode(data, label, video, key_pressed, column, previous_column, list_of_frames):
-    global start_frame, current_label, start_frame_bool, x, frame, frame_to_list, current_label_list
-    current_label = label
-    current_label_list = list_of_frames
-    if key_pressed and x == 0 and previous_column < column:
-        start_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-        inital = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-        next_frame = inital
-        data.iloc[inital-1, column] = label
-        video.set(cv2.CAP_PROP_POS_FRAMES, next_frame+1)
-        cv2.setTrackbarPos('frame',title_window, next_frame+1)
-        x += 1 
-        start_frame_bool = True
-        frame_to_list = inital
-        cv2.waitKey(0)
-    elif key_pressed:
-        start_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-        inital = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-        next_frame = inital + 1
-        data.iloc[inital-2,column] = label
-        video.set(cv2.CAP_PROP_POS_FRAMES, inital)
-        cv2.setTrackbarPos('frame',title_window, inital)
-        frame_to_list = inital-1
-        start_frame_bool = True
-        cv2.waitKey(0)
-        x += 1 
-
-    else:
-        x = 0
-        start_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-        inital = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-        next_frame = inital + 1
-        df.iloc[inital-1, column] = label
-        video.set(cv2.CAP_PROP_POS_FRAMES, next_frame)
-        cv2.setTrackbarPos('frame',title_window, next_frame)
-        start_frame_bool = True
-        frame_to_list = inital 
-        cv2.waitKey(0)
-
 def delete_mode(data, label, column_name):
     try:
         timestamp_v1 = player.get_time()
@@ -635,118 +600,6 @@ def dtype_checker(data, list_of_columns):
         data.loc[data[i] == "nan", i] = np.nan
     return data
 
-def start_vido1():
-    global label_name, cap, title_window, df, df_checker, label_1_list, label_2_list, label_3_list, label_4_list, label_5_list, label_6_list, label_7_list, label_8_list, label_9_list, key_label_controler, label_1_list_key_a, length_movie, current_label, closest_timestamp, start_frame_bool, list_of_times, timestamp
-
-    if video_file == None:
-        messagebox.showerror("Error box", "Upload the video first")
-    elif label_list == None:
-        messagebox.showerror("Error box", "Before you start labeling you have to submit any label first")
-    else:
-        cap = cv2.VideoCapture(video_file)
-        tots = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        frame_duration = length_movie / tots
-        if df_checker == False:
-            if len(np.arange(0, length_movie, frame_duration)) == tots:
-                df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
-                df.index.name="Frame No."
-                df["Frame time [ms]."] = np.arange(0, length_movie+frame_duration, frame_duration)
-                df_checker = True
-            else:
-                df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
-                df.index.name="Frame No."
-                df["Frame time [ms]."] = np.arange(0, length_movie, frame_duration)
-                df_checker = True
-        else:
-            messagebox.showinfo("Information box", "Labels uploaded")
-            names_columns = df.columns.tolist()
-            names_columns[0:9]= label_list
-            df.columns = names_columns
-        list_of_times = df["Frame time [ms]."].tolist()
-        stoper = True 
-        player.play()
-        while stoper:
-            if keyboard.read_key() == "d":
-                player.next_frame()
-            if keyboard.read_key() == "a":
-                back_one_frame = player.get_time()
-                time_12 = back_one_frame - round(frame_duration)
-                current_state = str(player.get_state())
-                if current_state == "State.Playing":
-                    player.set_time(time_12)
-                    player.pause()
-                else:
-                    player.set_time(time_12)
-            if keyboard.read_key() == "space":
-                player.pause()
-            if keyboard.read_key() == "q":
-                player.stop()
-                cv2.destroyAllWindows()
-                cap.release()
-                break
-            if keyboard.read_key() == "1":
-                current_label = label_name[0]
-                timestamp = player.get_time()
-                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                player.next_frame()
-                start_frame_bool = True
-            if keyboard.read_key() == "2":
-                current_label = label_name[1]
-                timestamp = player.get_time()
-                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                player.next_frame()
-                start_frame_bool = True
-            if keyboard.read_key() == "3":
-                current_label = label_name[2]
-                timestamp = player.get_time()
-                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                player.next_frame()
-                start_frame_bool = True
-            if keyboard.read_key() == "4":
-                current_label = label_name[3]
-                timestamp = player.get_time()
-                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                player.next_frame()
-                start_frame_bool = True
-            if keyboard.read_key() == "5":
-                current_label = label_name[4]
-                timestamp = player.get_time()
-                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                player.next_frame()
-                start_frame_bool = True
-            if keyboard.read_key() == "6":
-                current_label = label_name[5]
-                timestamp = player.get_time()
-                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                player.next_frame()
-                start_frame_bool = True
-            if keyboard.read_key() == "7":
-                current_label = label_name[6]
-                timestamp = player.get_time()
-                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                player.next_frame()
-                start_frame_bool = True
-            if keyboard.read_key() == "8":
-                current_label = label_name[7]
-                timestamp = player.get_time()
-                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                player.next_frame()
-                start_frame_bool = True 
-            if keyboard.read_key() == "9":
-                current_label = label_name[8]
-                timestamp = player.get_time()
-                closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
-                df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-                player.next_frame()
-                start_frame_bool = True 
 
 def start_vido3():
     global df, df_checker, video_title
@@ -801,15 +654,13 @@ def load_configuration_fun():
         label_list = label_name
         messagebox.showinfo("Information box", "Labels updated, before start labeling you have to submit them (go to labels settings window)")
 
-
-
 class Start_video:
 
     def __init__(self, master):
         global video_file, list_of_times, first_time, current_label, text, track_bar_panel, trackbar_name, label_panel_v1_text, label_panel_v2_text, length_movie, label_panel_v3_text, label_panel_v4_text, label_panel_v5_text, label_panel_v6_text, label_panel_v7_text, label_panel_v8_text, label_panel_v9_text, df
         self.master = master
         track_bar_panel = "Track bar"
-        trackbar_name = "Time in ms:"
+        trackbar_name = "Time [ms]"
         cv2.namedWindow(track_bar_panel, cv2.WINDOW_NORMAL)
         if not length_movie:
             length_movie = int(df.iloc[-1, 9])
@@ -829,6 +680,10 @@ class Start_video:
         self.master.bind("e", lambda event, data = df: self.end_key(data))
         self.master.bind("g", lambda event, data = df, label = np.nan: self.delete_mode(data, label))
         self.master.bind("h", lambda event, data = df: self.ctrl_alt_delet(data))
+        self.master.bind("c", lambda event: self.speed_up())
+        self.master.bind("z", lambda event: self.slow_down())
+        self.master.bind("x", lambda event: self.normal_speed())
+        self.master.bind_all("<1>", lambda event:event.widget.focus_set())
         
         self.labelspanel = tk.Frame(self.master, background="#116562")
         self.labelspanel.pack(side= tk.LEFT, fill=tk.BOTH, expand=1)
@@ -910,7 +765,7 @@ class Start_video:
         self.button_set_time.bind("<Button-1>", self.set_time_manually)
         self.button_set_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         
-        self.box_for_time = tk.Entry(self.main_frame_v2,  width = 16, background="black", foreground="green", insertbackground = "white")
+        self.box_for_time = tk.Entry(self.main_frame_v2,  width = 16, background="black", foreground="green", insertbackground = "green", highlightcolor = "white")
         self.box_for_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         
         self.Instance = vlc.Instance()
@@ -1035,6 +890,23 @@ class Start_video:
                 pass
             messagebox.showinfo("Information box", "Label deleted")
             
+    def speed_up(self):
+        global video_rate
+        video_rate = 2.5
+        messagebox.showinfo("Information box", "The video sped up")
+        return self.player.set_rate(video_rate)
+    
+    def slow_down(self):
+        global video_rate
+        video_rate = 0.2
+        messagebox.showinfo("Information box", "The video has slowed down")
+        return self.player.set_rate(video_rate)
+    
+    def normal_speed(self):
+        global video_rate
+        video_rate = 1.0
+        messagebox.showinfo("Information box", "Video speed, back to normal")
+        return self.player.set_rate(video_rate)
     
     def ctrl_alt_delet(self, data):
         
