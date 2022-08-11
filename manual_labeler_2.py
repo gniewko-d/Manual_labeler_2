@@ -665,25 +665,7 @@ class Start_video:
         if not length_movie:
             length_movie = int(df.iloc[-1, 9])
         cv2.createTrackbar(trackbar_name, track_bar_panel, 0, length_movie, self.slider_fun)
-        self.master.bind("<space>", self.button_pause_fun)
-        self.master.bind("<a>", self.previous_frame)
-        self.master.bind("<d>", self.next_frame)
-        self.master.bind("1", lambda event, index = 0: self.step_mode(index))
-        self.master.bind("2", lambda event, index = 1: self.step_mode(index))
-        self.master.bind("3", lambda event, index = 2: self.step_mode(index))
-        self.master.bind("4", lambda event, index = 3: self.step_mode(index))
-        self.master.bind("5", lambda event, index = 4: self.step_mode(index))
-        self.master.bind("6", lambda event, index = 5: self.step_mode(index))
-        self.master.bind("7", lambda event, index = 6: self.step_mode(index))
-        self.master.bind("8", lambda event, index = 7: self.step_mode(index))
-        self.master.bind("9", lambda event, index = 8: self.step_mode(index))
-        self.master.bind("e", lambda event, data = df: self.end_key(data))
-        self.master.bind("g", lambda event, data = df, label = np.nan: self.delete_mode(data, label))
-        self.master.bind("h", lambda event, data = df: self.ctrl_alt_delet(data))
-        self.master.bind("c", lambda event: self.speed_up())
-        self.master.bind("z", lambda event: self.slow_down())
-        self.master.bind("x", lambda event: self.normal_speed())
-        self.master.bind_all("<1>", lambda event:event.widget.focus_set())
+        self.bindings_on()
         
         self.labelspanel = tk.Frame(self.master, background="#116562")
         self.labelspanel.pack(side= tk.LEFT, fill=tk.BOTH, expand=1)
@@ -891,7 +873,27 @@ class Start_video:
             else:
                 pass
             messagebox.showinfo("Information box", "Label deleted")
-            
+    def bindings_on(self):
+        
+        bindings_space = self.master.bind("<space>", self.button_pause_fun)
+        bindings_a = self.master.bind("<a>", self.previous_frame)
+        bindings_d = self.master.bind("<d>", self.next_frame)
+        bindings_1 = self.master.bind("1", lambda event, index = 0: self.step_mode(index))
+        bindings_2 = self.master.bind("2", lambda event, index = 1: self.step_mode(index))
+        bindings_3 = self.master.bind("3", lambda event, index = 2: self.step_mode(index))
+        bindings_4 = self.master.bind("4", lambda event, index = 3: self.step_mode(index))
+        bindings_5 = self.master.bind("5", lambda event, index = 4: self.step_mode(index))
+        bindings_6 = self.master.bind("6", lambda event, index = 5: self.step_mode(index))
+        bindings_7 = self.master.bind("7", lambda event, index = 6: self.step_mode(index))
+        bindings_8 = self.master.bind("8", lambda event, index = 7: self.step_mode(index))
+        bindings_9 = self.master.bind("9", lambda event, index = 8: self.step_mode(index))
+        bindings_e = self.master.bind("e", lambda event, data = df: self.end_key(data))
+        bindings_g = self.master.bind("g", lambda event, data = df, label = np.nan: self.delete_mode(data, label))
+        bindings_h = self.master.bind("h", lambda event, data = df: self.ctrl_alt_delet(data))
+        bindings_c = self.master.bind("c", lambda event: self.speed_up())
+        bindings_z = self.master.bind("z", lambda event: self.slow_down())
+        bindings_x = self.master.bind("x", lambda event: self.normal_speed())
+        bindings_all = self.master.bind_all("<1>", lambda event:event.widget.focus_set())
     def speed_up(self):
         global video_rate
         video_rate = 2.5
