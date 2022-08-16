@@ -38,7 +38,8 @@ def advert():
     root_v1.after(3000, lambda: root_v1.destroy())
     root_v1.mainloop()
 
-
+df3 = None
+df4 = None
 label_name = [f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}"]
 configruation_title = f"{None}"
 video_file = None
@@ -165,6 +166,10 @@ class Application:
                 messagebox.showerror("Error box", "Wrong format of video!")
                 messagebox.showinfo("Information box", f'Currently available formats: .flv, .avi, .amv, .mp4, \nformat of your video : {video_format}')
         else:
+            self.current_video.delete("1.0","end")
+            self.text = "Video: None"
+            self.current_video.configure(width = len(self.text))
+            self.current_video.insert(tk.INSERT, self.text)
             messagebox.showerror("Error box", "Video was not loaded")
         
     def keyboard_settings(self):
@@ -561,7 +566,7 @@ def run_save_machine_state():
             mother_df.to_excel(save_mother_df)
             
 def load_machine_state_fun():
-    global df, df_checker, label_list, label_name
+    global df, df_checker, label_list, label_name, df2, df3, df4
     if video_file == None:
         messagebox.showerror("Error box", "Before you load state from file: Upload the video first")
     else:
@@ -595,9 +600,9 @@ def dtype_checker(data, list_of_columns):
     dict_convert = {item: str for item in name_checker if not data[item].dtypes.name == "object"}
     if dict_convert:
         data = data.astype(dict_convert)
-    for i in name_checker:
-        data.loc[data[i] != "nan", i] = i
-        data.loc[data[i] == "nan", i] = np.nan
+        for i in dict_convert:
+            data.loc[data[i] != "nan", i] = i
+            data.loc[data[i] == "nan", i] = np.nan
     return data
 
 
@@ -666,6 +671,7 @@ class Start_video:
             length_movie = int(df.iloc[-1, 9])
         cv2.createTrackbar(trackbar_name, track_bar_panel, 0, length_movie, self.slider_fun)
         self.bindings_on()
+        
         self.block_bindings = False
         self.labelspanel = tk.Frame(self.master, background="#116562")
         self.labelspanel.pack(side= tk.LEFT, fill=tk.BOTH, expand=1)
@@ -749,8 +755,8 @@ class Start_video:
         
         self.box_for_time = tk.Entry(self.main_frame_v2,  width = 16, background="black", foreground="green", insertbackground = "green")
         self.box_for_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
-        self.box_for_time.bind("<Button-1>", self.bindings_off)
-        
+        self.box_for_time.bind("<Enter>", self.bindings_off)
+        self.box_for_time.bind("<Leave>", lambda event: self.bindings_on_2())
         self.Instance = vlc.Instance()
         self.player = self.Instance.media_player_new()
         media = self.Instance.media_new(video_file)
@@ -831,8 +837,6 @@ class Start_video:
             index_timestamp = data.index[df["Frame time [ms]."] == closest_timestamp].tolist()
             index_timestamp_stop = data.index[df["Frame time [ms]."] == closest_timestamp_stop].tolist()
             
-            print("START: ", closest_timestamp)
-            print("STOP: ", closest_timestamp_stop)
             if range_timestamp < 10:
                 messagebox.showerror("Error box", "Your range is too short (at least 3 frames). Use step method")
                 start_frame_bool = False
@@ -840,17 +844,30 @@ class Start_video:
                 data.loc[index_timestamp[0]:index_timestamp_stop[0]-1, current_label] = current_label
                 start_frame_bool = False
                 start_frame_bool_v2 = True
-                self.player.pause()
+                current_state = str(self.player.get_state())
+                if current_state == "State.Playing":
+                    self.player.pause()
+                else:
+                    pass
                 messagebox.showinfo("Information box", f"Frames from {index_timestamp[0]} to {index_timestamp_stop[0]-1} were labeled")
                 
             elif closest_timestamp_stop < closest_timestamp:
                 data.loc[index_timestamp_stop[0]+1:index_timestamp[0], current_label] = current_label
                 start_frame_bool = False
                 start_frame_bool_v2 = True
-                self.player.pause()
+                current_state = str(self.player.get_state())
+                if current_state == "State.Playing":
+                    self.player.pause()
+                else:
+                    pass
                 messagebox.showinfo("Information box", f"Frames from {index_timestamp[0]+1} to {index_timestamp[0]} were labeled")
         else:
             root_v2 = tk.Tk()
+            current_state = str(self.player.get_state())
+            if current_state == "State.Playing":
+                self.player.pause()
+            else:
+                pass
             messagebox.showerror("Error box", "First, set the beginning of range", parent= root_v2)
             root_v2.destroy()
     
@@ -896,7 +913,7 @@ class Start_video:
         self.bindings_z = self.master.bind("z", lambda event: self.slow_down())
         self.bindings_x = self.master.bind("x", lambda event: self.normal_speed())
         self.bindings_all = self.master.bind_all("<1>", lambda event:event.widget.focus_set())
-        #self.bindings_all = self.master.bind_all("<1>", lambda event: self.bindings_on_2())
+        
     def bindings_off(self, event):
         
         self.master.unbind("<space>", self.bindings_space)
@@ -917,31 +934,29 @@ class Start_video:
         self.master.unbind("c", self.bindings_c)
         self.master.unbind("z", self.bindings_z)
         self.master.unbind("x",self.bindings_x)
-        self.block_bindings = True 
-        print("lalu")
+        self.box_for_time.focus_set()
+        #messagebox.showinfo("Information box", "Entering insert zone. Labeling off")
     def bindings_on_2(self):
-            widget = self.master.focus_get() 
-            print(widget)
-            if str(widget) != ".!toplevel2.!frame3.!entry":
-                self.bindings_space = self.master.bind("<space>", self.button_pause_fun)
-                self.bindings_a = self.master.bind("<a>", self.previous_frame)
-                self.bindings_d = self.master.bind("<d>", self.next_frame)
-                self.bindings_1 = self.master.bind("1", lambda event, index = 0: self.step_mode(index))
-                self.bindings_2 = self.master.bind("2", lambda event, index = 1: self.step_mode(index))
-                self.bindings_3 = self.master.bind("3", lambda event, index = 2: self.step_mode(index))
-                self.bindings_4 = self.master.bind("4", lambda event, index = 3: self.step_mode(index))
-                self.bindings_5 = self.master.bind("5", lambda event, index = 4: self.step_mode(index))
-                self.bindings_6 = self.master.bind("6", lambda event, index = 5: self.step_mode(index))
-                self.bindings_7 = self.master.bind("7", lambda event, index = 6: self.step_mode(index))
-                self.bindings_8 = self.master.bind("8", lambda event, index = 7: self.step_mode(index))
-                self.bindings_9 = self.master.bind("9", lambda event, index = 8: self.step_mode(index))
-                self.bindings_e = self.master.bind("e", lambda event, data = df: self.end_key(data))
-                self.bindings_g = self.master.bind("g", lambda event, data = df, label = np.nan: self.delete_mode(data, label))
-                self.bindings_h = self.master.bind("h", lambda event, data = df: self.ctrl_alt_delet(data))
-                self.bindings_c = self.master.bind("c", lambda event: self.speed_up())
-                self.bindings_z = self.master.bind("z", lambda event: self.slow_down())
-                self.bindings_x = self.master.bind("x", lambda event: self.normal_speed())
-                print('bindings _on')
+        self.bindings_space = self.master.bind("<space>", self.button_pause_fun)
+        self.bindings_a = self.master.bind("<a>", self.previous_frame)
+        self.bindings_d = self.master.bind("<d>", self.next_frame)
+        self.bindings_1 = self.master.bind("1", lambda event, index = 0: self.step_mode(index))
+        self.bindings_2 = self.master.bind("2", lambda event, index = 1: self.step_mode(index))
+        self.bindings_3 = self.master.bind("3", lambda event, index = 2: self.step_mode(index))
+        self.bindings_4 = self.master.bind("4", lambda event, index = 3: self.step_mode(index))
+        self.bindings_5 = self.master.bind("5", lambda event, index = 4: self.step_mode(index))
+        self.bindings_6 = self.master.bind("6", lambda event, index = 5: self.step_mode(index))
+        self.bindings_7 = self.master.bind("7", lambda event, index = 6: self.step_mode(index))
+        self.bindings_8 = self.master.bind("8", lambda event, index = 7: self.step_mode(index))
+        self.bindings_9 = self.master.bind("9", lambda event, index = 8: self.step_mode(index))
+        self.bindings_e = self.master.bind("e", lambda event, data = df: self.end_key(data))
+        self.bindings_g = self.master.bind("g", lambda event, data = df, label = np.nan: self.delete_mode(data, label))
+        self.bindings_h = self.master.bind("h", lambda event, data = df: self.ctrl_alt_delet(data))
+        self.bindings_c = self.master.bind("c", lambda event: self.speed_up())
+        self.bindings_z = self.master.bind("z", lambda event: self.slow_down())
+        self.bindings_x = self.master.bind("x", lambda event: self.normal_speed())
+        self.label_panel_v2.focus_set()
+        #messagebox.showinfo("Information box", "Leaving insert zone. Labeling on")
     def speed_up(self):
         global video_rate
         video_rate = 2.5
@@ -987,6 +1002,8 @@ class Start_video:
         self.player.next_frame()
         sleep(0.2)
         self.player.set_time(back_up_v2)
+        self.button_calibration["state"] = tk.DISABLED
+        self.button_calibration.update()
         messagebox.showinfo("Information box", "Thank you for your contribution")
     
     def slider_fun(self, unused):
