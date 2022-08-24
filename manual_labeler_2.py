@@ -283,11 +283,35 @@ class Application:
                 self.frames_labeled_submit.pack(side = tk.TOP, expand=True, fill='both')
 
     def get_play_labeled(self):
-        self.time_filter  = self.box_for_time_v1.get()
-        self.new_root_5.destroy()
-        self.on_value = [i.get() for i in self.list_of_choosen if i.get() != "None"]
-        self.filter_time_dict = {i: df.loc[df[i] == i, "Frame time [ms]."].tolist() for i in self.on_value}
-        print(self.time_filter)
+            self.time_filter  = self.box_for_time_v1.get()
+            self.new_root_5.destroy()
+            self.on_value = [i.get() for i in self.list_of_choosen if i.get() != "None"]
+            self.filter_time_dict = {i: df.loc[df[i] == i, "Frame time [ms]."].tolist() for i in self.on_value}
+            value = self.filter_time_dict.get(self.on_value[0])
+            key = self.on_value[0]
+            initial = 0
+            n = 0
+            start_stop_dict = {}
+            for i, j in enumerate(value):
+                if n == 0:
+                    start_point = j
+                    n += 1
+                    initial = j
+                elif j - initial < 60:
+                    initial = j
+                elif j - initial > 60 and n == 1:
+                    stop_point = initial
+                    start_stop_dict[start_point] = stop_point
+                    n += 1
+                    initial = j
+                    start_point = j
+                elif j - initial > 60: 
+                    stop_point = initial
+                    start_stop_dict[start_point] = stop_point
+                    initial = j
+                    start_point = j
+            print(start_stop_dict)
+            
         
     
     def easy_open(self):
