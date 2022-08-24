@@ -7,7 +7,6 @@ Created on Fri Jul  1 17:28:58 2022
 """
 
 import math
-import keyboard
 import vlc
 from time import sleep
 import tkinter as tk
@@ -25,6 +24,8 @@ import pandas as pd
 import numpy as np
 import csv
 from datetime import date
+
+
 def advert():
     root_v1 = tk.Tk()
     root_v1.title("Ad")
@@ -57,69 +58,95 @@ class Application:
         self.root = tk.Tk()
         self.root.title("Manual Labeler")
         self.root.protocol("WM_DELETE_WINDOW", disable_event)
-    
-        self.first_frame = tk.Frame(self.root, background="#116562", width=400, height = 30)
+        
+        self.desired_font = tk.font.Font(size = 14)
+        
+        self.first_frame = tk.Frame(self.root, background="#116562", width=400, height = 60)
         self.first_frame.pack(expand=True, fill='both')
         self.first_frame.pack_propagate(0)
         
-        self.open_file = tk.Button(self.first_frame, text = "Load video", command = self.easy_open, background="black", foreground="green", width = 26)
+        self.open_file = tk.Button(self.first_frame, text = "Load video", command = self.easy_open, background="black", foreground="green", width = 19)
+        self.open_file["font"] = self.desired_font
         self.open_file.pack(side= tk.LEFT, padx=1, pady=1, expand=True, fill='both')
+        
         self.text = f"Video: {None}"
-        self.current_video = tk.Text(self.first_frame, height = 1, width = 16, background="black", foreground="green", insertbackground = "white")
-        self.current_video.insert(tk.INSERT, self.text)
-        self.desired_font = tk.font.Font(size = 14)
+        self.current_video = tk.Label(self.first_frame, height = 1, width = 16, background="black", foreground="green", anchor = tk.CENTER)
+        self.current_video.config(text = self.text)
+        
         self.current_video.configure(font = self.desired_font)
         self.current_video.pack(side=tk.RIGHT, padx=1, pady=1, expand=True, fill='both')
         
-        self.second_frame = tk.Frame(self.root, background="#116562", width=400, height = 30)
+        self.second_frame = tk.Frame(self.root, background="#116562", width=400, height = 60)
         self.second_frame.pack(side = tk.TOP, expand=True, fill='both')
         self.second_frame.pack_propagate(0)
         
-        self.keyboard = tk.Button(self.second_frame, text="Keyboard settings", command = self.keyboard_settings, background="black", foreground="green", width = 13)
+        self.keyboard = tk.Button(self.second_frame, text="Keyboard settings", command = self.keyboard_settings, background="black", foreground="green", width = 16)
+        self.keyboard["font"] = self.desired_font
         self.keyboard.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.label_1_9 = tk.Button(self.second_frame, text="Labels settings", command = self.label_settings, background="black", foreground="green")
+        self.label_1_9["font"] = self.desired_font
         self.label_1_9.pack(side=tk.RIGHT, padx=1, pady=1, expand=True, fill='both')
         
-        self.third_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 30)
+        self.third_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 60)
         self.third_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.third_frame_v1.pack_propagate(0)
         
-        self.start_labeling = tk.Button(self.third_frame_v1, text="Start labeling", command = self.bridge_start_video, background="black", foreground="green", width = 15)
+        self.start_labeling = tk.Button(self.third_frame_v1, text="Start labeling", command = self.bridge_start_video, background="black", foreground="green", width = 17)
+        self.start_labeling["font"] = self.desired_font
         self.start_labeling.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.show_df = tk.Button(self.third_frame_v1, text="Show data frame", command = self.draw_table, background="black", foreground="green")
+        self.show_df["font"] = self.desired_font
         self.show_df.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
     
-        self.fifth_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 30)
+        self.fifth_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 60)
         self.fifth_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.fifth_frame_v1.pack_propagate(0)
     
-        self.save_machine_state = tk.Button(self.fifth_frame_v1, text = "Save current state", command = run_save_machine_state, background="black", foreground="green", width = 17)
+        self.save_machine_state = tk.Button(self.fifth_frame_v1, text = "Save current state", command = run_save_machine_state, background="black", foreground="green", width = 19)
+        self.save_machine_state["font"] = self.desired_font
         self.save_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.load_machine_state = tk.Button(self.fifth_frame_v1, text = "Load state from file", command = lambda:[load_machine_state_fun(), self.label_changer_2()], background="black", foreground="green")
+        self.load_machine_state["font"] = self.desired_font
         self.load_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.sixth_frame = tk.Frame(self.root, background="#116562", width=400, height = 30)
+        self.sixth_frame = tk.Frame(self.root, background="#116562", width=400, height = 60)
         self.sixth_frame.pack(side = tk.TOP, expand=True, fill='both')
         self.sixth_frame.pack_propagate(0)
         
         self.create_configuration = tk.Button(self.sixth_frame, text = "Create configuration", command = self.creat_configuration_fun, background="black", foreground="green", width = 19)
+        self.create_configuration["font"] = self.desired_font
         self.create_configuration.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.load_configuration = tk.Button(self.sixth_frame, text = "Load configuration", command = lambda:[load_configuration_fun(), self.label_changer_2()], background="black", foreground="green", width = 17)
+        self.load_configuration["font"] = self.desired_font
         self.load_configuration.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.fourth_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 30)
+        self.seventh_frame = tk.Frame(self.root, background="#116562", width= 400, height = 60)
+        self.seventh_frame.pack(side = tk.TOP, expand=True, fill='both')
+        self.seventh_frame.pack_propagate(0)
+        
+        self.play_labeled_frames = tk.Button(self.seventh_frame, text = "Play labeled frames", background="black", command = self.play_labeled_fun, foreground="green", width = 19)
+        self.play_labeled_frames["font"] = self.desired_font
+        self.play_labeled_frames.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
+        
+        self.save_labeled_frames = tk.Button(self.seventh_frame, text = "Save labeled frames", background="black", foreground="green", width = 19)
+        self.save_labeled_frames["font"] = self.desired_font
+        self.save_labeled_frames.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
+        
+        self.fourth_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 60)
         self.fourth_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.fourth_frame_v1.pack_propagate(0)
         
-        self.save_labeled_video = tk.Button(self.fourth_frame_v1, text= "Save data", command = start_vido3, background="black", foreground="green", width = 5)
+        self.save_labeled_video = tk.Button(self.fourth_frame_v1, text= "Save data", command = start_vido3, background="black", foreground="green", width = 7)
+        self.save_labeled_video["font"] = self.desired_font
         self.save_labeled_video.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.close_gui = tk.Button(self.fourth_frame_v1, text= "Exit", command = self.close_gate, background="black", foreground="green", activebackground = "white")
+        self.close_gui["font"] = self.desired_font
         self.close_gui.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.engine = pyttsx3.init()
@@ -145,6 +172,124 @@ class Application:
             self.root_support.destroy()
         else:
             pass
+    def play_labeled_fun(self):
+        if video_file == None or label_list == None or df_checker == False:
+            messagebox.showerror("Error box", "Video unlabeled")
+        else:
+            messagebox.showinfo("Information box", "Choose labels you interested to see")
+            self.new_root_5 = tk.Toplevel(self.root, background= "black")
+            self.new_root_5.title("Choose your labels")
+            filter_labels = [i for i in label_list if i != "None"]
+            self.list_of_choosen = []
+            if not filter_labels:
+                messagebox.showerror("Error box", "Labels were not set")
+            else:
+                if label_list[0] != "None":
+                    self.frames_labeled_v1 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v1.pack(side = tk.TOP, expand=True, fill='both')
+                    var1 = tk.StringVar()
+                    var1.set("None")
+                    self.label_check_box_v1 = tk.Checkbutton(self.frames_labeled_v1, text = '1. ' + str(label_list[0]), variable=var1, onvalue=label_list[0], offvalue= "None", background="black", foreground="green", highlightcolor = "black")
+                    self.label_check_box_v1.pack(side= tk.LEFT)
+                     
+                    self.list_of_choosen.append(var1)
+                
+                if label_list[1] != "None":
+                    self.frames_labeled_v2 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v2.pack(side = tk.TOP, expand=True, fill='both')
+                    var2 = tk.StringVar()
+                    var2.set("None")
+                    self.label_check_box_v2 = tk.Checkbutton(self.frames_labeled_v2, text = '2. ' + str(label_list[1]), variable=var2, onvalue=label_list[1], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v2.pack(side= tk.LEFT)
+                    self.list_of_choosen.append(var2)
+                    
+                if label_list[2] != "None":
+                    self.frames_labeled_v3 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v3.pack(side = tk.TOP, expand=True, fill='both')
+                    var3 = tk.StringVar()
+                    var3.set("None")
+                    self.label_check_box_v3 = tk.Checkbutton(self.frames_labeled_v3, text = '3. ' + str(label_list[2]), variable=var3, onvalue=label_list[2], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v3.pack(side= tk.LEFT)
+                    self.list_of_choosen.append(var3)
+                
+                if label_list[3] != "None":
+                    self.frames_labeled_v4 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v4.pack(side = tk.TOP, expand=True, fill='both')
+                    var4 = tk.StringVar()
+                    var4.set("None")
+                    self.label_check_box_v4 = tk.Checkbutton(self.frames_labeled_v4, text = '4. ' + str(label_list[3]), variable=var4, onvalue=label_list[3], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v4.pack(side= tk.LEFT)
+                    self.list_of_choosen.append(var4)
+                
+                if label_list[4] != "None":
+                    self.frames_labeled_v5 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v5.pack(side = tk.TOP, expand=True, fill='both')
+                    var5 = tk.StringVar()
+                    var5.set("None")
+                    self.label_check_box_v5 = tk.Checkbutton(self.frames_labeled_v5, text = '5. ' + str(label_list[4]), variable=var5, onvalue=label_list[4], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v5.pack(side= tk.LEFT)
+                    self.list_of_choosen.append(var5)
+                    
+                if label_list[5] != "None":
+                    self.frames_labeled_v6 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v6.pack(side = tk.TOP, expand=True, fill='both')
+                    var6 = tk.StringVar()
+                    var6.set("None")
+                    self.label_check_box_v6 = tk.Checkbutton(self.frames_labeled_v6, text = '6. ' + str(label_list[5]), variable=var6, onvalue=label_list[5], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v6.pack(side= tk.LEFT)
+                    self.list_of_choosen.append(var6)
+                    
+                if label_list[6] != "None":
+                    self.frames_labeled_v7 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v7.pack(side = tk.TOP, expand=True, fill='both')
+                    var7 = tk.StringVar()
+                    var7.set("None")
+                    self.label_check_box_v7 = tk.Checkbutton(self.frames_labeled_v7, text = '7. ' + str(label_list[6]), variable=var7, onvalue=label_list[6], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v7.pack(side= tk.LEFT)
+                    self.list_of_choosen.append(var7)
+                    
+                if label_list[7] != "None":
+                    self.frames_labeled_v8 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v8.pack(side = tk.TOP, expand=True, fill='both')
+                    var8 = tk.StringVar()
+                    var8.set("None")
+                    self.label_check_box_v8 = tk.Checkbutton(self.frames_labeled_v8, text = '8. ' + str(label_list[7]), variable=var8, onvalue=label_list[7], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v8.pack(side= tk.LEFT)
+                    self.list_of_choosen.append(var8)
+                    
+                if label_list[8] != "None":
+                    self.frames_labeled_v9 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v9.pack(side = tk.TOP, expand=True, fill='both')
+                    var9 = tk.StringVar()
+                    var9.set("None")
+                    self.label_check_box_v9 = tk.Checkbutton(self.frames_labeled_v9, text = '9. ' + str(label_list[8]), variable=var9, onvalue=label_list[8], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v9.pack(side= tk.LEFT)
+                    self.list_of_choosen.append(var9)
+                
+                self.frames_v10 = tk.Frame(self.new_root_5, background="black")
+                self.frames_v10.pack(side = tk.TOP, expand=True, fill='both')
+                
+                self.label_time_box = tk.Label(self.frames_v10, text = "Time of videos [s]:", background="black", foreground="green")
+                self.label_time_box.pack(side = tk.LEFT, expand=True, fill='both')
+                
+                self.box_for_time_v1 = tk.Entry(self.frames_v10, width = 16, background="black", foreground="green", insertbackground = "green", )
+                self.box_for_time_v1.insert(tk.INSERT, "1")
+                self.box_for_time_v1.pack(side = tk.LEFT, expand=True, fill='both')
+                
+                self.frames_v11 = tk.Frame(self.new_root_5, background="black")
+                self.frames_v11.pack(side = tk.TOP, expand=True, fill='both')
+                
+                self.frames_labeled_submit = tk.Button(self.frames_v11, text = "Save", command = self.get_play_labeled, foreground="green", background= "black")
+                self.frames_labeled_submit.pack(side = tk.TOP, expand=True, fill='both')
+
+    def get_play_labeled(self):
+        self.time_filter  = self.box_for_time_v1.get()
+        self.new_root_5.destroy()
+        self.on_value = [i.get() for i in self.list_of_choosen if i.get() != "None"]
+        self.filter_time_dict = {i: df.loc[df[i] == i, "Frame time [ms]."].tolist() for i in self.on_value}
+        print(self.time_filter)
+        
+    
     def easy_open(self):
         global video_file, available_formats, player
         video_file = easygui.fileopenbox(title="Select An Video", filetypes= ["*.gif", "*.flv", "*.avi", "*.amv", "*.mp4"])
@@ -153,10 +298,9 @@ class Application:
             video_format = video_title[-1].split(".")
             video_format = video_format[-1].lower()
             if video_format in available_formats:
-                self.current_video.delete("1.0","end")
                 self.text = f"Video: {video_title[-1]}"
                 self.current_video.configure(width = len(self.text))
-                self.current_video.insert(tk.INSERT, self.text)
+                self.current_video.config(text = self.text)
                 messagebox.showinfo("Information box", "Video uploaded")
                 vlc_instance = vlc.Instance()
                 player = vlc_instance.media_player_new()
@@ -166,10 +310,9 @@ class Application:
                 messagebox.showerror("Error box", "Wrong format of video!")
                 messagebox.showinfo("Information box", f'Currently available formats: .flv, .avi, .amv, .mp4, \nformat of your video : {video_format}')
         else:
-            self.current_video.delete("1.0","end")
             self.text = "Video: None"
             self.current_video.configure(width = len(self.text))
-            self.current_video.insert(tk.INSERT, self.text)
+            self.current_video.config(text = self.text)
             messagebox.showerror("Error box", "Video was not loaded")
         
     def keyboard_settings(self):
@@ -415,9 +558,9 @@ class Application:
             label_name[6] = self.label_7_text_box.get("1.0", "end-1c")
             label_name[7] = self.label_8_text_box.get("1.0", "end-1c")
             label_name[8] = self.label_9_text_box.get("1.0", "end-1c")
-        
             label_list = label_name
             messagebox.showinfo("Information box", "Labels updated")
+            self.new_root_2.destroy()
             player.play()
             sleep(0.2)
             length_movie = player.get_length()
@@ -664,17 +807,20 @@ class Start_video:
     def __init__(self, master):
         global video_file, list_of_times, first_time, current_label, text, track_bar_panel, trackbar_name, label_panel_v1_text, label_panel_v2_text, length_movie, label_panel_v3_text, label_panel_v4_text, label_panel_v5_text, label_panel_v6_text, label_panel_v7_text, label_panel_v8_text, label_panel_v9_text, df
         self.master = master
+        self.master.configure(background='black')
         track_bar_panel = "Track bar"
         trackbar_name = "Time [ms]"
         cv2.namedWindow(track_bar_panel, cv2.WINDOW_NORMAL)
         if not length_movie:
             length_movie = int(df.iloc[-1, 9])
         cv2.createTrackbar(trackbar_name, track_bar_panel, 0, length_movie, self.slider_fun)
-        self.bindings_on()
         
-        self.block_bindings = False
+        self.video_rate_gen = (2.5 * num for num in range(1,4))
+        self.bindings_on()
+        self.img = self.audio_icon()
+        
         self.labelspanel = tk.Frame(self.master, background="#116562")
-        self.labelspanel.pack(side= tk.LEFT, fill=tk.BOTH, expand=1)
+        self.labelspanel.pack(side= tk.LEFT, fill=tk.NONE, expand=0)
         
         self.videopanel = tk.Frame(self.master, background="#116562") # for video
         self.canvas = tk.Canvas(self.videopanel).pack(fill=tk.BOTH, expand=1)
@@ -702,17 +848,17 @@ class Start_video:
         label_panel_v1_text = tk.StringVar()
         label_panel_v1_text.set("Label 1: None")
         self.label_panel_v1 = tk.Label( self.labelspanel, textvariable = label_panel_v1_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
-        self.label_panel_v1.grid(row = 0, column = 0, padx=1, pady=1)
+        self.label_panel_v1.grid(row = 0, column = 0, padx=1, pady=1, sticky = tk.EW)
         
         label_panel_v2_text = tk.StringVar()
         label_panel_v2_text.set("Label 2: None")
         self.label_panel_v2 = tk.Label( self.labelspanel, textvariable = label_panel_v2_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
-        self.label_panel_v2.grid(row = 0, column = 1, padx=1, pady=1, sticky = tk.NE)
+        self.label_panel_v2.grid(row = 0, column = 1, padx=1, pady=1, sticky = tk.EW)
         
         label_panel_v3_text = tk.StringVar()
         label_panel_v3_text.set("Label 3: None")
         self.label_panel_v3 = tk.Label( self.labelspanel, textvariable = label_panel_v3_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
-        self.label_panel_v3.grid(row = 0, column = 2, padx=1, pady=1)
+        self.label_panel_v3.grid(row = 0, column = 2, padx=1, pady=1, sticky = tk.EW)
         
         label_panel_v4_text = tk.StringVar()
         label_panel_v4_text.set("Label 4: None")
@@ -757,6 +903,16 @@ class Start_video:
         self.box_for_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         self.box_for_time.bind("<Enter>", self.bindings_off)
         self.box_for_time.bind("<Leave>", lambda event: self.bindings_on_2())
+        
+        self.audio_label = tk.Label(self.main_frame_v2,image= self.img, bg = "green")
+        self.audio_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.audio_label.configure(foreground="green")
+        
+        self.var = tk.IntVar()
+        self.scale_audio = tk.Scale(self.main_frame_v2, from_ = 0, to=100, length=200, orient=tk.HORIZONTAL, command = self.audio_volume, variable=self.var, bg = "black", fg = "green", troughcolor = "green", bd = 0 , highlightthickness = 0)
+        self.scale_audio.set(100)
+        self.scale_audio.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        
         self.Instance = vlc.Instance()
         self.player = self.Instance.media_player_new()
         media = self.Instance.media_new(video_file)
@@ -768,6 +924,9 @@ class Start_video:
         
     def button_pause_fun(self, event):
         return self.player.pause()
+    
+    def audio_volume(self,val):
+        self.player.audio_set_volume(self.var.get())
     
     def next_frame(self, event):
         return self.player.next_frame()
@@ -814,6 +973,13 @@ class Start_video:
                 self.player.pause()
             else:
                 self.player.set_time(time_12)
+    def audio_icon(self):
+        url = "https://i.postimg.cc/MZVj1n3f/audio.png"
+        response = requests.get(url)
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((20, 15))
+        img = ImageTk.PhotoImage(img)
+        return img
     
     def step_mode(self, index):
         global start_frame_bool, closest_timestamp, current_label, text
@@ -827,6 +993,7 @@ class Start_video:
             text.set(f"Active label: {current_label}")
         else:
             messagebox.showinfo("Information box", "This key is disable, change label name If you want to use it")
+    
     def end_key(self, data):
         global start_frame_bool, current_label, index_timestamp, index_timestamp_stop, closest_timestamp_stop, start_frame_bool_v2
         if start_frame_bool:
@@ -915,7 +1082,7 @@ class Start_video:
         self.bindings_all = self.master.bind_all("<1>", lambda event:event.widget.focus_set())
         
     def bindings_off(self, event):
-        
+
         self.master.unbind("<space>", self.bindings_space)
         self.master.unbind("<a>", self.bindings_a)
         self.master.unbind("<d>", self.bindings_d)
@@ -935,8 +1102,9 @@ class Start_video:
         self.master.unbind("z", self.bindings_z)
         self.master.unbind("x",self.bindings_x)
         self.box_for_time.focus_set()
-        #messagebox.showinfo("Information box", "Entering insert zone. Labeling off")
+        
     def bindings_on_2(self):
+
         self.bindings_space = self.master.bind("<space>", self.button_pause_fun)
         self.bindings_a = self.master.bind("<a>", self.previous_frame)
         self.bindings_d = self.master.bind("<d>", self.next_frame)
@@ -956,13 +1124,14 @@ class Start_video:
         self.bindings_z = self.master.bind("z", lambda event: self.slow_down())
         self.bindings_x = self.master.bind("x", lambda event: self.normal_speed())
         self.label_panel_v2.focus_set()
-        #messagebox.showinfo("Information box", "Leaving insert zone. Labeling on")
+
     def speed_up(self):
-        global video_rate
-        video_rate = 2.5
-        messagebox.showinfo("Information box", "The video sped up")
-        return self.player.set_rate(video_rate)
-    
+        try:
+            messagebox.showinfo("Information box", "The video sped up")
+            return self.player.set_rate(next(self.video_rate_gen))
+        except StopIteration:
+            self.video_rate_gen = (2.5 * num for num in range(1,4))
+            return self.player.set_rate(next(self.video_rate_gen))
     def slow_down(self):
         global video_rate
         video_rate = 0.2
@@ -988,24 +1157,26 @@ class Start_video:
             messagebox.showerror("Error box", "First, set the beginning (key 1-9) and the end (key e) of the range")
     
     def calibration(self, event):
-        back_up_v2 = self.player.get_time()
-        self.player.next_frame()
-        sleep(0.2)
-        self.player.next_frame()
-        sleep(0.2)
-        self.player.next_frame()
-        sleep(0.2)
-        self.player.next_frame()
-        sleep(0.2)
-        self.player.next_frame()
-        sleep(0.2)
-        self.player.next_frame()
-        sleep(0.2)
-        self.player.set_time(back_up_v2)
-        self.button_calibration["state"] = tk.DISABLED
-        self.button_calibration.update()
-        messagebox.showinfo("Information box", "Thank you for your contribution")
-    
+        if self.button_calibration['state'] != "disabled":
+            back_up_v2 = self.player.get_time()
+            self.player.next_frame()
+            sleep(0.2)
+            self.player.next_frame()
+            sleep(0.2)
+            self.player.next_frame()
+            sleep(0.2)
+            self.player.next_frame()
+            sleep(0.2)
+            self.player.next_frame()
+            sleep(0.2)
+            self.player.next_frame()
+            sleep(0.2)
+            self.player.set_time(back_up_v2)
+            self.button_calibration["state"] = tk.DISABLED
+            self.button_calibration.update()
+            messagebox.showinfo("Information box", "Thank you for your contribution")
+        else:
+            pass
     def slider_fun(self, unused):
         global df
         timestamp_track = cv2.getTrackbarPos(trackbar_name, track_bar_panel)
