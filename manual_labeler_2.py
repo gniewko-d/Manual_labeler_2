@@ -372,7 +372,7 @@ class Application:
                 elif j - initial > 60 and n == 1:
                     stop_point = initial
                     if stop_point - start_point > self.time_filter:
-                        duration = stop_point - start_point
+                        #duration = stop_point - start_point
                         yield start_point, stop_point
                         initial = j
                         start_point = j
@@ -383,7 +383,7 @@ class Application:
                 elif j - initial > 60: 
                     stop_point = initial
                     if stop_point - start_point > self.time_filter:
-                        duration = stop_point - start_point
+                        #duration = stop_point - start_point
                         yield start_point, stop_point
                         initial = j
                         start_point = j
@@ -948,23 +948,23 @@ class Start_video:
         self.videopanel.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
         
         self.main_frame_v2 = tk.Frame(self.master, background="#116562") #for controls
-        self.main_frame_v2.pack(side= tk.BOTTOM, fill=tk.BOTH, expand=1)
+        self.main_frame_v2.pack(side= tk.BOTTOM, fill=tk.NONE, expand=0)
         
         self.button_pause = tk.Button(self.main_frame_v2, text = "Pause/PLay", background="black", foreground="green", width = 17)
         self.button_pause.bind("<Button-1>", self.button_pause_fun)
-        self.button_pause.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.button_pause.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.button_next = tk.Button(self.main_frame_v2, text = "Next Frame", background="black", foreground="green", width = 17)
         self.button_next.bind("<Button-1>", self.next_frame)
-        self.button_next.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.button_next.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.button_previous = tk.Button(self.main_frame_v2, text = "Prev. Frame", background="black", foreground="green", width = 17)
         self.button_previous.bind("<Button-1>", self.previous_frame)
-        self.button_previous.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.button_previous.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.button_calibration = tk.Button(self.main_frame_v2, text = "Calibration", background="black", foreground="green", width = 17)
         self.button_calibration.bind("<Button-1>", self.calibration)
-        self.button_calibration.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.button_calibration.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         label_panel_v1_text = tk.StringVar()
         label_panel_v1_text.set("Label 1: None")
@@ -1014,25 +1014,25 @@ class Start_video:
         text = tk.StringVar()
         text.set(f"Active label: {current_label}")
         self.current_label_widget = tk.Label(self.main_frame_v2, textvariable = text, background="black", foreground="green", width = 17)
-        self.current_label_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.current_label_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.button_set_time = tk.Button(self.main_frame_v2, text = "Set time [click me] of video [ms]:", background="black", foreground="green", width = 24)
         self.button_set_time.bind("<Button-1>", self.set_time_manually)
-        self.button_set_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.button_set_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.box_for_time = tk.Entry(self.main_frame_v2,  width = 16, background="black", foreground="green", insertbackground = "green")
-        self.box_for_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.box_for_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         self.box_for_time.bind("<Enter>", self.bindings_off)
         self.box_for_time.bind("<Leave>", lambda event: self.bindings_on_2())
         
         self.audio_label = tk.Label(self.main_frame_v2,image= self.img, bg = "green")
-        self.audio_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.audio_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         self.audio_label.configure(foreground="green")
         
         self.var = tk.IntVar()
         self.scale_audio = tk.Scale(self.main_frame_v2, from_ = 0, to=100, length=200, orient=tk.HORIZONTAL, command = self.audio_volume, variable=self.var, bg = "black", fg = "green", troughcolor = "green", bd = 0 , highlightthickness = 0)
         self.scale_audio.set(100)
-        self.scale_audio.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.scale_audio.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.Instance = vlc.Instance()
         self.player = self.Instance.media_player_new()
