@@ -13,6 +13,7 @@ import tkinter as tk
 import requests
 from PIL import Image, ImageTk
 from io import BytesIO
+
 from tkinter import messagebox
 import easygui
 
@@ -24,7 +25,7 @@ import pandas as pd
 import numpy as np
 import csv
 from datetime import date
-
+import keyboard
 
 def advert():
     root_v1 = tk.Tk()
@@ -39,26 +40,26 @@ def advert():
     root_v1.after(3000, lambda: root_v1.destroy())
     root_v1.mainloop()
 
-df3 = None
-df4 = None
 label_name = [f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}"]
 configruation_title = f"{None}"
 video_file = None
 available_formats = ["flv", "avi", "amv", "mp4"]
 length_movie = False
 df_checker = False
-current_label = "starter"
+current_label = "Nought"
 start_frame_bool = False
 label_list = None
 time_jump = 0
 video_rate = 1.0
 start_frame_bool_v2 = False
+
 class Application:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Manual Labeler")
         self.root.protocol("WM_DELETE_WINDOW", disable_event)
         
+        self.reupload_controler = 0
         self.desired_font = tk.font.Font(size = 14)
         
         self.first_frame = tk.Frame(self.root, background="#116562", width=400, height = 60)
@@ -269,7 +270,7 @@ class Application:
                 self.frames_v10 = tk.Frame(self.new_root_5, background="black")
                 self.frames_v10.pack(side = tk.TOP, expand=True, fill='both')
                 
-                self.label_time_box = tk.Label(self.frames_v10, text = "Time of videos [s]:", background="black", foreground="green")
+                self.label_time_box = tk.Label(self.frames_v10, text = " Minimal time of videos [s]:", background="black", foreground="green")
                 self.label_time_box.pack(side = tk.LEFT, expand=True, fill='both')
                 
                 self.box_for_time_v1 = tk.Entry(self.frames_v10, width = 16, background="black", foreground="green", insertbackground = "green", )
@@ -283,16 +284,85 @@ class Application:
                 self.frames_labeled_submit.pack(side = tk.TOP, expand=True, fill='both')
 
     def get_play_labeled(self):
-            self.time_filter  = self.box_for_time_v1.get()
+        try:    
+            self.time_filter = float(self.box_for_time_v1.get()) * 1000
             self.new_root_5.destroy()
+            self.new_root_6 = tk.Toplevel(self.root, background= "black")
+            self.new_root_6.title("Video screen")
+            self.on_value = [i.get() for i in self.list_of_choosen if i.get() != "None"]
+            
+            
+            self.frame_otpions = tk.Frame(self.new_root_6, background="#116562")
+            self.frame_otpions.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            
             self.on_value = [i.get() for i in self.list_of_choosen if i.get() != "None"]
             self.filter_time_dict = {i: df.loc[df[i] == i, "Frame time [ms]."].tolist() for i in self.on_value}
-            value = self.filter_time_dict.get(self.on_value[0])
-            key = self.on_value[0]
+            
+            variable = tk.StringVar()
+            variable.set("Choose your label")
+            
+            self.dropdown_menu = tk.OptionMenu(self.frame_otpions, variable, *self.on_value, command = self.option_menu)
+            self.dropdown_menu["menu"].config(bg = "black")
+            self.dropdown_menu["menu"].config(fg = "green")
+            self.dropdown_menu.config(bg = "black")
+            self.dropdown_menu.config(fg = "green")
+            self.dropdown_menu.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            
+            
+            self.videopanel_v1 = tk.Frame(self.new_root_6, background="#116562") # for video
+            self.canvas = tk.Canvas(self.videopanel_v1).pack(fill=tk.BOTH, expand=1)
+            self.videopanel_v1.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+        
+            self.frame_next_button= tk.Frame(self.new_root_6, background="#116562")
+            self.frame_next_button.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            
+            self.next_button = tk.Button(self.frame_next_button, text = "Play", foreground="green", background= "black", command = self.generator_controler) 
+            self.next_button.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            
+            self.next_video = tk.Button(self.frame_next_button, text = "Next video/Video", foreground="green", background= "black", command = self.next_video_controler)
+            self.next_video.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            
+            self.Instance = vlc.Instance()
+            self.player = self.Instance.media_player_new()
+            media = self.Instance.media_new(video_file)
+            self.player.set_media(media)
+            self.player.set_hwnd(self.videopanel_v1.winfo_id())
+        except ValueError:
+            messagebox.showerror("Error box", "You inserted wrong value try using integers")
+    
+    def next_video_controler(self):
+        self.break_point = 1
+        print("oł yea")
+    def option_menu(self, selection):
+        self.value = self.filter_time_dict.get(selection)
+        self.value.append(self.value[-1] + 20000)
+        self.generator_instance = self.generator_labels()
+    
+    def generator_controler(self):
+        try:
+            self.start_time, self.sleep_time = next(self.generator_instance)
+            self.player.set_time(round(self.start_time))
+            print(f"sleep time: {self.sleep_time}")
+            get_state = 0
+            self.break_point = 0
+            self.player.play()
+            #sleep(self.sleep_time)
+            while get_state < self.sleep_time:
+                get_state = self.player.get_time()
+                if keyboard.is_pressed('q'):
+                    break
+            self.player.pause()
+            print(f"time after sleep: {self.player.get_time()}")
+        except StopIteration:
+            messagebox.showinfo("Information box", "All labeled video been played. If you want to watch them again, click Next button")
+            self.generator_instance = self.generator_labels()
+        except AttributeError:
+            messagebox.showerror("Error box", "First, choose label you want to watch!")
+            
+    def generator_labels(self):
             initial = 0
             n = 0
-            start_stop_dict = {}
-            for i, j in enumerate(value):
+            for i, j in enumerate(self.value):
                 if n == 0:
                     start_point = j
                     n += 1
@@ -301,19 +371,25 @@ class Application:
                     initial = j
                 elif j - initial > 60 and n == 1:
                     stop_point = initial
-                    start_stop_dict[start_point] = stop_point
-                    n += 1
-                    initial = j
-                    start_point = j
+                    if stop_point - start_point > self.time_filter:
+                        duration = stop_point - start_point
+                        yield start_point, stop_point
+                        initial = j
+                        start_point = j
+                    else:
+                        n += 1
+                        initial = j
+                        start_point = j
                 elif j - initial > 60: 
                     stop_point = initial
-                    start_stop_dict[start_point] = stop_point
-                    initial = j
-                    start_point = j
-            print(start_stop_dict)
-            
-        
-    
+                    if stop_point - start_point > self.time_filter:
+                        duration = stop_point - start_point
+                        yield start_point, stop_point
+                        initial = j
+                        start_point = j
+                    else:
+                        initial = j
+                        start_point = j
     def easy_open(self):
         global video_file, available_formats, player
         video_file = easygui.fileopenbox(title="Select An Video", filetypes= ["*.gif", "*.flv", "*.avi", "*.amv", "*.mp4"])
@@ -321,7 +397,21 @@ class Application:
             video_title = video_file.split("\\")
             video_format = video_title[-1].split(".")
             video_format = video_format[-1].lower()
-            if video_format in available_formats:
+            if self.reupload_controler == 1 and video_format in available_formats:
+                msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to re-upload video? Unsaved data will be lost?',icon = 'warning')
+                if msgbox == "yes":
+                    self.restart_systems()
+                    self.text = f"Video: {video_title[-1]}"
+                    self.current_video.configure(width = len(self.text))
+                    self.current_video.config(text = self.text)
+                    messagebox.showinfo("Information box", "Video re-uploaded")
+                    vlc_instance = vlc.Instance()
+                    player = vlc_instance.media_player_new()
+                    media = vlc_instance.media_new(video_file)
+                    player.set_media(media)
+                else:
+                    pass
+            elif video_format in available_formats:
                 self.text = f"Video: {video_title[-1]}"
                 self.current_video.configure(width = len(self.text))
                 self.current_video.config(text = self.text)
@@ -330,6 +420,7 @@ class Application:
                 player = vlc_instance.media_player_new()
                 media = vlc_instance.media_new(video_file)
                 player.set_media(media)
+                self.reupload_controler += 1
             else:
                 messagebox.showerror("Error box", "Wrong format of video!")
                 messagebox.showinfo("Information box", f'Currently available formats: .flv, .avi, .amv, .mp4, \nformat of your video : {video_format}')
@@ -338,7 +429,13 @@ class Application:
             self.current_video.configure(width = len(self.text))
             self.current_video.config(text = self.text)
             messagebox.showerror("Error box", "Video was not loaded")
-        
+    
+    def restart_systems(self):
+        global df_checker, label_list, label_name
+        df_checker = False
+        label_list = None
+        label_name = [f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}"]
+    
     def keyboard_settings(self):
         global fps
         self.new_root = tk.Toplevel(self.root)
@@ -944,6 +1041,9 @@ class Start_video:
         self.player.set_hwnd(self.videopanel.winfo_id())
         messagebox.showinfo("Information box", "Before you start press Calibration button")
         self.player.play()
+        sleep(0.2)
+        self.player.pause()
+        self.player.set_time(0)
         list_of_times = df["Frame time [ms]."].tolist()
         
     def button_pause_fun(self, event):
@@ -1006,20 +1106,48 @@ class Start_video:
         return img
     
     def step_mode(self, index):
-        global start_frame_bool, closest_timestamp, current_label, text
+        global start_frame_bool, closest_timestamp, current_label, text, time_jump
         current_label = label_name[index]
-        if current_label != "None":
+        if not time_jump:
+            current_state = str(self.player.get_state())
+            if current_state == "State.Playing":
+                self.player.pause()
+            else:
+                pass
+            messagebox.showinfo("Information box", "I have to calibrate my self. Now you can use this option normally. Thank your for your contribution")
+            back_up = self.player.get_time()
+            self.player.next_frame()
+            sleep(0.2)
+            self.player.next_frame()
+            sleep(0.2)
+            self.player.next_frame()
+            sleep(0.2)
+            first_time = self.player.get_time()
+            sleep(0.2)
+            self.player.next_frame()
+            sleep(0.2)
+            second_time = self.player.get_time()
+            time_jump = second_time - first_time
+            self.player.set_time(back_up)
+        elif current_label != "None":
+            current_state = str(self.player.get_state())
+            self.bindings_on()
+            if current_state == "State.Playing":
+                self.player.pause()
+            else:
+                pass
             timestamp = self.player.get_time()
             closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
             df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
-            self.player.next_frame()
+            time_12 = timestamp + round(time_jump)
+            self.player.set_time(time_12)
             start_frame_bool = True
             text.set(f"Active label: {current_label}")
         else:
             messagebox.showinfo("Information box", "This key is disable, change label name If you want to use it")
     
     def end_key(self, data):
-        global start_frame_bool, current_label, index_timestamp, index_timestamp_stop, closest_timestamp_stop, start_frame_bool_v2
+        global start_frame_bool, current_label, index_timestamp, index_timestamp_stop, closest_timestamp_stop, start_frame_bool_v2, text
         if start_frame_bool:
             timestamp_stop = self.player.get_time()
             closest_timestamp_stop = min(list_of_times, key=lambda x:abs(x-timestamp_stop))
@@ -1036,6 +1164,8 @@ class Start_video:
                 start_frame_bool = False
                 start_frame_bool_v2 = True
                 current_state = str(self.player.get_state())
+                current_label = "Nought"
+                text.set(f"Active label: {current_label}")
                 if current_state == "State.Playing":
                     self.player.pause()
                 else:
@@ -1047,6 +1177,8 @@ class Start_video:
                 start_frame_bool = False
                 start_frame_bool_v2 = True
                 current_state = str(self.player.get_state())
+                current_label = "Nought"
+                text.set(f"Active label: {current_label}")
                 if current_state == "State.Playing":
                     self.player.pause()
                 else:
@@ -1181,26 +1313,28 @@ class Start_video:
             messagebox.showerror("Error box", "First, set the beginning (key 1-9) and the end (key e) of the range")
     
     def calibration(self, event):
+        global time_jump
         if self.button_calibration['state'] != "disabled":
-            back_up_v2 = self.player.get_time()
+            back_up = self.player.get_time()
             self.player.next_frame()
             sleep(0.2)
             self.player.next_frame()
             sleep(0.2)
             self.player.next_frame()
             sleep(0.2)
-            self.player.next_frame()
+            first_time = self.player.get_time()
             sleep(0.2)
             self.player.next_frame()
             sleep(0.2)
-            self.player.next_frame()
-            sleep(0.2)
-            self.player.set_time(back_up_v2)
+            second_time = self.player.get_time()
+            time_jump = second_time - first_time
+            self.player.set_time(back_up)
             self.button_calibration["state"] = tk.DISABLED
             self.button_calibration.update()
             messagebox.showinfo("Information box", "Thank you for your contribution")
         else:
             pass
+    
     def slider_fun(self, unused):
         global df
         timestamp_track = cv2.getTrackbarPos(trackbar_name, track_bar_panel)
