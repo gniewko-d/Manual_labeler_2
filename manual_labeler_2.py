@@ -58,83 +58,84 @@ class Application:
         self.root = tk.Tk()
         self.root.title("Manual Labeler")
         self.root.protocol("WM_DELETE_WINDOW", disable_event)
+        self.root.geometry("600x600")
         
         self.reupload_controler = 0
         self.desired_font = tk.font.Font(size = 14)
         
-        self.first_frame = tk.Frame(self.root, background="#116562", width=400, height = 60)
+        self.first_frame = tk.Frame(self.root, background="#116562", width=200, height = 60)
         self.first_frame.pack(expand=True, fill='both')
         self.first_frame.pack_propagate(0)
         
-        self.open_file = tk.Button(self.first_frame, text = "Load video", command = self.easy_open, background="black", foreground="green", width = 19)
+        self.open_file = tk.Button(self.first_frame, text = "Load video", command = self.easy_open, background="black", foreground="green", width=25, relief = tk.RAISED)
         self.open_file["font"] = self.desired_font
         self.open_file.pack(side= tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.text = f"Video: {None}"
-        self.current_video = tk.Label(self.first_frame, height = 1, width = 16, background="black", foreground="green", anchor = tk.CENTER)
+        self.current_video = tk.Label(self.first_frame, height = 1, width=25, background="black", foreground="green", anchor = tk.CENTER, relief = tk.RAISED)
         self.current_video.config(text = self.text)
         
         self.current_video.configure(font = self.desired_font)
         self.current_video.pack(side=tk.RIGHT, padx=1, pady=1, expand=True, fill='both')
         
-        self.second_frame = tk.Frame(self.root, background="#116562", width=400, height = 60)
+        self.second_frame = tk.Frame(self.root, background="#116562", width=200, height = 60)
         self.second_frame.pack(side = tk.TOP, expand=True, fill='both')
         self.second_frame.pack_propagate(0)
         
-        self.keyboard = tk.Button(self.second_frame, text="Keyboard settings", command = self.keyboard_settings, background="black", foreground="green", width = 16)
+        self.keyboard = tk.Button(self.second_frame, text="Keyboard settings", command = self.keyboard_settings, background="black", foreground="green", width=25)
         self.keyboard["font"] = self.desired_font
         self.keyboard.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.label_1_9 = tk.Button(self.second_frame, text="Labels settings", command = self.label_settings, background="black", foreground="green")
+        self.label_1_9 = tk.Button(self.second_frame, text="Labels settings", command = self.label_settings, background="black", foreground="green", width=25)
         self.label_1_9["font"] = self.desired_font
         self.label_1_9.pack(side=tk.RIGHT, padx=1, pady=1, expand=True, fill='both')
         
-        self.third_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 60)
+        self.third_frame_v1 = tk.Frame(self.root, background="#116562", width=200, height = 60)
         self.third_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.third_frame_v1.pack_propagate(0)
         
-        self.start_labeling = tk.Button(self.third_frame_v1, text="Start labeling", command = self.bridge_start_video, background="black", foreground="green", width = 17)
+        self.start_labeling = tk.Button(self.third_frame_v1, text="Start labeling", command = self.bridge_start_video, background="black", foreground="green", width=25)
         self.start_labeling["font"] = self.desired_font
         self.start_labeling.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.show_df = tk.Button(self.third_frame_v1, text="Show data frame", command = self.draw_table, background="black", foreground="green")
+        self.show_df = tk.Button(self.third_frame_v1, text="Show data frame", command = self.draw_table, background="black", foreground="green", width=25)
         self.show_df["font"] = self.desired_font
         self.show_df.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
     
-        self.fifth_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 60)
+        self.fifth_frame_v1 = tk.Frame(self.root, background="#116562", width=200, height = 60)
         self.fifth_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.fifth_frame_v1.pack_propagate(0)
     
-        self.save_machine_state = tk.Button(self.fifth_frame_v1, text = "Save current state", command = run_save_machine_state, background="black", foreground="green", width = 19)
+        self.save_machine_state = tk.Button(self.fifth_frame_v1, text = "Save current state", command = run_save_machine_state, background="black", foreground="green", width=25)
         self.save_machine_state["font"] = self.desired_font
         self.save_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.load_machine_state = tk.Button(self.fifth_frame_v1, text = "Load state from file", command = lambda:[load_machine_state_fun(), self.label_changer_2()], background="black", foreground="green")
+        self.load_machine_state = tk.Button(self.fifth_frame_v1, text = "Load state from file", command = lambda:[load_machine_state_fun(), self.label_changer_2()], background="black", foreground="green", width=25)
         self.load_machine_state["font"] = self.desired_font
         self.load_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.sixth_frame = tk.Frame(self.root, background="#116562", width=400, height = 60)
+        self.sixth_frame = tk.Frame(self.root, background="#116562", width=200, height = 60)
         self.sixth_frame.pack(side = tk.TOP, expand=True, fill='both')
         self.sixth_frame.pack_propagate(0)
         
-        self.create_configuration = tk.Button(self.sixth_frame, text = "Create configuration", command = self.creat_configuration_fun, background="black", foreground="green", width = 19)
+        self.create_configuration = tk.Button(self.sixth_frame, text = "Create configuration", command = self.creat_configuration_fun, background="black", foreground="green", width=25)
         self.create_configuration["font"] = self.desired_font
         self.create_configuration.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.load_configuration = tk.Button(self.sixth_frame, text = "Load configuration", command = lambda:[load_configuration_fun(), self.label_changer_2()], background="black", foreground="green", width = 17)
+        self.load_configuration = tk.Button(self.sixth_frame, text = "Load configuration", command = lambda:[load_configuration_fun(), self.label_changer_2()], background="black", foreground="green", width=25)
         self.load_configuration["font"] = self.desired_font
         self.load_configuration.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.seventh_frame = tk.Frame(self.root, background="#116562", width= 400, height = 60)
+        self.seventh_frame = tk.Frame(self.root, background="#116562", width= 200, height = 60)
         self.seventh_frame.pack(side = tk.TOP, expand=True, fill='both')
         self.seventh_frame.pack_propagate(0)
         
-        self.play_labeled_frames = tk.Button(self.seventh_frame, text = "Play labeled frames", background="black", command = self.play_labeled_fun, foreground="green", width = 19)
+        self.play_labeled_frames = tk.Button(self.seventh_frame, text = "Play labeled frames", background="black", command = self.play_labeled_fun, foreground="green", width=25)
         self.play_labeled_frames["font"] = self.desired_font
         self.play_labeled_frames.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.save_labeled_frames = tk.Button(self.seventh_frame, text = "Save labeled frames", background="black", foreground="green", width = 19)
+        self.save_labeled_frames = tk.Button(self.seventh_frame, text = "Save labeled frames", background="black", foreground="green", width=25)
         self.save_labeled_frames["font"] = self.desired_font
         self.save_labeled_frames.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
@@ -142,11 +143,11 @@ class Application:
         self.fourth_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.fourth_frame_v1.pack_propagate(0)
         
-        self.save_labeled_video = tk.Button(self.fourth_frame_v1, text= "Save data", command = start_vido3, background="black", foreground="green", width = 7)
+        self.save_labeled_video = tk.Button(self.fourth_frame_v1, text= "Save data", command = start_vido3, background="black", foreground="green", width=25)
         self.save_labeled_video["font"] = self.desired_font
         self.save_labeled_video.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.close_gui = tk.Button(self.fourth_frame_v1, text= "Exit", command = self.close_gate, background="black", foreground="green", activebackground = "white")
+        self.close_gui = tk.Button(self.fourth_frame_v1, text= "Exit", command = self.close_gate, background="black", foreground="green", activebackground = "white", width=25)
         self.close_gui["font"] = self.desired_font
         self.close_gui.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
@@ -456,217 +457,275 @@ class Application:
         global label_name
         self.new_root_2 = tk.Toplevel(self.root, background= "black")
         self.new_root_2.title("Label_settings")
+        self.new_root_2.bind("<FocusIn>", lambda event, color = "#DCDC14": self.handle_focus(event, color))
+        self.new_root_2.bind("<FocusOut>", self.handle_focus_out)
         
         self.first_frame_v2 = tk.Frame(self.new_root_2, background="black")
-        self.first_frame_v2.pack()
+        self.first_frame_v2.pack(expand=True, fill='both')
         
         self.label_1 = tk.Label(self.first_frame_v2, text = "key_1 label:", foreground="green", background= "black")
-        self.label_1.pack(side=tk.LEFT)
+        self.label_1["font"] = self.desired_font
+        self.label_1.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.label_1_text_box = tk.Text(self.first_frame_v2, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_1_text_box.insert(tk.INSERT, label_name[0])
-        self.label_1_text_box.pack(side=tk.LEFT)
+        self.label_1_text_box["font"] = self.desired_font
+        self.label_1_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.second_frame_v1 = tk.Frame(self.new_root_2, background= "black")
-        self.second_frame_v1.pack(side = tk.TOP)
+        self.second_frame_v1.pack(side = tk.TOP,expand=True, fill='both')
         
         self.label_2 = tk.Label(self.second_frame_v1, text = "key_2 label:", foreground="green", background= "black")
-        self.label_2.pack(side=tk.LEFT)
+        self.label_2["font"] = self.desired_font
+        self.label_2.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.label_2_text_box = tk.Text(self.second_frame_v1, height = 1, width = 20, foreground="green", background= "black",insertbackground = "white")
         self.label_2_text_box.insert(tk.INSERT, label_name[1])
-        self.label_2_text_box.pack(side=tk.LEFT)
+        self.label_2_text_box["font"] = self.desired_font
+        self.label_2_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.third_frame = tk.Frame(self.new_root_2, background= "black")
-        self.third_frame.pack(side = tk.TOP)
+        self.third_frame.pack(side = tk.TOP, expand=True, fill='both')
         
         self.label_3 = tk.Label(self.third_frame, text = "key_3 label:", foreground="green", background= "black")
-        self.label_3.pack(side=tk.LEFT)
+        self.label_3["font"] = self.desired_font
+        self.label_3.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.label_3_text_box = tk.Text(self.third_frame, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_3_text_box.insert(tk.INSERT, label_name[2])
-        self.label_3_text_box.pack(side=tk.LEFT)
+        self.label_3_text_box["font"] = self.desired_font
+        self.label_3_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.fourth_frame = tk.Frame(self.new_root_2, background= "black")
-        self.fourth_frame.pack(side = tk.TOP)
+        self.fourth_frame.pack(side = tk.TOP, expand=True, fill='both')
         
         self.label_4 = tk.Label(self.fourth_frame, text = "key_4 label:", foreground="green", background= "black")
-        self.label_4.pack(side=tk.LEFT)
+        self.label_4["font"] = self.desired_font
+        self.label_4.pack(side=tk.LEFT, expand=True, fill='both')
         
         self.label_4_text_box = tk.Text(self.fourth_frame, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_4_text_box.insert(tk.INSERT, label_name[3])
-        self.label_4_text_box.pack(side=tk.LEFT)
+        self.label_4_text_box["font"] = self.desired_font
+        self.label_4_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.fifth_frame = tk.Frame(self.new_root_2, background= "black")
-        self.fifth_frame.pack(side = tk.TOP)
+        self.fifth_frame.pack(side = tk.TOP, expand=True, fill='both')
         
         self.label_5 = tk.Label(self.fifth_frame, text = "key_5 label:", foreground="green", background= "black")
-        self.label_5.pack(side=tk.LEFT)
+        self.label_5["font"] = self.desired_font
+        self.label_5.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.label_5_text_box = tk.Text(self.fifth_frame, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_5_text_box.insert(tk.INSERT, label_name[4])
-        self.label_5_text_box.pack(side=tk.LEFT)
+        self.label_5_text_box["font"] = self.desired_font
+        self.label_5_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.sixth_frame = tk.Frame(self.new_root_2, background= "black")
-        self.sixth_frame.pack(side = tk.TOP)
+        self.sixth_frame.pack(side = tk.TOP,expand=True, fill='both')
         
         self.label_6 = tk.Label(self.sixth_frame, text = "key_6 label:", foreground="green", background= "black")
-        self.label_6.pack(side=tk.LEFT)
+        self.label_6["font"] = self.desired_font
+        self.label_6.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.label_6_text_box = tk.Text(self.sixth_frame, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_6_text_box.insert(tk.INSERT, label_name[5])
-        self.label_6_text_box.pack(side=tk.LEFT)
+        self.label_6_text_box["font"] = self.desired_font
+        self.label_6_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.seventh_frame = tk.Frame(self.new_root_2, background= "black")
-        self.seventh_frame.pack(side = tk.TOP)
+        self.seventh_frame.pack(side = tk.TOP, expand=True, fill='both')
         
         self.label_7 = tk.Label(self.seventh_frame, text = "key_7 label:", foreground="green", background= "black")
-        self.label_7.pack(side=tk.LEFT)
+        self.label_7["font"] = self.desired_font
+        self.label_7.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.label_7_text_box = tk.Text(self.seventh_frame, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_7_text_box.insert(tk.INSERT, label_name[6])
-        self.label_7_text_box.pack(side=tk.LEFT)
+        self.label_7_text_box["font"] = self.desired_font
+        self.label_7_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         
         self.eighth_frame = tk.Frame(self.new_root_2, background= "black")
-        self.eighth_frame.pack(side = tk.TOP)
+        self.eighth_frame.pack(side = tk.TOP, expand=True, fill='both')
         
         self.label_8 = tk.Label(self.eighth_frame, text = "key_8 label:", foreground="green", background= "black")
-        self.label_8.pack(side=tk.LEFT)
+        self.label_8["font"] = self.desired_font
+        self.label_8.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.label_8_text_box = tk.Text(self.eighth_frame, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_8_text_box.insert(tk.INSERT, label_name[7])
-        self.label_8_text_box.pack(side=tk.LEFT)
+        self.label_8_text_box["font"] = self.desired_font
+        self.label_8_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.ninth_frame = tk.Frame(self.new_root_2, background= "black")
-        self.ninth_frame.pack(side = tk.TOP)
+        self.ninth_frame.pack(side = tk.TOP, expand=True, fill='both')
         
         self.label_9 = tk.Label(self.ninth_frame, text = "key_9 label:", foreground="green", background= "black")
-        self.label_9.pack(side=tk.LEFT)
+        self.label_9["font"] = self.desired_font
+        self.label_9.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.label_9_text_box = tk.Text(self.ninth_frame, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_9_text_box.insert(tk.INSERT, label_name[8])
-        self.label_9_text_box.pack(side=tk.LEFT)
+        self.label_9_text_box["font"] = self.desired_font
+        self.label_9_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
         
         self.submit_frame = tk.Frame(self.new_root_2, background= "black")
-        self.submit_frame.pack(side = tk.TOP)
+        self.submit_frame.pack(side = tk.TOP, expand=True, fill='both')
         
         self.submit = tk.Button(self.submit_frame, text = "Submit", command = self.label_changer, foreground="green", background= "black")
-        self.submit.pack(side = tk.BOTTOM)
+        self.submit["font"] = self.desired_font
+        self.submit.pack(side = tk.BOTTOM, expand=True, fill='both', padx=1, pady=1)
         
     
     def creat_configuration_fun(self):
         global label_name, configruation_title
         self.new_root_4 = tk.Toplevel(self.root, background= "black")
         self.new_root_4.title("Label_configuration")
+        self.new_root_4.bind("<FocusIn>", lambda event, color = "#00008B": self.handle_focus(event, color))
+        self.new_root_4.bind("<FocusOut>", self.handle_focus_out)
         
         self.first_frame_v3 = tk.Frame(self.new_root_4, background="black")
         self.first_frame_v3.pack()
         
         self.label_1_v1 = tk.Label(self.first_frame_v3, text = "key_1 label:", foreground="green", background= "black")
-        self.label_1_v1.pack(side=tk.LEFT)
+        self.label_1_v1["font"] = self.desired_font
+        self.label_1_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.label_1_v1_text_box = tk.Text(self.first_frame_v3, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_1_v1_text_box.insert(tk.INSERT, label_name[0])
-        self.label_1_v1_text_box.pack(side=tk.LEFT)
+        self.label_1_v1_text_box["font"] = self.desired_font
+        self.label_1_v1_text_box.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.second_frame_v2 = tk.Frame(self.new_root_4, background= "black")
         self.second_frame_v2.pack(side = tk.TOP)
         
         self.label_2_v1 = tk.Label(self.second_frame_v2, text = "key_2 label:", foreground="green", background= "black")
-        self.label_2_v1.pack(side=tk.LEFT)
+        self.label_2_v1["font"] = self.desired_font
+        self.label_2_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.label_2_v1_text_box = tk.Text(self.second_frame_v2, height = 1, width = 20, foreground="green", background= "black",insertbackground = "white")
         self.label_2_v1_text_box.insert(tk.INSERT, label_name[1])
-        self.label_2_v1_text_box.pack(side=tk.LEFT)
+        self.label_2_v1_text_box["font"] = self.desired_font
+        self.label_2_v1_text_box.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.third_frame_v1 = tk.Frame(self.new_root_4, background= "black")
         self.third_frame_v1.pack(side = tk.TOP)
         
         self.label_3_v1 = tk.Label(self.third_frame_v1, text = "key_3 label:", foreground="green", background= "black")
-        self.label_3_v1.pack(side=tk.LEFT)
+        self.label_3_v1["font"] = self.desired_font
+        self.label_3_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.label_3_v1_text_box = tk.Text(self.third_frame_v1, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_3_v1_text_box.insert(tk.INSERT, label_name[2])
-        self.label_3_v1_text_box.pack(side=tk.LEFT)
+        self.label_3_v1_text_box["font"] = self.desired_font
+        self.label_3_v1_text_box.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.fourth_frame_v1 = tk.Frame(self.new_root_4, background= "black")
         self.fourth_frame_v1.pack(side = tk.TOP)
         
         self.label_4_v1 = tk.Label(self.fourth_frame_v1, text = "key_4 label:", foreground="green", background= "black")
-        self.label_4_v1.pack(side=tk.LEFT)
+        self.label_4_v1["font"] = self.desired_font
+        self.label_4_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.label_4_v1_text_box = tk.Text(self.fourth_frame_v1, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_4_v1_text_box.insert(tk.INSERT, label_name[3])
-        self.label_4_v1_text_box.pack(side=tk.LEFT)
+        self.label_4_v1_text_box["font"] = self.desired_font
+        self.label_4_v1_text_box.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.fifth_frame_v1 = tk.Frame(self.new_root_4, background= "black")
         self.fifth_frame_v1.pack(side = tk.TOP)
         
         self.label_5_v1 = tk.Label(self.fifth_frame_v1, text = "key_5 label:", foreground="green", background= "black")
-        self.label_5_v1.pack(side=tk.LEFT)
+        self.label_5_v1["font"] = self.desired_font
+        self.label_5_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.label_5_v1_text_box = tk.Text(self.fifth_frame_v1, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_5_v1_text_box.insert(tk.INSERT, label_name[4])
-        self.label_5_v1_text_box.pack(side=tk.LEFT)
+        self.label_5_v1_text_box["font"] = self.desired_font
+        self.label_5_v1_text_box.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.sixth_frame_v1 = tk.Frame(self.new_root_4, background= "black")
         self.sixth_frame_v1.pack(side = tk.TOP)
         
         self.label_6_v1 = tk.Label(self.sixth_frame_v1, text = "key_6 label:", foreground="green", background= "black")
-        self.label_6_v1.pack(side=tk.LEFT)
+        self.label_6_v1["font"] = self.desired_font
+        self.label_6_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.label_6_v1_text_box = tk.Text(self.sixth_frame_v1, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_6_v1_text_box.insert(tk.INSERT, label_name[5])
-        self.label_6_v1_text_box.pack(side=tk.LEFT)
+        self.label_6_v1_text_box["font"] = self.desired_font
+        self.label_6_v1_text_box.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.seventh_frame_v1 = tk.Frame(self.new_root_4, background= "black")
         self.seventh_frame_v1.pack(side = tk.TOP)
         
         self.label_7_v1 = tk.Label(self.seventh_frame_v1, text = "key_7 label:", foreground="green", background= "black")
-        self.label_7_v1.pack(side=tk.LEFT)
+        self.label_7_v1["font"] = self.desired_font
+        self.label_7_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.label_7_v1_text_box = tk.Text(self.seventh_frame_v1, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_7_v1_text_box.insert(tk.INSERT, label_name[6])
-        self.label_7_v1_text_box.pack(side=tk.LEFT)
+        self.label_7_v1_text_box["font"] = self.desired_font
+        self.label_7_v1_text_box.pack(side=tk.LEFT, padx=1, pady=1)
         
         
         self.eighth_frame_v1 = tk.Frame(self.new_root_4, background= "black")
         self.eighth_frame_v1.pack(side = tk.TOP)
         
         self.label_8_v1 = tk.Label(self.eighth_frame_v1, text = "key_8 label:", foreground="green", background= "black")
-        self.label_8_v1.pack(side=tk.LEFT)
+        self.label_8_v1["font"] = self.desired_font
+        self.label_8_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.label_8_v1_text_box = tk.Text(self.eighth_frame_v1, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_8_v1_text_box.insert(tk.INSERT, label_name[7])
-        self.label_8_v1_text_box.pack(side=tk.LEFT)
+        self.label_8_v1_text_box["font"] = self.desired_font
+        self.label_8_v1_text_box.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.ninth_frame_v1 = tk.Frame(self.new_root_4, background= "black")
         self.ninth_frame_v1.pack(side = tk.TOP)
         
         self.label_9_v1 = tk.Label(self.ninth_frame_v1, text = "key_9 label:", foreground="green", background= "black")
-        self.label_9_v1.pack(side=tk.LEFT)
+        self.label_9_v1["font"] = self.desired_font
+        self.label_9_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.label_9_v1_text_box = tk.Text(self.ninth_frame_v1, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_9_v1_text_box.insert(tk.INSERT, label_name[8])
-        self.label_9_v1_text_box.pack(side=tk.LEFT)
+        self.label_9_v1_text_box["font"] = self.desired_font
+        self.label_9_v1_text_box.pack(side=tk.LEFT, padx=1, pady=1)
         
         self.tenth_frame = tk.Frame(self.new_root_4, background= "black")
         self.tenth_frame.pack(side = tk.TOP)
         
         self.label_10 = tk.Label(self.tenth_frame, text = "Configuration title:", foreground="green", background= "black")
+        self.label_10["font"] = self.desired_font
         self.label_10.pack(side=tk.LEFT, pady=10)
         
         self.label_10_text_box = tk.Text(self.tenth_frame, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_10_text_box.insert(tk.INSERT, configruation_title)
+        self.label_10_text_box["font"] = self.desired_font
         self.label_10_text_box.pack(side=tk.LEFT, pady=15)
         
         self.save_v1_frame = tk.Frame(self.new_root_4, background= "black")
         self.save_v1_frame.pack(side = tk.TOP)
         
         self.submit = tk.Button(self.save_v1_frame, text = "Save", command = self.label_configurator_save, foreground="green", background= "black")
-        self.submit.pack(side = tk.BOTTOM)
-
+        self.submit["font"] = self.desired_font
+        self.submit.pack(side = tk.BOTTOM, padx=1, pady=1)
+    
+    def handle_focus(self, event, color: str):
+        x = event.widget.get("1.0", "end-1c")
+        
+        if x == "None":
+            event.widget.delete("1.0","end")
+            event.widget.config(fg = color)
+        else:
+            event.widget.config(fg = color)
+    
+    def handle_focus_out(self, event):
+        x = event.widget.get("1.0", "end-1c")
+        if len(x) == 0:
+            event.widget.insert(tk.INSERT, "None")
+            event.widget.config(fg = "green")
     def label_changer(self):
         global label_name, label_list, key_unlocker, video_file, length_movie
         if video_file:
@@ -702,8 +761,6 @@ class Application:
         self.label_8_text_box.insert(tk.INSERT, label_name[7])
         self.label_9_text_box.insert(tk.INSERT, label_name[8])
         label_list = label_name
-        
-        
         
     def label_configurator_save(self):
         
