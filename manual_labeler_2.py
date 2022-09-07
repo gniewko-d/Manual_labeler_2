@@ -61,7 +61,7 @@ class Application:
         self.root.geometry("600x600")
         
         self.reupload_controler = 0
-        self.desired_font = tk.font.Font(size = 14)
+        self.desired_font = tk.font.Font(size = 16)
         
         self.first_frame = tk.Frame(self.root, background="#116562", width=200, height = 60)
         self.first_frame.pack(expand=True, fill='both')
@@ -294,7 +294,7 @@ class Application:
             
             
             self.frame_otpions = tk.Frame(self.new_root_6, background="#116562")
-            self.frame_otpions.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            self.frame_otpions.pack(fill=tk.BOTH, expand=0, side = tk.TOP)
             
             self.on_value = [i.get() for i in self.list_of_choosen if i.get() != "None"]
             self.filter_time_dict = {i: df.loc[df[i] == i, "Frame time [ms]."].tolist() for i in self.on_value}
@@ -307,27 +307,29 @@ class Application:
             self.dropdown_menu["menu"].config(fg = "green")
             self.dropdown_menu.config(bg = "black")
             self.dropdown_menu.config(fg = "green")
-            self.dropdown_menu.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
-            
+            self.dropdown_menu.pack(fill=tk.BOTH, expand=0, side = tk.TOP)
+            self.dropdown_menu["font"] = self.desired_font
+            self.dropdown_menu["menu"]["font"] = self.desired_font
             
             self.videopanel_v1 = tk.Frame(self.new_root_6, background="#116562") # for video
             self.canvas = tk.Canvas(self.videopanel_v1).pack(fill=tk.BOTH, expand=1)
             self.videopanel_v1.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
         
             self.frame_next_button= tk.Frame(self.new_root_6, background="#116562")
-            self.frame_next_button.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            self.frame_next_button.pack(fill=tk.BOTH, expand=0, side = tk.TOP)
             
             self.next_button = tk.Button(self.frame_next_button, text = "Play", foreground="green", background= "black", command = self.generator_controler) 
-            self.next_button.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            self.next_button["font"] = self.desired_font
+            self.next_button.pack(fill=tk.BOTH, expand=0, side = tk.TOP)
             
-            self.next_video = tk.Button(self.frame_next_button, text = "Next video/Video", foreground="green", background= "black", command = self.next_video_controler)
-            self.next_video.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
             
             self.Instance = vlc.Instance()
             self.player = self.Instance.media_player_new()
             media = self.Instance.media_new(video_file)
             self.player.set_media(media)
             self.player.set_hwnd(self.videopanel_v1.winfo_id())
+            ###########
+            self.bindings_space = self.new_root_6.bind("<space>", self.button_pause_fun)
         except ValueError:
             messagebox.showerror("Error box", "You inserted wrong value try using integers")
     
@@ -343,17 +345,14 @@ class Application:
         try:
             self.start_time, self.sleep_time = next(self.generator_instance)
             self.player.set_time(round(self.start_time))
-            print(f"sleep time: {self.sleep_time}")
             get_state = 0
             self.break_point = 0
             self.player.play()
-            #sleep(self.sleep_time)
             while get_state < self.sleep_time:
                 get_state = self.player.get_time()
                 if keyboard.is_pressed('q'):
                     break
             self.player.pause()
-            print(f"time after sleep: {self.player.get_time()}")
         except StopIteration:
             messagebox.showinfo("Information box", "All labeled video been played. If you want to watch them again, click Next button")
             self.generator_instance = self.generator_labels()
