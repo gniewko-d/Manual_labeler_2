@@ -325,9 +325,10 @@ class Application:
             
             self.Instance = vlc.Instance()
             self.player = self.Instance.media_player_new()
-            media = self.Instance.media_new(video_file)
-            self.player.set_media(media)
+            self.media = self.Instance.media_new(video_file)
+            self.player.set_media(self.media)
             self.player.set_hwnd(self.videopanel_v1.winfo_id())
+            self.changer = 0
             ###########
             self.bindings_space = self.new_root_6.bind("<space>", self.button_pause_fun)
         except ValueError:
@@ -335,7 +336,6 @@ class Application:
     
     def next_video_controler(self):
         self.break_point = 1
-        print("oł yea")
     def option_menu(self, selection):
         self.value = self.filter_time_dict.get(selection)
         self.value.append(self.value[-1] + 20000)
@@ -343,19 +343,50 @@ class Application:
     
     def generator_controler(self):
         try:
-            self.start_time, self.sleep_time = next(self.generator_instance)
-            self.player.set_time(round(self.start_time))
-            get_state = 0
-            self.break_point = 0
-            self.player.play()
-            while get_state < self.sleep_time:
-                get_state = self.player.get_time()
-                if keyboard.is_pressed('q'):
-                    break
-            self.player.pause()
+            self.start_time, self.stop_time_v1 = next(self.generator_instance)
+            self.stop_time_v1 /= 1000
+            if self.changer == 0 :
+                self.media.add_option(f"stop-time={self.stop_time_v1}")
+                self.changer = 1
+                self.player.set_time(0)
+                self.player.play()
+                sleep(0.1)
+                self.player.play()
+                self.player.set_time(round(self.start_time))
+            elif self.changer == 1:
+                self.media = self.Instance.media_new(video_file)
+                print(self.player.get_time())
+                self.player.set_media(self.media)
+                self.player.set_hwnd(self.videopanel_v1.winfo_id())
+                self.media.add_option(f"stop-time={self.stop_time_v1}")
+                self.player.play()
+                self.player.set_time(round(self.start_time))
+                self.player.play()
+            #elif self.changer == 2:
+            #self.player.set_media(self.media)
+            #self.player.set_hwnd(self.videopanel_v1.winfo_id())
+            #    print(self.stop_time_v1, " z 2")
+            #    self.media = self.Instance.media_new(video_file)
+            #    self.player.set_media(self.media)-
+             #   self.player.set_hwnd(self.videopanel_v1.winfo_id())
+             #   self.media.add_option(f"stop-time={self.stop_time_v1}")
+                
+            #self.player.set_time(0)
+            #get_state = 0
+            #self.break_point = 0
+            #self.player.play()
+            #sleep(0.3)
+    
+            
+            #while get_state < self.stop_time_v1:
+            #    get_state = self.player.get_time()
+            #    if keyboard.is_pressed('q'):
+           #         break
         except StopIteration:
             messagebox.showinfo("Information box", "All labeled video been played. If you want to watch them again, click Next button")
             self.generator_instance = self.generator_labels()
+            
+            self.changer = 1
         except AttributeError:
             messagebox.showerror("Error box", "First, choose label you want to watch!")
             
