@@ -1,6 +1,4 @@
-
-
-import math
+import threading
 import vlc
 from time import sleep
 import tkinter as tk
@@ -19,7 +17,6 @@ import pandas as pd
 import numpy as np
 import csv
 from datetime import date
-import keyboard
 
 def advert():
     root_v1 = tk.Tk()
@@ -34,6 +31,7 @@ def advert():
     root_v1.after(3000, lambda: root_v1.destroy())
     root_v1.mainloop()
 
+back_current_label = False
 label_name = [f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}"]
 configruation_title = f"{None}"
 video_file = None
@@ -47,6 +45,9 @@ time_jump = 0
 video_rate = 1.0
 start_frame_bool_v2 = False
 window_checker = 0
+radio_variable = "off"
+t = None
+save_mother_df_automatic = None
 
 class Application:
     def __init__(self):
@@ -54,6 +55,13 @@ class Application:
         self.root.title("Manual Labeler")
         self.root.protocol("WM_DELETE_WINDOW", disable_event)
         self.root.geometry("600x600")
+        
+        self.var1 = tk.StringVar()
+        self.var1.set("off")
+        self.var2 = tk.StringVar()
+        self.var2.set("off")
+        self.var1_controller = False
+        self.var2_controller = False
         
         self.reupload_controler = 0
         self.desired_font = tk.font.Font(size = 16)
@@ -67,7 +75,7 @@ class Application:
         self.open_file.pack(side= tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
         self.text = f"Video: {None}"
-        self.current_video = tk.Label(self.first_frame, height = 1, width=25, background="black", foreground="green", anchor = tk.CENTER, relief = tk.RAISED)
+        self.current_video = tk.Label(self.first_frame, height = 1, width=25, background="black", foreground="#FFFF00", anchor = tk.CENTER, relief = tk.RAISED)
         self.current_video.config(text = self.text)
         
         self.current_video.configure(font = self.desired_font)
@@ -77,7 +85,7 @@ class Application:
         self.second_frame.pack(side = tk.TOP, expand=True, fill='both')
         self.second_frame.pack_propagate(0)
         
-        self.keyboard = tk.Button(self.second_frame, text="Keyboard settings", command = self.keyboard_settings, background="black", foreground="green", width=25)
+        self.keyboard = tk.Button(self.second_frame, text="Settings", command = self.keyboard_settings, background="black", foreground="green", width=25)
         self.keyboard["font"] = self.desired_font
         self.keyboard.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
@@ -101,7 +109,7 @@ class Application:
         self.fifth_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.fifth_frame_v1.pack_propagate(0)
     
-        self.save_machine_state = tk.Button(self.fifth_frame_v1, text = "Save current state", command = run_save_machine_state, background="black", foreground="green", width=25)
+        self.save_machine_state = tk.Button(self.fifth_frame_v1, text = "Save current state", command = lambda: run_save_machine_state(logic_gate = True), background="black", foreground="green", width=25)
         self.save_machine_state["font"] = self.desired_font
         self.save_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
@@ -160,6 +168,7 @@ class Application:
             self.engine.say(random.choice(self.list_of_voices_2))
             self.engine.runAndWait()
             self.root.destroy()
+            cv2.destroyAllWindows()
         else:
             pass
     def close_gate2(self):
@@ -285,9 +294,22 @@ class Application:
             self.new_root_6.title("Video screen")
             self.on_value = [i.get() for i in self.list_of_choosen if i.get() != "None"]
             
+            self.videopanel_v1 = tk.Frame(self.new_root_6, background="#116562") # for video
+            self.canvas = tk.Canvas(self.videopanel_v1).pack(fill=tk.BOTH, expand=1)
+            self.videopanel_v1.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            
+            self.Instance = vlc.Instance()
+            self.player_v1 = self.Instance.media_player_new()
+            self.media = self.Instance.media_new(video_file)
+            self.player_v1.set_media(self.media)
+            self.player_v1.set_hwnd(self.videopanel_v1.winfo_id())
+            self.changer = 0
+            
+            self.screen_width = int(self.new_root_6.winfo_screenwidth())
+            self.screen_height = int(self.new_root_6.winfo_screenheight()/2)
             
             self.frame_otpions = tk.Frame(self.new_root_6, background="#116562")
-            self.frame_otpions.pack(fill=tk.BOTH, expand=0, side = tk.TOP)
+            self.frame_otpions.pack(fill=tk.BOTH, expand=0, side = tk.BOTTOM)
             
             self.on_value = [i.get() for i in self.list_of_choosen if i.get() != "None"]
             self.filter_time_dict = {i: df.loc[df[i] == i, "Frame time [ms]."].tolist() for i in self.on_value}
@@ -303,11 +325,7 @@ class Application:
             self.dropdown_menu.pack(fill=tk.BOTH, expand=0, side = tk.TOP)
             self.dropdown_menu["font"] = self.desired_font
             self.dropdown_menu["menu"]["font"] = self.desired_font
-            
-            self.videopanel_v1 = tk.Frame(self.new_root_6, background="#116562") # for video
-            self.canvas = tk.Canvas(self.videopanel_v1).pack(fill=tk.BOTH, expand=1)
-            self.videopanel_v1.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
-        
+                    
             self.frame_next_button= tk.Frame(self.new_root_6, background="#116562")
             self.frame_next_button.pack(fill=tk.BOTH, expand=0, side = tk.TOP)
             
@@ -319,28 +337,44 @@ class Application:
             self.sync_video["font"] = self.desired_font
             self.sync_video.pack(fill=tk.BOTH, expand=0, side = tk.LEFT)
             
-            self.Instance = vlc.Instance()
-            self.player_v1 = self.Instance.media_player_new()
-            self.media = self.Instance.media_new(video_file)
-            self.player_v1.set_media(self.media)
-            self.player_v1.set_hwnd(self.videopanel_v1.winfo_id())
-            self.changer = 0
+            self.pause_button_v1 = tk.Button(self.frame_next_button, text = "Pause", foreground="green", background= "black") 
+            self.pause_button_v1.bind("<Button-1>", lambda event, player = self.player_v1: app.button_pause_fun(player))
+            self.pause_button_v1["font"] = self.desired_font
+            self.pause_button_v1.pack(fill=tk.BOTH, expand=0, side = tk.LEFT)
             
-            self.bindings_space = self.new_root_6.bind("<space>", self.button_pause_fun)
+            self.button_next_frame = tk.Button(self.frame_next_button, text = "Next Frame", background="black", foreground="green", width = 17)
+            self.button_next_frame.bind("<Button-1>", lambda event, player = self.player_v1: app.next_frame(player))
+            self.button_next_frame["font"] = self.desired_font
+            self.button_next_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+            
+            self.button_previous = tk.Button(self.frame_next_button, text = "Prev. Frame", background="black", foreground="green", width = 17)
+            self.button_previous["font"] = self.desired_font
+            self.button_previous.bind("<Button-1>", lambda event, player = self.player_v1, master = self.new_root_6: app.previous_frame(player, master))
+            self.button_previous.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+            
+            self.bindings_previous = self.new_root_6.bind("<a>", lambda event, player = self.player_v1, master = self.new_root_6: app.previous_frame(player, master))
+            self.bindings_next = self.new_root_6.bind("<d>", lambda event, player = self.player_v1: app.next_frame(player))
+            self.bindings_space = self.new_root_6.bind("<space>", lambda event, player = self.player_v1: app.button_pause_fun(player))
         except ValueError:
             messagebox.showerror("Error box", "You inserted wrong value try using integers")
     
     def next_video_controler(self):
         self.break_point = 1
+    
     def option_menu(self, selection):
         self.value = self.filter_time_dict.get(selection)
         self.value.append(self.value[-1] + 20000)
         self.generator_instance = self.generator_labels()
     
     def generator_controler(self):
-        try:
+     global answer_scale, length_movie
+     try:
             self.start_time, self.stop_time_v1 = next(self.generator_instance)
             self.stop_time_v1 /= 1000
+            if self.var2_controller:
+                 self.start_time = 0 if self.start_time - answer_scale * 1000 <= 0 else self.start_time - answer_scale * 1000
+                 self.stop_time_v1 = length_movie / 1000 if self.stop_time_v1 * 1000 + answer_scale * 1000 >= length_movie else self.stop_time_v1 + answer_scale 
+            
             if self.changer == 0 :
                 self.media.add_option(f"stop-time={self.stop_time_v1}")
                 self.changer = 1
@@ -357,13 +391,13 @@ class Application:
                 self.player_v1.play()
                 self.player_v1.set_time(round(self.start_time))
                 self.player_v1.play()
-
-        except StopIteration:
+                self.pause_button_v1.focus_set()
+     except StopIteration:
             messagebox.showinfo("Information box", "All labeled video been played. If you want to watch them again, click Next button")
             self.generator_instance = self.generator_labels()
             
             self.changer = 1
-        except AttributeError:
+     except AttributeError:
             messagebox.showerror("Error box", "First, choose label you want to watch!")
             
     def generator_labels(self):
@@ -398,17 +432,30 @@ class Application:
                         initial = j
                         start_point = j
     def video_synchronizer(self):
-        global window_checker 
+        global window_checker, app
         if window_checker == 0:
+            current_state = str(self.player_v1.get_state())
+            if current_state == "State.Playing":
+                self.player_v1.pause()
             self.bridge_start_video()
             time_to_set = self.player_v1.get_time()
             Start_video.set_time_automatically(self, time_set = time_to_set)
+            self.new_root_6.geometry(f'{self.screen_width}x{self.screen_height-50}+0-34')
+            app.set_video_postion()
+            self.pause_button_v1.focus_set()
+            cv2.setTrackbarPos(trackbar_name, track_bar_panel, time_to_set)
         else:
+            current_state = str(self.player_v1.get_state())
+            if current_state == "State.Playing":
+                self.player_v1.pause()
             time_to_set = self.player_v1.get_time()
             Start_video.set_time_automatically(self, time_set = time_to_set)
-    
+            self.new_root_6.geometry(f'{self.screen_width}x{self.screen_height-50}+0-34')
+            self.pause_button_v1.focus_set()
+            cv2.setTrackbarPos(trackbar_name, track_bar_panel, time_to_set)
+            
     def easy_open(self):
-        global video_file, available_formats, player
+        global video_file, available_formats, player, media
         video_file = easygui.fileopenbox(title="Select An Video", filetypes= ["*.gif", "*.flv", "*.avi", "*.amv", "*.mp4"])
         if video_file != None:
             video_title = video_file.split("\\")
@@ -448,16 +495,19 @@ class Application:
             messagebox.showerror("Error box", "Video was not loaded")
     
     def restart_systems(self):
-        global df_checker, label_list, label_name
+        global df_checker, label_list, label_name, radio_variable
         df_checker = False
         label_list = None
         label_name = [f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}"]
-    
+        self.var1_controller = False
+        radio_variable = "off"
+        if t != None:
+            t.cancel()
     def keyboard_settings(self):
         global fps
         self.new_root = tk.Toplevel(self.root)
         self.new_root.title("Keyboard_settings")
-        
+        self.var_checker()
         self.first_frame_v1 = tk.Frame(self.new_root, background="black")
         self.first_frame_v1.pack(expand=True, fill='both')
         
@@ -467,11 +517,14 @@ class Application:
         self.third_frame_v2 = tk.Frame(self.new_root, background="black")
         self.third_frame_v2.pack(expand=True, fill='both')
         
+        self.third_frame_v3 = tk.Frame(self.new_root, background="black")
+        self.third_frame_v3.pack(expand=True, fill='both')
+        
         self.fourth_frame_v2 = tk.Frame(self.new_root, background="black")
         self.fourth_frame_v2.pack(expand=True, fill='both')
         
         self.instruction = tk.Text(self.first_frame_v1, height = 23, width = 70)
-        self.text_v1 = "Press on your keyboard:\n a = move one frame backward\n d = move one frame forward\n space = pause/resume the video\n z = slow down the video\n c = speed up the video\n x = video speed back to normal\n e = frame to which (without it) all the preceding ones will\n\t be appropriately marked (depends on labels name set by user).\n\t Start point is set by key 1-9\n key 1-9 = label current frame and jumpt to next one or\n\t set the beginning of the range.\n\t Next you can move to whatever frame (backward or forward)\n\t and there set the end of the range by key e.\n\t All frames within that range will be labeled\n g = delete last used label (Check active label) from current frame\n h = removes the last labelled range\n Extra seconds = If turn on, adds extra labelled frames (5s), at the \n\t beginning, and end of labeled range but only during playback \n\t (Play labeled frames).\n" 
+        self.text_v1 = "Press on your keyboard:\n a = move one frame backward\n d = move one frame forward\n space = pause/resume the video\n z = slow down the video\n c = speed up the video\n x = video speed back to normal\n e = frame to which (without it) all the preceding ones will\n\t be appropriately marked (depends on labels name set by user).\n\t Start point is set by key 1-9\n key 1-9 = label current frame and jumpt to next one or\n\t set the beginning of the range.\n\t Next you can move to whatever frame (backward or forward)\n\t and there set the end of the range by key e.\n\t All frames within that range will be labeled\n g = delete last used label (Check active label) from current frame\n h = removes the last labelled range\n Extra seconds = If turn on, adds extra labelled frames (1s-10s), at the \n\t beginning, and end of labeled range but only during playback \n\t (Play labeled frames).\n" 
 
         conteiner = ["~"*70, "~"*70, self.text_v1, "="*70, "="*70]
         
@@ -484,11 +537,6 @@ class Application:
         self.label_saving["font"] = self.desired_font
         self.label_saving.pack(side=tk.LEFT, padx=1, pady=1)
         
-        self.var1 = tk.StringVar()
-        self.var1.set("off")
-        self.var2 = tk.StringVar()
-        self.var2.set("off")
-        
         self.radio_BTN_saving_on = tk.Radiobutton(self.second_frame_v2, fg = "green" ,bg = "black", text = "on", variable =self.var1, value = "on", selectcolor = "black", tristatevalue= "on")
         self.radio_BTN_saving_on["font"] = self.desired_font
         self.radio_BTN_saving_on.pack(side=tk.LEFT, padx=1, pady=1)
@@ -497,27 +545,86 @@ class Application:
         self.radio_BTN_saving_off["font"] = self.desired_font
         self.radio_BTN_saving_off.pack(side=tk.LEFT, padx=1, pady=1)
         
-        
         self.label_saving = tk.Label(self.third_frame_v2, text = "Extra seconds:", foreground="green", background= "black")
         self.label_saving["font"] = self.desired_font
         self.label_saving.pack(side=tk.LEFT, padx=1, pady=1)
         
-        self.radio_BTN_saving_on_v1 = tk.Radiobutton(self.third_frame_v2, bg = "black", fg = "green", text = "on", variable = self.var2, value = "on", highlightbackground = "black", selectcolor = "black", tristatevalue= "on")
+        self.radio_BTN_saving_on_v1 = tk.Radiobutton(self.third_frame_v2, bg = "black", fg = "green", text = "on", variable = self.var2, value = "on", highlightbackground = "black", selectcolor = "black")
         self.radio_BTN_saving_on_v1["font"] = self.desired_font
         self.radio_BTN_saving_on_v1.pack(side=tk.LEFT, padx=1, pady=1)
         
-        self.radio_BTN_saving_off_v1 = tk.Radiobutton(self.third_frame_v2, bg = "black", fg = "green", text = "off", variable = self.var2, value = "off", tristatevalue="off", selectcolor = "black")
+        self.radio_BTN_saving_off_v1 = tk.Radiobutton(self.third_frame_v2, bg = "black", fg = "green", text = "off", variable = self.var2, value = "off", selectcolor = "black")
         self.radio_BTN_saving_off_v1["font"] = self.desired_font
         self.radio_BTN_saving_off_v1.pack(side=tk.LEFT, padx=1, pady=1)
-        
+              
         self.submit = tk.Button(self.fourth_frame_v2, text = "Submit", command = self.get_k_settings, foreground="green", background= "black")
         self.submit["font"] = self.desired_font
         self.submit.pack(side = tk.TOP, expand=True, fill='both', padx=1, pady=1)
-    
+
     def get_k_settings(self):
-        print(self.var1.get())
-        print(self.var2.get())
-    
+        global save_file3, radio_variable, save_mother_df_automatic, t
+        if self.var1.get() == "on":
+            if video_file == None:
+                messagebox.showerror("Error box", "Upload the video first")
+            else:
+                radio_variable = "on"
+                save_file3 = None
+                save_file3 = easygui.diropenbox(msg = "Select a folder for auto save", title = "Typical window")
+                if save_file3 == None:
+                    messagebox.showerror("Error box", "Folder was not selected, the data will not be saved automatically")
+                    self.var1.set("off")
+                    radio_variable = "off"
+                else:
+                    today = str(date.today()).replace("-", "_")
+                    video_title = video_file.split("\\")
+                    video_title = video_title[-1].split(".")
+                    save_mother_df_automatic = save_file3 + "\\" + video_title[0] + "_auto" + ".xlsx"
+                    messagebox.showinfo("Information box", "Auto save ON")
+                    self.var1_controller = True
+        elif self.var1.get() == "off":
+            radio_variable = "off"
+            self.var1_controller = False
+            if t != None:
+                t.cancel()
+                messagebox.showinfo("Information box", "Auto save OFF")
+        if self.var2.get() == "on":
+            
+            self.new_root_v1 = tk.Toplevel(self.new_root)
+            self.first_frame_v4 = tk.Frame(self.new_root_v1, background="black")
+            self.first_frame_v4.pack(expand=True, fill='both')
+            
+            self.label_to_scale = tk.Label(self.first_frame_v4, text = "How many seconds do you want to add?", foreground="green", background= "black")
+            self.label_to_scale["font"] = self.desired_font
+            self.label_to_scale.pack(side=tk.TOP, padx=1, pady=1)
+            
+            self.submit = tk.Button(self.first_frame_v4, text = "Submit", command = self.get_scale_val, foreground="green", background= "black")
+            self.submit["font"] = self.desired_font
+            self.submit.pack(side=tk.BOTTOM, expand=True, fill='both', padx=1, pady=1)
+            
+            self.scale_widget = tk.Scale(self.first_frame_v4, bg = "black", fg = "green", borderwidth=0  , from_=1, to=10, orient=tk.HORIZONTAL, length=400, troughcolor = 'green', activebackground = "black", highlightthickness = 1, highlightbackground = "green")
+            self.scale_widget["font"] = self.desired_font
+            self.scale_widget.pack(side=tk.BOTTOM, padx=1, pady=1)
+        if self.var2.get() == "off":
+            self.var2_controller = False
+            messagebox.showinfo("Information box", "Extra time OFF")
+            
+    def get_scale_val(self):
+        global answer_scale
+        answer_scale = self.scale_widget.get()
+        self.new_root_v1.destroy()
+        self.var2_controller = True
+        messagebox.showinfo("Information box", f"Extra time : {answer_scale}")
+        
+    def var_checker(self):
+        if self.var1_controller:
+            self.var1.set("on")
+        else:
+            self.var1.set("off")
+        
+        if self.var2_controller:
+            self.var2.set("on")
+        else:
+            self.var2.set("off")
     def label_settings(self):
         global label_name
         self.new_root_2 = tk.Toplevel(self.root, background= "black")
@@ -535,7 +642,8 @@ class Application:
         self.label_1_text_box = tk.Text(self.first_frame_v2, height = 1, width = 20, foreground="green", background= "black", insertbackground = "white")
         self.label_1_text_box.insert(tk.INSERT, label_name[0])
         self.label_1_text_box["font"] = self.desired_font
-        self.label_1_text_box.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
+        self.label_1_text_box.pack(side=tk.LEFT, expand=True,
+                                   fill='both', padx=1, pady=1)
         
         self.second_frame_v1 = tk.Frame(self.new_root_2, background= "black")
         self.second_frame_v1.pack(side = tk.TOP,expand=True, fill='both')
@@ -895,7 +1003,7 @@ class Application:
                 names_columns = df.columns.tolist()
                 names_columns[0:9]= label_list
                 df.columns = names_columns
-            
+            self.root.state(newstate='iconic')
             self.Instance = vlc.Instance()
             self.player_v2 = self.Instance.media_player_new()
             media = self.Instance.media_new(video_file)
@@ -916,34 +1024,14 @@ def delete_mode(data, label, column_name):
         player.pause()
     except ValueError:
         messagebox.showerror("Error box", f"Frame unlabeled or wrong label to delet (current label :{current_label})")
-        
-def ctrl_alt_delet(data):
-    global stop_frame, start_frame_freezed, current_label_list, column
-    try:
-        if stop_frame >= start_frame_freezed:
-            data.iloc[start_frame_freezed-2:stop_frame, column] = np.nan
-            z = [current_label_list.remove(i) for i in range(start_frame_freezed-1, stop_frame) if i in current_label_list]
-            cv2.waitKey(-1)
-        elif stop_frame < start_frame_freezed:
-            data.iloc[stop_frame:start_frame_freezed, column] = np.nan
-            cv2.waitKey(-1)
-    except TypeError:
-        messagebox.showerror("Error box", "First, set the beginning (key 1-9) and the end (key e) of the range")
-
-def save_machine_state_fun(mother_list, *args):
     
-    mother_list = []
-    zz = [mother_list.append(i) for i in args]
-    xx = [i.append("exist") for i in mother_list if len(i) == 0]
-    return mother_list
 
-def run_save_machine_state():
-    global df, video_file, label_list
+def run_save_machine_state(logic_gate):
+    global df, video_file, label_list, t
     if video_file == None or label_list == None or df_checker == False:
         messagebox.showerror("Error box", "Before save current state:\n 1. Upload the video \n 2. Submit any label \n 3. Label something")
-    else:
+    elif logic_gate:
         mother_df = df
-        mother_list = []
         save_file1 = None
         save_file1 = easygui.diropenbox(msg = "Select folder for a save location", title = "Typical window")
         if save_file1 == None:
@@ -956,7 +1044,16 @@ def run_save_machine_state():
             video_title = video_title[-1].split(".")
             save_mother_df = save_file1 + "\\" + video_title[0] + "_" + today + ".xlsx"
             mother_df.to_excel(save_mother_df)
-            
+    elif radio_variable == "on":
+        autosave()
+
+def autosave():
+    global t, df
+    mother_df = df
+    mother_df.to_excel(save_mother_df_automatic)
+    t = threading.Timer(120, autosave)
+    t.start()
+
 def load_machine_state_fun():
     global df, df_checker, label_list, label_name, df2, df3, df4
     if video_file == None:
@@ -1053,9 +1150,9 @@ def load_configuration_fun():
 
 class Start_video:
 
-    def __init__(self, master, player_v2):
+    def __init__(self, newwindow, player_v2):
         global video_file, list_of_times, first_time, current_label, text, track_bar_panel, trackbar_name, label_panel_v1_text, label_panel_v2_text, length_movie, label_panel_v3_text, label_panel_v4_text, label_panel_v5_text, label_panel_v6_text, label_panel_v7_text, label_panel_v8_text, label_panel_v9_text, df, window_checker
-        self.master = master
+        self.master = newwindow
         self.master.configure(background='black')
         self.master.protocol("WM_DELETE_WINDOW", disable_event)
         self.player = player_v2
@@ -1066,6 +1163,8 @@ class Start_video:
         if not length_movie:
             length_movie = int(df.iloc[-1, 9])
         cv2.createTrackbar(trackbar_name, track_bar_panel, 0, length_movie, self.slider_fun)
+        self.set_video_postion()
+        run_save_machine_state(logic_gate= False)
         
         self.video_rate_gen = (2.5 * num for num in range(1,4))
         self.bindings_on()
@@ -1082,15 +1181,15 @@ class Start_video:
         self.main_frame_v2.pack(side= tk.BOTTOM, fill=tk.NONE, expand=0)
         
         self.button_pause = tk.Button(self.main_frame_v2, text = "Pause/PLay", background="black", foreground="green", width = 17)
-        self.button_pause.bind("<Button-1>", self.button_pause_fun)
+        self.button_pause.bind("<Button-1>", lambda event, player = self.player: self.button_pause_fun(player))
         self.button_pause.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.button_next = tk.Button(self.main_frame_v2, text = "Next Frame", background="black", foreground="green", width = 17)
-        self.button_next.bind("<Button-1>", self.next_frame)
+        self.button_next.bind("<Button-1>", lambda event, player = self.player: self.next_frame(player))
         self.button_next.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.button_previous = tk.Button(self.main_frame_v2, text = "Prev. Frame", background="black", foreground="green", width = 17)
-        self.button_previous.bind("<Button-1>", self.previous_frame)
+        self.button_previous.bind("<Button-1>", lambda event, player = self.player, master = self.master: self.previous_frame(player, master))
         self.button_previous.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.button_calibration = tk.Button(self.main_frame_v2, text = "Calibration", background="black", foreground="green", width = 17)
@@ -1142,28 +1241,28 @@ class Start_video:
         self.label_panel_v9 = tk.Label( self.labelspanel, textvariable = label_panel_v9_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
         self.label_panel_v9.grid(row = 2, column = 2, padx=1, pady=1)
         
-        text = tk.StringVar()
-        text.set(f"Active label: {current_label}")
-        self.current_label_widget = tk.Label(self.main_frame_v2, textvariable = text, background="black", foreground="green", width = 17)
-        self.current_label_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
-        
         self.button_set_time = tk.Button(self.main_frame_v2, text = "Set time [click me] of video [ms]:", background="black", foreground="green", width = 24)
         self.button_set_time.bind("<Button-1>", self.set_time_manually)
         self.button_set_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
-        self.box_for_time = tk.Entry(self.main_frame_v2,  width = 16, background="black", foreground="green", insertbackground = "green")
+        self.box_for_time = tk.Entry(self.main_frame_v2,  width = 16, background="black", foreground="green", insertbackground = "green", relief = tk.RAISED)
         self.box_for_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         self.box_for_time.bind("<Enter>", self.bindings_off)
         self.box_for_time.bind("<Leave>", lambda event: self.bindings_on_2())
         
-        self.audio_label = tk.Label(self.main_frame_v2,image= self.img, bg = "green")
+        self.audio_label = tk.Label(self.main_frame_v2,image= self.img, bg = "green", relief = tk.SUNKEN)
         self.audio_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         self.audio_label.configure(foreground="green")
     
         self.var = tk.IntVar()
-        self.scale_audio = tk.Scale(self.main_frame_v2, from_ = 0, to=100, length=200, orient=tk.HORIZONTAL, command = self.audio_volume, variable=self.var, bg = "black", fg = "green", troughcolor = "green", bd = 0 , highlightthickness = 0)
+        self.scale_audio = tk.Scale(self.main_frame_v2, from_ = 0, to=100, length=200, orient=tk.HORIZONTAL, command = self.audio_volume, variable=self.var, bg = "black", fg = "green", troughcolor = "green", bd = 0 , highlightthickness = 0, relief = tk.RAISED)
         self.scale_audio.set(100)
         self.scale_audio.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+        
+        text = tk.StringVar()
+        text.set(f"Active label: {current_label}")
+        self.current_label_widget = tk.Label(self.main_frame_v2, textvariable = text, background="black", foreground="#FFFF00", width = 17, relief = tk.RAISED)
+        self.current_label_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.exit_v1 = tk.Button(self.main_frame_v2, text = "Exit", background="black", foreground="green", width = 24, command = self.close_gate_v2)
         self.exit_v1.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
@@ -1175,9 +1274,19 @@ class Start_video:
         self.player.pause()
         self.player.set_time(0)
         list_of_times = df["Frame time [ms]."].tolist()
-        
-    def button_pause_fun(self, event):
-        return self.player.pause()
+        self.active_window(self.master)
+    
+    def set_video_postion(self):
+    
+        self.screen_width_v1 = int(self.master.winfo_screenwidth())
+        self.screen_height_v1 = int(self.master.winfo_screenheight()/2)
+        self.master.geometry(f'{self.screen_width_v1}x{self.screen_height_v1-50}+0+0')
+    
+    def active_window(self, window):
+        window.after(1, lambda: window.focus_force())
+    
+    def button_pause_fun(self, player):
+        return player.pause()
     
     def audio_volume(self,val):
         self.player.audio_set_volume(self.var.get())
@@ -1186,9 +1295,10 @@ class Start_video:
         global window_checker
         self.master.destroy()
         window_checker = 0
-
-    def next_frame(self, event):
-        return self.player.next_frame()
+        cv2.destroyAllWindows()
+    
+    def next_frame(self, player):
+        return player.next_frame()
     def set_time_automatically(self, time_set):
         app.player.set_time(time_set)
     def set_time_manually(self, event):
@@ -1205,34 +1315,37 @@ class Start_video:
         except ValueError:
             messagebox.showerror("Error box", "You inserted wrong value try using integers")
     
-    def previous_frame(self, event):
+    def previous_frame(self, player, master):
         global frame_duration, time_jump
         
         if not time_jump:
             messagebox.showinfo("Information box", "I have to calibrate my self. Now you can use this option normally. Thank your for your contribution")
-            back_up = self.player.get_time()
-            self.player.next_frame()
+            back_up = player.get_time()
+            player.next_frame()
             sleep(0.2)
-            self.player.next_frame()
+            player.next_frame()
             sleep(0.2)
-            self.player.next_frame()
+            player.next_frame()
             sleep(0.2)
-            first_time = self.player.get_time()
+            first_time = player.get_time()
             sleep(0.2)
-            self.player.next_frame()
+            player.next_frame()
             sleep(0.2)
-            second_time = self.player.get_time()
+            second_time = player.get_time()
             time_jump = second_time - first_time
-            self.player.set_time(back_up)
+            player.set_time(back_up)
+            self.button_calibration["state"] = tk.DISABLED
+            self.button_calibration.update()
+            self.active_window(master)
         else:
-            back_one_frame = self.player.get_time()
+            back_one_frame = player.get_time()
             time_12 = back_one_frame - round(time_jump)
-            current_state = str(self.player.get_state())
+            current_state = str(player.get_state())
             if current_state == "State.Playing":
-                self.player.set_time(time_12)
-                self.player.pause()
+                player.set_time(time_12)
+                player.pause()
             else:
-                self.player.set_time(time_12)
+                player.set_time(time_12)
     def audio_icon(self):
         url = "https://i.postimg.cc/MZVj1n3f/audio.png"
         response = requests.get(url)
@@ -1242,7 +1355,7 @@ class Start_video:
         return img
     
     def step_mode(self, index):
-        global start_frame_bool, closest_timestamp, current_label, text, time_jump
+        global start_frame_bool, closest_timestamp, current_label, text, time_jump, back_current_label 
         current_label = label_name[index]
         if not time_jump:
             current_state = str(self.player.get_state())
@@ -1265,6 +1378,9 @@ class Start_video:
             second_time = self.player.get_time()
             time_jump = second_time - first_time
             self.player.set_time(back_up)
+            self.button_calibration["state"] = tk.DISABLED
+            self.button_calibration.update()
+            self.active_window(self.master)
         elif current_label != "None":
             current_state = str(self.player.get_state())
             self.bindings_on()
@@ -1272,6 +1388,7 @@ class Start_video:
                 self.player.pause()
             else:
                 pass
+            back_current_label = current_label
             timestamp = self.player.get_time()
             closest_timestamp = min(list_of_times, key=lambda x:abs(x-timestamp))
             df.loc[df["Frame time [ms]."] == closest_timestamp, current_label,] = current_label
@@ -1283,7 +1400,7 @@ class Start_video:
             messagebox.showinfo("Information box", "This key is disable, change label name If you want to use it")
     
     def end_key(self, data):
-        global start_frame_bool, current_label, index_timestamp, index_timestamp_stop, closest_timestamp_stop, start_frame_bool_v2, text
+        global start_frame_bool, current_label, index_timestamp, index_timestamp_stop, closest_timestamp_stop, start_frame_bool_v2, text, back_current_label
         if start_frame_bool:
             timestamp_stop = self.player.get_time()
             closest_timestamp_stop = min(list_of_times, key=lambda x:abs(x-timestamp_stop))
@@ -1300,6 +1417,7 @@ class Start_video:
                 start_frame_bool = False
                 start_frame_bool_v2 = True
                 current_state = str(self.player.get_state())
+                back_current_label = current_label
                 current_label = "Nought"
                 text.set(f"Active label: {current_label}")
                 if current_state == "State.Playing":
@@ -1307,19 +1425,22 @@ class Start_video:
                 else:
                     pass
                 messagebox.showinfo("Information box", f"Frames from {index_timestamp[0]} to {index_timestamp_stop[0]-1} were labeled")
+                self.active_window(self.master)
                 
             elif closest_timestamp_stop < closest_timestamp:
                 data.loc[index_timestamp_stop[0]+1:index_timestamp[0], current_label] = current_label
                 start_frame_bool = False
                 start_frame_bool_v2 = True
                 current_state = str(self.player.get_state())
+                back_current_label = current_label
                 current_label = "Nought"
                 text.set(f"Active label: {current_label}")
                 if current_state == "State.Playing":
                     self.player.pause()
                 else:
                     pass
-                messagebox.showinfo("Information box", f"Frames from {index_timestamp[0]+1} to {index_timestamp[0]} were labeled")
+                messagebox.showinfo("Information box", f"Frames from {index_timestamp_stop[0]+1} to {index_timestamp[0]} were labeled")
+                self.active_window(self.master)
         else:
             root_v2 = tk.Tk()
             current_state = str(self.player.get_state())
@@ -1332,31 +1453,44 @@ class Start_video:
     
     def delete_mode(self, data, label):
         global current_label
-        timestamp_v1 = self.player.get_time()
-        closest_timestamp_stop_v1 = min(list_of_times, key=lambda x:abs(x-timestamp_v1))
-        checker = data.loc[df["Frame time [ms]."] == closest_timestamp_stop_v1, current_label].tolist()
-        if str(checker[0]) == "nan":
-            current_state = str(self.player.get_state())
-            if current_state == "State.Playing":
-                self.player.pause()
-            else:
-                pass
-            messagebox.showerror("Error box", f"Frame unlabeled or wrong label to delet (current label :{current_label})")
-        
+        if not back_current_label:
+            messagebox.showerror("Error box", "Data unlabeled")
+            self.active_window(self.master)
         else:
-            data.loc[df["Frame time [ms]."] == closest_timestamp_stop_v1, current_label] = label
-            current_state = str(self.player.get_state())
-            if current_state == "State.Playing":
-                self.player.pause()
+            timestamp_v1 = self.player.get_time()
+            if current_label != "Nought":
+                closest_timestamp_stop_v1 = min(list_of_times, key=lambda x:abs(x-timestamp_v1))
+                checker = data.loc[df["Frame time [ms]."] == closest_timestamp_stop_v1, current_label].tolist()
+                if str(checker[0]) == "nan":
+                    current_state = str(self.player.get_state())
+                    if current_state == "State.Playing":
+                        self.player.pause()
+                    else:
+                        pass
+                    messagebox.showerror("Error box", f"Frame unlabeled or wrong label to delet (current label :{current_label})")
+                    self.active_window(self.master)
+                else:
+                    data.loc[df["Frame time [ms]."] == closest_timestamp_stop_v1, current_label] = label
+                    current_state = str(self.player.get_state())
+                    if current_state == "State.Playing":
+                        self.player.pause()
+                    else:
+                        pass
+                    messagebox.showinfo("Information box", "Label deleted")
+                    self.active_window(self.master)
             else:
-                pass
-            messagebox.showinfo("Information box", "Label deleted")
+                msgbox = tk.messagebox.askquestion ('Information box','Label inactive. Do you want to activate the key with the last used label?',icon = 'warning')
+                if msgbox == "yes":
+                    current_label = back_current_label
+                    text.set(f"Active label: {current_label}")
+                    self.active_window(self.master)
+
     
     def bindings_on(self):
         
-        self.bindings_space = self.master.bind("<space>", self.button_pause_fun)
-        self.bindings_a = self.master.bind("<a>", self.previous_frame)
-        self.bindings_d = self.master.bind("<d>", self.next_frame)
+        self.bindings_space = self.master.bind("<space>", lambda event, player = self.player: self.button_pause_fun(player))
+        self.bindings_a = self.master.bind("<a>", lambda event, player = self.player, master = self.master: self.previous_frame(player, master))
+        self.bindings_d = self.master.bind("<d>", lambda event, player = self.player: self.next_frame(player))
         self.bindings_1 = self.master.bind("1", lambda event, index = 0: self.step_mode(index))
         self.bindings_2 = self.master.bind("2", lambda event, index = 1: self.step_mode(index))
         self.bindings_3 = self.master.bind("3", lambda event, index = 2: self.step_mode(index))
@@ -1398,9 +1532,9 @@ class Start_video:
         
     def bindings_on_2(self):
 
-        self.bindings_space = self.master.bind("<space>", self.button_pause_fun)
-        self.bindings_a = self.master.bind("<a>", self.previous_frame)
-        self.bindings_d = self.master.bind("<d>", self.next_frame)
+        self.bindings_space = self.master.bind("<space>", lambda event, player = self.player: self.button_pause_fun(player))
+        self.bindings_a = self.master.bind("<a>", lambda event, player = self.player, master = self.master: self.previous_frame(player, master))
+        self.bindings_d = self.master.bind("<d>", lambda event, player = self.player: self.next_frame(player))
         self.bindings_1 = self.master.bind("1", lambda event, index = 0: self.step_mode(index))
         self.bindings_2 = self.master.bind("2", lambda event, index = 1: self.step_mode(index))
         self.bindings_3 = self.master.bind("3", lambda event, index = 2: self.step_mode(index))
@@ -1421,35 +1555,45 @@ class Start_video:
     def speed_up(self):
         try:
             messagebox.showinfo("Information box", "The video sped up")
-            self.master.focus_set()
+            self.active_window(self.master)
             return self.player.set_rate(next(self.video_rate_gen))
         except StopIteration:
             self.video_rate_gen = (2.5 * num for num in range(1,4))
-            self.master.focus_set()
+            self.active_window(self.master)
             return self.player.set_rate(next(self.video_rate_gen))
     def slow_down(self):
         global video_rate
         video_rate = 0.2
         messagebox.showinfo("Information box", "The video has slowed down")
-        self.master.focus_set()
+        self.active_window(self.master)
         return self.player.set_rate(video_rate)
     
     def normal_speed(self):
         global video_rate
         video_rate = 1.0
         messagebox.showinfo("Information box", "Video speed, back to normal")
-        self.master.focus_set()
+        self.active_window(self.master)
         return self.player.set_rate(video_rate)
     
     def ctrl_alt_delet(self, data):
-        
+        global label_name
         if start_frame_bool_v2:
             if closest_timestamp_stop >= closest_timestamp:
-                data.loc[index_timestamp[0]:index_timestamp_stop[0]-1, current_label] = np.nan
-                messagebox.showinfo("Information box", f"Labels from {index_timestamp[0]} to {index_timestamp_stop[0]} were deleted")
+                data.iloc[index_timestamp[0]-1:index_timestamp_stop[0], label_name.index(back_current_label)] = np.nan
+                current_state = str(self.player.get_state())
+                if current_state == "State.Playing":
+                        self.player.pause()
+                else:
+                        pass
+                messagebox.showinfo("Information box", f"Labels from {index_timestamp[0]} to {index_timestamp_stop[0]-1} were deleted")
             elif closest_timestamp_stop < closest_timestamp:
-                data.loc[index_timestamp_stop[0]+1:index_timestamp[0], current_label] = current_label
-                messagebox.showinfo("Information box", f"Labels from {index_timestamp_stop[0]} to {index_timestamp[0]} were deleted")
+                data.iloc[index_timestamp_stop[0]-1:index_timestamp[0]-1, label_name.index(back_current_label)] = np.nan
+                current_state = str(self.player.get_state())
+                if current_state == "State.Playing":
+                        self.player.pause()
+                else:
+                        pass
+                messagebox.showinfo("Information box", f"Labels from {index_timestamp_stop[0]+1} to {index_timestamp[0]} were deleted")
         else:
             messagebox.showerror("Error box", "First, set the beginning (key 1-9) and the end (key e) of the range")
     
@@ -1473,6 +1617,7 @@ class Start_video:
             self.button_calibration["state"] = tk.DISABLED
             self.button_calibration.update()
             messagebox.showinfo("Information box", "Thank you for your contribution")
+            self.active_window(self.master)
         else:
             pass
     
@@ -1581,7 +1726,7 @@ class Start_video:
                 label_panel_v9_text.set("Label 9: unlabel")
                 self.label_panel_v9.config(bg = "black")
         self.player.set_time(timestamp_track)
-#advert()
+advert()
 video_object = Application()
 video_object.root.mainloop()
     
