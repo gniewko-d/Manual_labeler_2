@@ -989,7 +989,7 @@ class Application:
             frame_duration = length_movie / tots
             if df_checker == False:
                 if len(np.arange(0, length_movie, frame_duration)) == tots:
-                    df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
+                    df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 3))
                     df.index.name="Frame No."
                     df["Frame time [ms]."] = np.arange(0, length_movie+frame_duration, frame_duration)
                     df_checker = True
