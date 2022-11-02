@@ -916,6 +916,7 @@ class Application:
             player.play()
             sleep(0.2)
             length_movie = player.get_length()
+            
             player.stop()
         else:
             messagebox.showerror("Error box", "Before you submit labels, upload the video first")
@@ -987,12 +988,16 @@ class Application:
             tots = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             
             frame_duration = length_movie / tots
+            
             if df_checker == False:
                 if len(np.arange(0, length_movie, frame_duration)) == tots:
-                    df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 3))
+                    print("tu jestem")
+                    df = pd.DataFrame(columns = label_list, index = range(1, len(np.arange(0, length_movie + frame_duration, frame_duration)) + 1))
                     df.index.name="Frame No."
-                    df["Frame time [ms]."] = np.arange(0, length_movie+frame_duration, frame_duration)
+                    df["Frame time [ms]."] = np.arange(0, length_movie + frame_duration, frame_duration)
                     df_checker = True
+                    if not df.iloc[-1,9] == length_movie:
+                        df.drop(df.index[-1], inplace=True)
                 else:
                     df = pd.DataFrame(columns = label_list, index = range(1, int(tots) + 2))
                     df.index.name="Frame No."
@@ -1729,4 +1734,4 @@ class Start_video:
 advert()
 video_object = Application()
 video_object.root.mainloop()
-    
+print("last version")
