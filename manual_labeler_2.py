@@ -217,7 +217,7 @@ class Application:
                 
     
     def open_first(self, optional_video):
-        global df_loaded_first
+        global df_loaded_first, df_loaded_second
         if video_file == None:
             messagebox.showerror("Error box", "Before you load file: Upload the video first")
         else:
@@ -253,34 +253,45 @@ class Application:
     def compare_option(self):
         
         self.new_root_v2.destroy()
+        try:
+            assert len(df_loaded_first) == len(df_loaded_second)
+            self.new_root_v3 = tk.Toplevel(self.root, background= "black")
+            self.new_root_v3.title("Data_comparator")
+    
+            self.first_frame_v1 = tk.Frame(self.new_root_v3, background="black")
+            self.first_frame_v1.pack(expand=True, fill='both', pady=10)
+    
+            self.b_first = tk.Button(self.first_frame_v1, text = "Real-time comparison", foreground="green", background= "black")
+            self.b_first["font"] = self.desired_font
+            self.b_first.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
+            self.b_first.pack(side=tk.TOP, padx=1, pady=1)
+    
+            self.first_frame_v2 = tk.Frame(self.new_root_v3, background="black")
+            self.first_frame_v2.pack(expand=True, fill='both', pady=10)
+    
+            self.b_second = tk.Button(self.first_frame_v2, text = "Paired labels comparison", foreground="green", background= "black")
+            self.b_second["font"] = self.desired_font
+            self.b_second.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
+            self.b_second.pack(side=tk.TOP, padx=1, pady=1)
+    
+            self.first_frame_v3 = tk.Frame(self.new_root_v3, background="black")
+            self.first_frame_v3.pack(expand=True, fill='both', pady=10)
+    
+            self.b_thrid = tk.Button(self.first_frame_v3, text = "Select the labels to compare", foreground="green", background= "black")
+            self.b_thrid["font"] = self.desired_font
+            self.b_thrid.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
+            self.b_thrid.pack(side=tk.TOP, padx=1, pady=1)
+        except AssertionError:
+            messagebox.showerror("Error box", "The size of the uploaded files does not match")
         
-        self.new_root_v3 = tk.Toplevel(self.root, background= "black")
-        self.new_root_v3.title("Data_comparator")
+    def paired(self):
+        list_column_1 = list(df_loaded_first.columns)
+        index_list_column_1 = [i for i in range(len(list_column_1)) if "None" not in list_column_1[i]]
+        list_column_2 = list(df_loaded_second.columns)
+        index_list_column_2 = [i for i in range(len(list_column_2)) if "None" not in list_column_2[i]]
+        join_index_list = list(set(index_list_column_1 + index_list_column_2))
+        df_loaded_first["Test"] = np.where()
     
-        self.first_frame_v1 = tk.Frame(self.new_root_v3, background="black")
-        self.first_frame_v1.pack(expand=True, fill='both', pady=10)
-    
-        self.b_first = tk.Button(self.first_frame_v2, text = "Real-time comparison", foreground="green", background= "black")
-        self.b_first["font"] = self.desired_font
-        self.b_first.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
-        self.b_first.pack(side=tk.TOP, padx=1, pady=1)
-    
-        self.first_frame_v2 = tk.Frame(self.new_root_v3, background="black")
-        self.first_frame_v2.pack(expand=True, fill='both', pady=10)
-    
-        self.b_second = tk.Button(self.first_frame_v2, text = "Paired labels comparison", foreground="green", background= "black")
-        self.b_second["font"] = self.desired_font
-        self.b_second.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
-        self.b_second.pack(side=tk.TOP, padx=1, pady=1)
-    
-        self.first_frame_v3 = tk.Frame(self.new_root_v3, background="black")
-        self.first_frame_v3.pack(expand=True, fill='both', pady=10)
-    
-        self.b_thrid = tk.Button(self.first_frame_v2, text = "Select the labels to compare", foreground="green", background= "black")
-        self.b_second["font"] = self.desired_font
-        self.b_second.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
-        self.b_second.pack(side=tk.TOP, padx=1, pady=1)
-
     def close_gate(self):
         msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to exit the application? Unsaved data will be lost',icon = 'warning')
         if msgbox == "yes":
@@ -1855,4 +1866,5 @@ class Start_video:
 advert()
 video_object = Application()
 video_object.root.mainloop()
+
 print("last version")
