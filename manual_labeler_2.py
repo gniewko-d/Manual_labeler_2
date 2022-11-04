@@ -109,11 +109,11 @@ class Application:
         self.fifth_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.fifth_frame_v1.pack_propagate(0)
     
-        self.save_machine_state = tk.Button(self.fifth_frame_v1, text = "Save current state", command = lambda: run_save_machine_state(logic_gate = True), background="black", foreground="green", width=25)
-        self.save_machine_state["font"] = self.desired_font
-        self.save_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
+        self.data_comparison = tk.Button(self.fifth_frame_v1, text = "Compare data", command = self.compare_main, background="black", foreground="green", width=25)
+        self.data_comparison["font"] = self.desired_font
+        self.data_comparison.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.load_machine_state = tk.Button(self.fifth_frame_v1, text = "Load state from file", command = lambda:[load_machine_state_fun(), self.label_changer_2()], background="black", foreground="green", width=25)
+        self.load_machine_state = tk.Button(self.fifth_frame_v1, text = "Load file", command = lambda:[load_machine_state_fun(), self.label_changer_2()], background="black", foreground="green", width=25)
         self.load_machine_state["font"] = self.desired_font
         self.load_machine_state.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
@@ -161,6 +161,125 @@ class Application:
         self.engine.say(random.choice(self.list_of_voices))
         self.engine.runAndWait()
 
+    def compare_main(self):
+        self.new_root_v2 = tk.Toplevel(self.root, background= "black")
+        self.new_root_v2.title("Data_comparator")
+    
+        self.first_frame_v1 = tk.Frame(self.new_root_v2, background="black")
+        self.first_frame_v1.pack(expand=True, fill='both', pady=10)
+    
+        self.label_info = tk.Label(self.first_frame_v1, text = "Add files to compare", foreground="#FFFF00", background= "black")
+        self.label_info["font"] = self.desired_font
+        self.label_info.pack(side=tk.TOP, padx=1, pady=1)
+    
+        self.first_frame_v2 = tk.Frame(self.new_root_v2, background="black")
+        self.first_frame_v2.pack(expand=True, fill='both', pady=10)
+    
+        self.b_first = tk.Button(self.first_frame_v2, text = "Add first file", foreground="green", background= "black")
+        self.b_first["font"] = self.desired_font
+        self.b_first.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
+        self.b_first.pack(side=tk.TOP, padx=1, pady=1)
+    
+        self.first_frame_v3 = tk.Frame(self.new_root_v2, background="black")
+        self.first_frame_v3.pack(expand=True, fill='both', pady=10)
+    
+        self.text_first = f"File: {None}"
+        self.current_video_first = tk.Label(self.first_frame_v3, height = 1, width=25, background="black", foreground="#FFFF00", anchor = tk.CENTER, relief = tk.RAISED)
+        self.current_video_first.config(text = self.text_first)
+        
+        self.current_video_first.configure(font = self.desired_font)
+        self.current_video_first.pack(side=tk.TOP, padx=1, pady=1, expand=True, fill='both')
+    
+        self.first_frame_v4 = tk.Frame(self.new_root_v2, background="black")
+        self.first_frame_v4.pack(expand=True, fill='both', pady=10)
+    
+        self.b_second = tk.Button(self.first_frame_v4, text = "Add second file", foreground="green", background= "black")
+        self.b_second["font"] = self.desired_font
+        self.b_second.bind("<Button-1>", lambda event, optional_video = False: self.open_first(optional_video))
+        self.b_second.pack(side=tk.TOP, padx=1, pady=1)
+    
+        self.first_frame_v5 = tk.Frame(self.new_root_v2, background="black")
+        self.first_frame_v5.pack(expand=True, fill='both', pady=10)
+    
+        self.text_second = f"File: {None}"
+        self.current_video_second = tk.Label(self.first_frame_v5, height = 1, width=25, background="black", foreground="#FFFF00", anchor = tk.CENTER, relief = tk.RAISED)
+        self.current_video_second.config(text = self.text_second)
+        
+        self.current_video_second.configure(font = self.desired_font)
+        self.current_video_second.pack(side=tk.TOP, padx=1, pady=1, expand=True, fill='both')
+    
+        self.first_frame_v6 = tk.Frame(self.new_root_v2, background="black")
+        self.first_frame_v6.pack(expand=True, fill='both', pady=10)
+    
+        self.comper_submit = tk.Button(self.first_frame_v6, text = "Save", command = self.compare_option, foreground="green", background= "black")
+        self.comper_submit["font"] = self.desired_font
+        self.comper_submit.pack(side = tk.TOP, expand=True, fill='both')
+                
+    
+    def open_first(self, optional_video):
+        global df_loaded_first
+        if video_file == None:
+            messagebox.showerror("Error box", "Before you load file: Upload the video first")
+        else:
+            video_title = video_file.split("\\")
+            video_title = video_title[-1].split(".")
+            video_title_first, format_type = video_title
+            if optional_video:
+                messagebox.showinfo("Information box", f"Load first file for video named: {video_title[0]}")
+                df_loaded_first = easygui.fileopenbox(title="Select a file", filetypes= ["*.xlsx", ".xlsm", ".xlsb"])
+                df_loaded_checker_first = df_loaded_first.split("\\")
+                df_loaded_checker_first, _ = df_loaded_checker_first[-1].split(".")
+                if video_title_first in df_loaded_checker_first:
+                    df_loaded_first = pd.read_excel(df_loaded_first)
+                    df_loaded_first = df_loaded_first.set_index("Frame No.")
+                    self.text_first = f"File: {df_loaded_checker_first}"
+                    self.current_video_first.config(text = self.text_first)
+                    messagebox.showinfo("Information box", "Data loaded.")
+                else:
+                    messagebox.showerror("Error box", "Wrong file uploaded. Try again")
+            elif not optional_video:
+                messagebox.showinfo("Information box", f"Load second file for video named: {video_title[0]}")
+                df_loaded_second = easygui.fileopenbox(title="Select a file", filetypes= ["*.xlsx", ".xlsm", ".xlsb"])
+                df_loaded_checker_second = df_loaded_second.split("\\")
+                df_loaded_checker_second, _ = df_loaded_checker_second[-1].split(".")
+                if video_title_first in df_loaded_checker_second:
+                    df_loaded_second = pd.read_excel(df_loaded_second)
+                    df_loaded_second = df_loaded_second.set_index("Frame No.")
+                    self.text_second = f"File: {df_loaded_checker_second}"
+                    self.current_video_second.config(text = self.text_second)
+                    messagebox.showinfo("Information box", "Data loaded.")
+                
+        
+    def compare_option(self):
+        
+        self.new_root_v2.destroy()
+        
+        self.new_root_v3 = tk.Toplevel(self.root, background= "black")
+        self.new_root_v3.title("Data_comparator")
+    
+        self.first_frame_v1 = tk.Frame(self.new_root_v3, background="black")
+        self.first_frame_v1.pack(expand=True, fill='both', pady=10)
+    
+        self.b_first = tk.Button(self.first_frame_v2, text = "Real-time comparison", foreground="green", background= "black")
+        self.b_first["font"] = self.desired_font
+        self.b_first.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
+        self.b_first.pack(side=tk.TOP, padx=1, pady=1)
+    
+        self.first_frame_v2 = tk.Frame(self.new_root_v3, background="black")
+        self.first_frame_v2.pack(expand=True, fill='both', pady=10)
+    
+        self.b_second = tk.Button(self.first_frame_v2, text = "Paired labels comparison", foreground="green", background= "black")
+        self.b_second["font"] = self.desired_font
+        self.b_second.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
+        self.b_second.pack(side=tk.TOP, padx=1, pady=1)
+    
+        self.first_frame_v3 = tk.Frame(self.new_root_v3, background="black")
+        self.first_frame_v3.pack(expand=True, fill='both', pady=10)
+    
+        self.b_thrid = tk.Button(self.first_frame_v2, text = "Select the labels to compare", foreground="green", background= "black")
+        self.b_second["font"] = self.desired_font
+        self.b_second.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
+        self.b_second.pack(side=tk.TOP, padx=1, pady=1)
 
     def close_gate(self):
         msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to exit the application? Unsaved data will be lost',icon = 'warning')
@@ -1106,6 +1225,7 @@ def start_vido3():
         messagebox.showerror("Error box", "Before save current state:\n 1. Upload the video \n 2. Submit any label \n 3. Label something")
     else:
         video_title = video_file.split("\\")
+        
         video_title = video_title[-1].split(".")
         save_file = None
         save_file = easygui.diropenbox(msg = "Select folder for a save location", title = "Typical window")
@@ -1113,7 +1233,8 @@ def start_vido3():
             messagebox.showerror("Error box", "Folder was not selected")
         else:
             messagebox.showinfo("Information box", "Folder added :):):)")
-        save_file_excel = save_file + "\\" + video_title[0] + ".xlsx"
+        today = str(date.today()).replace("-", "_")
+        save_file_excel = save_file + "\\" + video_title[0] + "_" + today + '.xlsx'
         df.to_excel(save_file_excel)
         messagebox.showinfo("Information box", "Data saved successfully :):):)")
 
