@@ -271,7 +271,7 @@ class Application:
     
             self.b_second = tk.Button(self.first_frame_v2, text = "Paired labels comparison", foreground="green", background= "black")
             self.b_second["font"] = self.desired_font
-            self.b_second.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
+            self.b_second.bind("<Button-1>", lambda event : self.paired())
             self.b_second.pack(side=tk.TOP, padx=1, pady=1)
     
             self.first_frame_v3 = tk.Frame(self.new_root_v3, background="black")
@@ -285,12 +285,47 @@ class Application:
             messagebox.showerror("Error box", "The size of the uploaded files does not match")
         
     def paired(self):
+        global df_loaded_first, df_loaded_second, join_index_list_g, join_index_list
+        df_loaded_first = df_loaded_first.fillna("989_12478")
+        df_loaded_second = df_loaded_second.fillna("989_12478")
         list_column_1 = list(df_loaded_first.columns)
         index_list_column_1 = [i for i in range(len(list_column_1)) if "None" not in list_column_1[i]]
         list_column_2 = list(df_loaded_second.columns)
         index_list_column_2 = [i for i in range(len(list_column_2)) if "None" not in list_column_2[i]]
         join_index_list = list(set(index_list_column_1 + index_list_column_2))
-        df_loaded_first["Test"] = np.where()
+        join_index_list.remove(9)
+        result_column_list = ["General_fidelity_", "Labeling_fidelity_", "Unlabeling_fidelity_", "Labeled_by_both_[n]", "Unlabeled_by_both_[n]", "Labeled_by_one_[n]"]
+        #result_column_list = [j + str(i) + "[%]" for i in join_index_list for j in result_column_list]
+        
+        join_index_list_g = (i for i in join_index_list)
+        g_paried_gen = self.paried_gen()
+        len_df, _ = df_loaded_first.shape
+        for i in range(len(join_index_list)):
+            next(g_paried_gen)
+        result_count = [df_loaded_first.iloc[:,i].sum() for i in range(10, 10+2*len(join_index_list))]
+        row_n = [f"Key_{i+1}" for i in range(len(join_index_list))]
+        df_result = pd.DataFrame(columns = result_column_list, index =  row_n)
+        print(result_column_list)
+        x = 0
+        for i,j in enumerate(result_count):
+            if i%2 == 0:
+                
+                res = round((j + result_count[i+1]) / len_df * 100)
+                res_1 = round(j/ (j + (len_df - (j + result_count[i+1]))) * 100)
+                res_2 =  round(result_count[i+1]/ (result_count[i+1] + (len_df - (j + result_count[i+1]))) * 100)
+                res_3 = j
+                res_4 = result_count[i+1]
+                res_5 = len_df - (j + result_count[i+1])
+                df_result.iloc[x,:] = [res, res_1, res_2, res_3, res_4, res_5]
+                x +=1
+    
+    def paried_gen(self):
+        global join_index_list_g, join_index_list
+        for j in range(len(join_index_list)):
+            i = next(join_index_list_g)
+            df_loaded_first[f"Key_{i+1}_label"] = np.where((df_loaded_first.iloc[:, i] != "989_12478") & (df_loaded_second.iloc[:,i] != "989_12478"), True, False)
+            df_loaded_first[f"Key_{i+1}_unlabel"] = np.where((df_loaded_first.iloc[:, i] == "989_12478") & (df_loaded_second.iloc[:,i] == "989_12478"), True, False)
+            yield df_loaded_first
     
     def close_gate(self):
         msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to exit the application? Unsaved data will be lost',icon = 'warning')
@@ -1863,7 +1898,7 @@ class Start_video:
                 label_panel_v9_text.set("Label 9: unlabel")
                 self.label_panel_v9.config(bg = "black")
         self.player.set_time(timestamp_track)
-advert()
+#advert()
 video_object = Application()
 video_object.root.mainloop()
 
