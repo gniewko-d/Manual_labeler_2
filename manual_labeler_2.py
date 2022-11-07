@@ -285,7 +285,11 @@ class Application:
             messagebox.showerror("Error box", "The size of the uploaded files does not match")
         
     def paired(self):
-        global df_loaded_first, df_loaded_second, join_index_list_g, join_index_list
+        global df_loaded_first, df_loaded_second, join_index_list_g, join_index_list, df_loaded_first_copy, df_result
+        
+        self.new_root_v3.destroy()
+        self.new_root_v4 = tk.Toplevel(self.root, background= "black")
+        self.new_root_v4.title("Paired labels comparison")
         df_loaded_first = df_loaded_first.fillna("989_12478")
         df_loaded_second = df_loaded_second.fillna("989_12478")
         list_column_1 = list(df_loaded_first.columns)
@@ -294,18 +298,19 @@ class Application:
         index_list_column_2 = [i for i in range(len(list_column_2)) if "None" not in list_column_2[i]]
         join_index_list = list(set(index_list_column_1 + index_list_column_2))
         join_index_list.remove(9)
-        result_column_list = ["General_fidelity_", "Labeling_fidelity_", "Unlabeling_fidelity_", "Labeled_by_both_[n]", "Unlabeled_by_both_[n]", "Labeled_by_one_[n]"]
+        result_column_list = ["General_fidelity_[%]", "Labeling_fidelity_[%]", "Unlabeling_fidelity_[%]", "Labeled_by_both_[n]", "Unlabeled_by_both_[n]", "Labeled_by_one_[n]"]
         #result_column_list = [j + str(i) + "[%]" for i in join_index_list for j in result_column_list]
         
         join_index_list_g = (i for i in join_index_list)
+        df_loaded_first_copy = df_loaded_first.copy(deep=True)
         g_paried_gen = self.paried_gen()
         len_df, _ = df_loaded_first.shape
         for i in range(len(join_index_list)):
             next(g_paried_gen)
-        result_count = [df_loaded_first.iloc[:,i].sum() for i in range(10, 10+2*len(join_index_list))]
+        result_count = [df_loaded_first_copy.iloc[:,i].sum() for i in range(10, 10+2*len(join_index_list))]
         row_n = [f"Key_{i+1}" for i in range(len(join_index_list))]
-        df_result = pd.DataFrame(columns = result_column_list, index =  row_n)
-        print(result_column_list)
+        df_result = pd.DataFrame(columns = result_column_list, index = row_n)
+        
         x = 0
         for i,j in enumerate(result_count):
             if i%2 == 0:
@@ -318,14 +323,18 @@ class Application:
                 res_5 = len_df - (j + result_count[i+1])
                 df_result.iloc[x,:] = [res, res_1, res_2, res_3, res_4, res_5]
                 x +=1
+        self.tabel_frame_v1 = tk.Frame(self.new_root_v4)
+        self.tabel_frame_v1.pack(fill='both', expand=True)
+        pt = Table(self.tabel_frame_v1, dataframe=df_result)
+        pt.show()
     
     def paried_gen(self):
         global join_index_list_g, join_index_list
         for j in range(len(join_index_list)):
             i = next(join_index_list_g)
-            df_loaded_first[f"Key_{i+1}_label"] = np.where((df_loaded_first.iloc[:, i] != "989_12478") & (df_loaded_second.iloc[:,i] != "989_12478"), True, False)
-            df_loaded_first[f"Key_{i+1}_unlabel"] = np.where((df_loaded_first.iloc[:, i] == "989_12478") & (df_loaded_second.iloc[:,i] == "989_12478"), True, False)
-            yield df_loaded_first
+            df_loaded_first_copy[f"Key_{i+1}_label"] = np.where((df_loaded_first.iloc[:, i] != "989_12478") & (df_loaded_second.iloc[:,i] != "989_12478"), True, False)
+            df_loaded_first_copy[f"Key_{i+1}_unlabel"] = np.where((df_loaded_first.iloc[:, i] == "989_12478") & (df_loaded_second.iloc[:,i] == "989_12478"), True, False)
+            yield df_loaded_first_copy
     
     def close_gate(self):
         msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to exit the application? Unsaved data will be lost',icon = 'warning')
@@ -1902,4 +1911,3 @@ class Start_video:
 video_object = Application()
 video_object.root.mainloop()
 
-print("last version")
