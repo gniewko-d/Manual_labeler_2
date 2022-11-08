@@ -5,10 +5,10 @@ import tkinter as tk
 import requests
 from PIL import Image, ImageTk
 from io import BytesIO
-
+import matplotlib.pyplot as plt
 from tkinter import messagebox
 import easygui
-
+from matplotlib.figure import Figure
 import pyttsx3
 import random
 from pandastable import Table
@@ -18,6 +18,7 @@ import numpy as np
 import csv
 from datetime import date
 from sklearn.metrics import matthews_corrcoef
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 
 def advert():
     root_v1 = tk.Tk()
@@ -270,7 +271,7 @@ class Application:
     
             self.b_first = tk.Button(self.first_frame_v1, text = "Real-time comparison", foreground="green", background= "black")
             self.b_first["font"] = self.desired_font
-            self.b_first.bind("<Button-1>", lambda event, optional_video = True: self.open_first(optional_video))
+            self.b_first.bind("<Button-1>", lambda event : self.real_time_fun())
             self.b_first.pack(side=tk.TOP, padx=1, pady=1)
     
             self.first_frame_v2 = tk.Frame(self.new_root_v3, background="black")
@@ -297,6 +298,8 @@ class Application:
         self.new_root_v3.destroy()
         self.new_root_v4 = tk.Toplevel(self.root, background= "black")
         self.new_root_v4.title("Paired labels comparison")
+        self.new_root_v5 = tk.Toplevel(self.root, background= "black")
+        self.new_root_v5.title("Plot")
         df_loaded_first = df_loaded_first.fillna("989_12478")
         df_loaded_second = df_loaded_second.fillna("989_12478")
         list_column_1 = list(df_loaded_first.columns)
@@ -338,10 +341,33 @@ class Application:
                 df_result.iloc[x,:] = [res, res_1, res_2, res_3, res_4, res_5, res_6]
                 x +=1
         df_result.insert(0, "Key" ,row_n)
+        
+        #Tabel 
         self.tabel_frame_v1 = tk.Frame(self.new_root_v4)
         self.tabel_frame_v1.pack(fill='both', expand=True)
         pt = Table(self.tabel_frame_v1, dataframe=df_result)
         pt.show()
+        
+        
+        # Figure Matplotlib
+        plt.style.use("ggplot")
+        barWidth = 0.25
+        fig = Figure(figsize = (5, 5), dpi = 100)
+        plot1 = fig.add_subplot(111)
+        
+        br1 = np.arange(len(row_n))
+        br2= [x + barWidth for x in br1]
+        br3 = [x + barWidth for x in br2]
+        plot1.bar(br1, list(df_result["General_fidelity_[%]"]), color = "tomato", width = barWidth, edgecolor ='black', label = "General fidelity")
+        plot1.bar(br2, list(df_result["Labeling_fidelity_[%]"]), color = "limegreen", width = barWidth, edgecolor ='black', label = "Labeling fidelity")
+        plot1.bar(br3, list(df_result["Unlabeling_fidelity_[%]"]), color = "lightskyblue", width = barWidth, edgecolor ='black', label = "Unlabeling fidelity")
+        plot1.set_ylabel("Fidelity [%]", fontweight = "bold", fontsize  = 15)
+        plot1.set_xlabel("Key number", fontweight = "bold", fontsize  = 15)
+        plot1.set_xticks(br2)
+        plot1.set_xticklabels(row_n)
+        plot1.legend()
+        tk_plot = FigureCanvasTkAgg(fig, self.new_root_v5)
+        tk_plot.get_tk_widget().pack(fill=tk.BOTH)
         
     
     def paried_gen(self):
@@ -352,6 +378,10 @@ class Application:
             df_loaded_first_copy[f"Key_{i+1}_unlabel"] = np.where((df_loaded_first.iloc[:, i] == "989_12478") & (df_loaded_second.iloc[:,i] == "989_12478"), True, False)
             
             yield df_loaded_first_copy
+    
+    def real_time_fun(self):
+        app_v2 = Real_time()
+
     
     def close_gate(self):
         msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to exit the application? Unsaved data will be lost',icon = 'warning')
@@ -623,6 +653,7 @@ class Application:
                     else:
                         initial = j
                         start_point = j
+    
     def video_synchronizer(self):
         global window_checker, app
         if window_checker == 0:
@@ -1183,7 +1214,6 @@ class Application:
             
             if df_checker == False:
                 if len(np.arange(0, length_movie, frame_duration)) == tots:
-                    print("tu jestem")
                     df = pd.DataFrame(columns = label_list, index = range(1, len(np.arange(0, length_movie + frame_duration, frame_duration)) + 1))
                     df.index.name="Frame No."
                     df["Frame time [ms]."] = np.arange(0, length_movie + frame_duration, frame_duration)
@@ -1208,6 +1238,7 @@ class Application:
             #self.player_v2.set_hwnd(self.videopanel.winfo_id())
             self.newwindow = tk.Toplevel(self.root)
             app = Start_video(self.newwindow, self.player_v2)
+
 def disable_event():
     pass
 
@@ -1925,6 +1956,113 @@ class Start_video:
                 label_panel_v9_text.set("Label 9: unlabel")
                 self.label_panel_v9.config(bg = "black")
         self.player.set_time(timestamp_track)
+
+
+class Real_time:
+    
+    def __init__(self):
+        global video_file, label_panel_v1_text_v1
+        self.newwindow_v2 = tk.Tk()
+        self.newwindow_v3 = tk.Tk()
+        self.Instance = vlc.Instance()
+        self.player_v3 = self.Instance.media_player_new()
+        media = self.Instance.media_new(video_file)
+        self.player_v3.set_media(media)
+        
+        track_bar_panel = "Track bar"
+        trackbar_name = "Frame"
+        cv2.namedWindow(track_bar_panel, cv2.WINDOW_NORMAL)
+        cv2.createTrackbar(trackbar_name, track_bar_panel, 1, self.len_df, self.slider_fun)
+        
+        self.videopanel_v1 = tk.Frame(self.newwindow_v2, background="#116562") # for video
+        self.canvas = tk.Canvas(self.videopanel_v1).pack(fill=tk.BOTH, expand=1)
+        self.videopanel_v1.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+        
+        self.labelspanel = tk.Frame(self.newwindow_v3, background="#116562")
+        self.labelspanel.pack(side= tk.TOP, fill=tk.BOTH, expand=1)
+        
+        self.player_v3.set_hwnd(self.videopanel_v1.winfo_id())
+        
+        self.label_panel_v1 = tk.Label( self.labelspanel, text = "Label 1: None", background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v1.grid(row = 0, column = 0, padx=1, pady=1, sticky = tk.EW)
+        
+        label_panel_v2_text = tk.StringVar()
+        label_panel_v2_text.set("Label 2: None")
+        self.label_panel_v2 = tk.Label( self.labelspanel, textvariable = label_panel_v2_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v2.grid(row = 0, column = 1, padx=1, pady=1, sticky = tk.EW)
+        
+        label_panel_v3_text = tk.StringVar()
+        label_panel_v3_text.set("Label 3: None")
+        self.label_panel_v3 = tk.Label( self.labelspanel, textvariable = label_panel_v3_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v3.grid(row = 0, column = 2, padx=1, pady=1, sticky = tk.EW)
+        
+        label_panel_v4_text = tk.StringVar()
+        label_panel_v4_text.set("Label 4: None")
+        self.label_panel_v4 = tk.Label( self.labelspanel, textvariable = label_panel_v4_text, background="red", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v4.grid(row = 1, column = 0, padx=1, pady=1)
+        
+        label_panel_v5_text = tk.StringVar()
+        label_panel_v5_text.set("Label 5: None")
+        self.label_panel_v5 = tk.Label( self.labelspanel, textvariable = label_panel_v5_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v5.grid(row = 1, column = 1, padx=1, pady=1)
+        
+        label_panel_v6_text = tk.StringVar()
+        label_panel_v6_text.set("Label 6: None")
+        self.label_panel_v6 = tk.Label( self.labelspanel, text = "ELO", background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v6.grid(row = 1, column = 2, padx=1, pady=1)
+        
+        label_panel_v7_text = tk.StringVar()
+        label_panel_v7_text.set("Label 7: None")
+        self.label_panel_v7 = tk.Label( self.labelspanel, textvariable = label_panel_v7_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v7.grid(row = 2, column = 0, padx=1, pady=1)
+        
+        label_panel_v8_text = tk.StringVar()
+        label_panel_v8_text.set("Label 8: None")
+        self.label_panel_v8 = tk.Label( self.labelspanel, textvariable = label_panel_v8_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v8.grid(row = 2, column = 1, padx=1, pady=1)
+        
+        label_panel_v9_text = tk.StringVar()
+        label_panel_v9_text.set("Label 9: None")
+        self.label_panel_v9 = tk.Label( self.labelspanel, textvariable = label_panel_v9_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v9.grid(row = 2, column = 2, padx=1, pady=1)
+        
+        self.player_v3.play()
+        #sleep(0.2)
+        #self.player_v3.pause()
+        #self.player_v3.set_time(0)
+        def df_helper(self):
+            global df_loaded_first, df_loaded_second
+            self.len_df, _ = df_loaded_first.shape
+            
+            list_column_1 = list(df_loaded_first.columns)
+            index_list_column_1 = [i for i in range(len(list_column_1)) if "None" not in list_column_1[i]]
+            list_column_2 = list(df_loaded_second.columns)
+            index_list_column_2 = [i for i in range(len(list_column_2)) if "None" not in list_column_2[i]]
+            join_index_list = list(set(index_list_column_1 + index_list_column_2))
+        
+        def slider_operator(self):
+            timestamp_track = int(cv2.getTrackbarPos(trackbar_name, track_bar_panel))
+            list_column_1 = list(df_loaded_first.columns)
+            list_column_2 = list(df_loaded_second.columns)
+            
+            if "None" in list_column_1[0] or "None" in list_column_2[0]:
+                self.label_panel_v1.config(text = "Unused")
+                self.label_panel_v1.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 0] == list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] == list_column_1[0]:
+                self.label_panel_v1.config(text = "Key_1: Labeled by both")
+                self.label_panel_v1.config(bg = "green")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 0] == list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] != list_column_1[0]:
+                self.label_panel_v1.config(text = "Key_1: Labeled by First")
+                self.label_panel_v1.config(bg = "red")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 0] != list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] == list_column_1[0]:
+                self.label_panel_v1.config(text = "Key_1: Labeled by First")
+                self.label_panel_v1.config(bg = "red")
+
+
+
 #advert()
 video_object = Application()
 video_object.root.mainloop()
