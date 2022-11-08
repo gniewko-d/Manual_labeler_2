@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 import csv
 from datetime import date
+from sklearn.metrics import matthews_corrcoef
 
 def advert():
     root_v1 = tk.Tk()
@@ -160,7 +161,11 @@ class Application:
         self.engine.setProperty('voice', voices[1].id)
         self.engine.say(random.choice(self.list_of_voices))
         self.engine.runAndWait()
-
+    
+      
+    def active_window(self, window):
+        window.after(1, lambda: window.focus_force())
+    
     def compare_main(self):
         self.new_root_v2 = tk.Toplevel(self.root, background= "black")
         self.new_root_v2.title("Data_comparator")
@@ -235,6 +240,8 @@ class Application:
                     self.text_first = f"File: {df_loaded_checker_first}"
                     self.current_video_first.config(text = self.text_first)
                     messagebox.showinfo("Information box", "Data loaded.")
+                    self.active_window(self.new_root_v2)
+    
                 else:
                     messagebox.showerror("Error box", "Wrong file uploaded. Try again")
             elif not optional_video:
@@ -248,7 +255,7 @@ class Application:
                     self.text_second = f"File: {df_loaded_checker_second}"
                     self.current_video_second.config(text = self.text_second)
                     messagebox.showinfo("Information box", "Data loaded.")
-                
+                    self.active_window(self.new_root_v2)
         
     def compare_option(self):
         
@@ -298,8 +305,8 @@ class Application:
         index_list_column_2 = [i for i in range(len(list_column_2)) if "None" not in list_column_2[i]]
         join_index_list = list(set(index_list_column_1 + index_list_column_2))
         join_index_list.remove(9)
-        result_column_list = ["General_fidelity_[%]", "Labeling_fidelity_[%]", "Unlabeling_fidelity_[%]", "Labeled_by_both_[n]", "Unlabeled_by_both_[n]", "Labeled_by_one_[n]"]
-        #result_column_list = [j + str(i) + "[%]" for i in join_index_list for j in result_column_list]
+        result_column_list = ["General_fidelity_[%]", "Labeling_fidelity_[%]", "Unlabeling_fidelity_[%]", "Labeled_by_both_[n]", "Unlabeled_by_both_[n]", "Labeled_by_one_[n]", "Phi_coefficient"]
+        
         
         join_index_list_g = (i for i in join_index_list)
         df_loaded_first_copy = df_loaded_first.copy(deep=True)
@@ -310,10 +317,12 @@ class Application:
         result_count = [df_loaded_first_copy.iloc[:,i].sum() for i in range(10, 10+2*len(join_index_list))]
         row_n = [f"Key_{i+1}" for i in range(len(join_index_list))]
         df_result = pd.DataFrame(columns = result_column_list, index = row_n)
+        df_loaded_first.iloc[:, 0:9] = df_loaded_first.iloc[:, 0:9] != "989_12478"
+        df_loaded_second.iloc[:, 0:9] = df_loaded_second.iloc[:, 0:9] != "989_12478"
         
         x = 0
         for i,j in enumerate(result_count):
-            if i%2 == 0:
+            if i% 2 == 0:
                 
                 res = round((j + result_count[i+1]) / len_df * 100)
                 res_1 = round(j/ (j + (len_df - (j + result_count[i+1]))) * 100)
@@ -321,12 +330,19 @@ class Application:
                 res_3 = j
                 res_4 = result_count[i+1]
                 res_5 = len_df - (j + result_count[i+1])
-                df_result.iloc[x,:] = [res, res_1, res_2, res_3, res_4, res_5]
+                first_np = np.asarray(df_loaded_first.iloc[:, x])
+                first_np = first_np * 1
+                second_np = np.asarray(df_loaded_second.iloc[:, x])
+                second_np = second_np * 1
+                res_6 = round(matthews_corrcoef(first_np, second_np),2)
+                df_result.iloc[x,:] = [res, res_1, res_2, res_3, res_4, res_5, res_6]
                 x +=1
+        df_result.insert(0, "Key" ,row_n)
         self.tabel_frame_v1 = tk.Frame(self.new_root_v4)
         self.tabel_frame_v1.pack(fill='both', expand=True)
         pt = Table(self.tabel_frame_v1, dataframe=df_result)
         pt.show()
+        
     
     def paried_gen(self):
         global join_index_list_g, join_index_list
@@ -334,6 +350,7 @@ class Application:
             i = next(join_index_list_g)
             df_loaded_first_copy[f"Key_{i+1}_label"] = np.where((df_loaded_first.iloc[:, i] != "989_12478") & (df_loaded_second.iloc[:,i] != "989_12478"), True, False)
             df_loaded_first_copy[f"Key_{i+1}_unlabel"] = np.where((df_loaded_first.iloc[:, i] == "989_12478") & (df_loaded_second.iloc[:,i] == "989_12478"), True, False)
+            
             yield df_loaded_first_copy
     
     def close_gate(self):
@@ -345,6 +362,7 @@ class Application:
             cv2.destroyAllWindows()
         else:
             pass
+    
     def close_gate2(self):
         msgbox = tk.messagebox.askquestion ('Exit Application','Are you sure you want to exit the support window? Unsaved data will be lost',icon = 'warning')
         if msgbox == "yes":
