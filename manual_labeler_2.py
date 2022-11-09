@@ -49,8 +49,10 @@ start_frame_bool_v2 = False
 window_checker = 0
 radio_variable = "off"
 t = None
+player_first = 0
+player_second = 0
 save_mother_df_automatic = None
-
+controler_slider = True
 class Application:
     def __init__(self):
         self.root = tk.Tk()
@@ -223,7 +225,7 @@ class Application:
                 
     
     def open_first(self, optional_video):
-        global df_loaded_first, df_loaded_second
+        global df_loaded_first, df_loaded_second, player_first, player_second
         if video_file == None:
             messagebox.showerror("Error box", "Before you load file: Upload the video first")
         else:
@@ -242,7 +244,7 @@ class Application:
                     self.current_video_first.config(text = self.text_first)
                     messagebox.showinfo("Information box", "Data loaded.")
                     self.active_window(self.new_root_v2)
-    
+                    player_first = str(easygui.enterbox("Enter author's nick", "Message Box", "Enter here.."))
                 else:
                     messagebox.showerror("Error box", "Wrong file uploaded. Try again")
             elif not optional_video:
@@ -257,7 +259,9 @@ class Application:
                     self.current_video_second.config(text = self.text_second)
                     messagebox.showinfo("Information box", "Data loaded.")
                     self.active_window(self.new_root_v2)
-        
+                    player_second = str(easygui.enterbox("Enter author's nick", "Message Box", "Enter here.."))
+                else:
+                    messagebox.showerror("Error box", "Wrong file uploaded. Try again")
     def compare_option(self):
         
         self.new_root_v2.destroy()
@@ -326,9 +330,10 @@ class Application:
         x = 0
         for i,j in enumerate(result_count):
             if i% 2 == 0:
-                
+                print(i,j)
                 res = round((j + result_count[i+1]) / len_df * 100)
-                res_1 = round(j/ (j + (len_df - (j + result_count[i+1]))) * 100)
+                
+                res_1 = round(j/ (j + (len_df - (j + result_count[i+1]))) * 100) if j != 0 else 0
                 res_2 =  round(result_count[i+1]/ (result_count[i+1] + (len_df - (j + result_count[i+1]))) * 100)
                 res_3 = j
                 res_4 = result_count[i+1]
@@ -339,7 +344,9 @@ class Application:
                 second_np = second_np * 1
                 res_6 = round(matthews_corrcoef(first_np, second_np),2)
                 df_result.iloc[x,:] = [res, res_1, res_2, res_3, res_4, res_5, res_6]
+                
                 x +=1
+        
         df_result.insert(0, "Key" ,row_n)
         
         #Tabel 
@@ -1475,7 +1482,7 @@ class Start_video:
         self.button_set_time.bind("<Button-1>", self.set_time_manually)
         self.button_set_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
-        self.box_for_time = tk.Entry(self.main_frame_v2,  width = 16, background="black", foreground="green", insertbackground = "green", relief = tk.RAISED)
+        self.box_for_time = tk.Entry(self.main_frame_v2, width = 16, background="black", foreground="green", insertbackground = "green", relief = tk.RAISED)
         self.box_for_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         self.box_for_time.bind("<Enter>", self.bindings_off)
         self.box_for_time.bind("<Leave>", lambda event: self.bindings_on_2())
@@ -1963,6 +1970,7 @@ class Real_time:
     def __init__(self):
         global video_file, label_panel_v1_text_v1, trackbar_name, track_bar_panel
         self.newwindow_v2 = tk.Tk()
+        self.newwindow_v2.protocol("WM_DELETE_WINDOW", disable_event)
         self.newwindow_v3 = tk.Tk()
         self.Instance = vlc.Instance()
         self.player_v3 = self.Instance.media_player_new()
@@ -1983,6 +1991,10 @@ class Real_time:
         
         self.labelspanel = tk.Frame(self.newwindow_v3, background="#116562")
         self.labelspanel.pack(side= tk.TOP, fill=tk.BOTH, expand=1)
+        
+        
+        self.keypanel = tk.Frame(self.newwindow_v2, background="#116562")
+        self.keypanel.pack(side= tk.TOP, fill=tk.NONE, expand=0)
         
         self.player_v3.set_hwnd(self.videopanel_v1.winfo_id())
         
@@ -2022,15 +2034,359 @@ class Real_time:
         self.label_panel_v9["font"] = self.desired_font
         self.label_panel_v9.grid(row = 2, column = 2, padx=1, pady=1)
         
-        self.player_v3.play()
-        #sleep(0.2)
-        #self.player_v3.pause()
-        #self.player_v3.set_time(0)
-            
-            
+        self.pause_button_v1 = tk.Button(self.keypanel, text = "Pause", foreground="green", background= "black", width = 17) 
+        self.pause_button_v1["font"] = self.desired_font
+        self.pause_button_v1.bind("<Button-1>", lambda event: self.pause())
+        self.pause_button_v1.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
+        self.bindings_space = self.newwindow_v2.bind("<space>", lambda event: self.pause())
         
-    def slider_operator(self, unused):
+        self.next_button_v1 = tk.Button(self.keypanel, text = "Next Frame", foreground="green", background= "black", width = 17) 
+        self.next_button_v1["font"] = self.desired_font
+        self.next_button_v1.bind("<Button-1>", lambda event: self.next_frame())
+        self.next_button_v1.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
+        self.next_binding = self.newwindow_v2.bind("<d>", lambda event: self.next_frame())
+            
+        self.button_previous_v1 = tk.Button(self.keypanel, text = "Prev. Frame", background="black", foreground="green", width = 17)
+        self.button_previous_v1["font"] = self.desired_font
+        self.button_previous_v1.bind("<Button-1>", lambda event, player = self.player_v3, master = self.newwindow_v2: self.previous_frame(player, master))
+        self.button_previous_v1.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
+        self.prev_binding = self.newwindow_v2.bind("<a>", lambda event, player = self.player_v3, master = self.newwindow_v2: self.previous_frame(player, master))
+        
+        self.button_check_v1 = tk.Button(self.keypanel, text = "Check_labeling", background="black", foreground="green", width = 17)
+        self.button_check_v1["font"] = self.desired_font
+        self.button_check_v1.bind("<Button-1>", lambda event: self.check_labeling())
+        self.button_check_v1.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
+        self.button_check_v1_binding = self.newwindow_v2.bind("<s>", lambda event: self.check_labeling())
+        
+        self.button_set_time_v1 = tk.Button(self.keypanel, text = "Set frame [click me] of video:", background="black", foreground="green", width = 24)
+        self.button_set_time_v1["font"] = self.desired_font
+        self.button_set_time_v1.bind("<Button-1>", self.set_time_manually)
+        self.button_set_time_v1.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
+        
+        self.box_for_time_v1 = tk.Entry(self.keypanel, width = 17, background="black", foreground="green", insertbackground = "green", relief = tk.RAISED)
+        self.box_for_time_v1["font"] = self.desired_font
+        self.box_for_time_v1.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
+        self.box_for_time_v1.bind("<Enter>", self.bindings_off)
+        self.box_for_time_v1.bind("<Leave>", lambda event, master = self.newwindow_v2: self.active_window(master))
+        
+        self.exit_v2 = tk.Button(self.keypanel, text = "Exit", background="black", foreground="green", width = 24, command = self.close_gate_v2)
+        self.exit_v2["font"] = self.desired_font
+        self.exit_v2.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+        
+        self.player_v3.play()
+        sleep(0.2)
+        self.player_v3.pause()
+        self.player_v3.set_time(0)
+            
+    def bindings_off(self, event):
+
+        self.box_for_time_v1.focus_set()
+    
+    def bindings_on_2(self):
+
+        self.label_panel_v2.focus_set()
+    
+    def check_labeling(self):
+        global controler_slider
+        controler_slider = False
+        self.slider_operator_v2()
+    
+    def pause(self):
+        global controler_slider
+        controler_slider = False
+        self.player_v3.pause()
+        self.slider_operator_v2()
+    def next_frame(self):
+        global controler_slider
+        controler_slider = False
+        self.player_v3.next_frame()
+        self.slider_operator_v2()
+    
+    def previous_frame(self, player, master):
+        global frame_duration, time_jump, controler_slider
+        
+        controler_slider = False
+        if not time_jump:
+            messagebox.showinfo("Information box", "I have to calibrate my self. Now you can use this option normally. Thank your for your contribution")
+            back_up = player.get_time()
+            player.next_frame()
+            sleep(0.2)
+            player.next_frame()
+            sleep(0.2)
+            player.next_frame()
+            sleep(0.2)
+            first_time = player.get_time()
+            sleep(0.2)
+            player.next_frame()
+            sleep(0.2)
+            second_time = player.get_time()
+            time_jump = second_time - first_time
+            player.set_time(back_up)
+            self.active_window(master)
+        else:
+            back_one_frame = player.get_time()
+            time_12 = back_one_frame - round(time_jump)
+            current_state = str(player.get_state())
+            self.slider_operator_v2()
+            if current_state == "State.Playing":
+                player.set_time(time_12)
+                player.pause()
+            else:
+                player.set_time(time_12)
+    def set_time_manually(self, event):
+        try:
+            answer_int = int(self.box_for_time_v1.get())
+            self.player_v3.set_time(answer_int)
+            cv2.setTrackbarPos(trackbar_name, track_bar_panel, answer_int)
+            current_state = str(self.player_v3.get_state())
+            if current_state == "State.Playing":
+                self.player_v3.pause()
+            else:
+                pass
+        except ValueError:
+            messagebox.showerror("Error box", "You inserted wrong value try using integers")
+    
+    def close_gate_v2(self):
+        global window_checker
+        self.newwindow_v2.destroy()
+        self.newwindow_v3.destroy()
+        cv2.destroyAllWindows()
+    
+    def active_window(self, window):
+        window.after(1, lambda: window.focus_force())
+    
+    def slider_operator_v2(self):
             global trackbar_name, track_bar_panel
+            
+            time_frame = int(self.player_v3.get_time())
+            list_of_times = df_loaded_first["Frame time [ms]."].tolist()
+            closest_timestamp = min(list_of_times, key=lambda x:abs(x-time_frame))
+            list_of_times.index(closest_timestamp)
+            
+            list_column_1 = list(df_loaded_first.columns)
+            list_column_2 = list(df_loaded_second.columns)
+            
+            if "None" in list_column_1[0] and "None" in list_column_2[0]:
+                self.label_panel_v1.config(text = "Unused")
+                self.label_panel_v1.config(bg = "#8B8B83")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 0] == list_column_1[0] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 0] == list_column_1[0]:
+                self.label_panel_v1.config(text = "Key_1: Labeled by both")
+                self.label_panel_v1.config(bg = "green")
+                self.label_panel_v1.config(foreground="white")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 0] == list_column_1[0] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 0] != list_column_1[0]:
+                self.label_panel_v1.config(text = f"Key_1: Labeled by {player_first}")
+                self.label_panel_v1.config(bg = "red")
+                self.label_panel_v1.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 0] != list_column_1[0] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 0] == list_column_1[0]:
+                self.label_panel_v1.config(text = f"Key_1: {player_second}")
+                self.label_panel_v1.config(bg = "red")
+                self.label_panel_v1.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 0] != list_column_1[0] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 0] != list_column_1[0]:
+                self.label_panel_v1.config(text = "Key_1: Unlabeled by both")
+                self.label_panel_v1.config(bg = "blue")
+                self.label_panel_v1.config(foreground="white")
+            
+            if "None" in list_column_1[1] and "None" in list_column_2[1]:
+                self.label_panel_v2.config(text = "Unused")
+                self.label_panel_v2.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 1] == list_column_1[1] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 1] == list_column_1[1]:
+                self.label_panel_v2.config(text = "Key_2: Labeled by both")
+                self.label_panel_v2.config(bg = "green")
+                self.label_panel_v2.config(foreground="white")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 1] == list_column_1[1] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 1] != list_column_1[1]:
+                self.label_panel_v2.config(text = f"Key_2: Labeled by {player_first}")
+                self.label_panel_v2.config(bg = "red")
+                self.label_panel_v2.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 1] != list_column_1[1] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 1] == list_column_1[1]:
+                self.label_panel_v2.config(text = f"Key_2: Labeled by {player_second}")
+                self.label_panel_v2.config(bg = "red")
+                self.label_panel_v2.config(foreground="black")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 1] != list_column_1[1] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 1] != list_column_1[1]:
+                self.label_panel_v2.config(text = "Key_2: Unlabeled by both")
+                self.label_panel_v2.config(bg = "blue")
+                self.label_panel_v2.config(foreground="white")
+                
+            if "None" in list_column_1[2] and "None" in list_column_2[2]:
+                self.label_panel_v3.config(text = "Unused")
+                self.label_panel_v3.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 2] == list_column_1[2] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 2] == list_column_1[2]:
+                self.label_panel_v3.config(text = "Key_3: Labeled by both")
+                self.label_panel_v3.config(bg = "green")
+                self.label_panel_v3.config(foreground="white")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 2] == list_column_1[2] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 2] != list_column_1[2]:
+                self.label_panel_v3.config(text = f"Key_3: Labeled by {player_first}")
+                self.label_panel_v3.config(bg = "red")
+                self.label_panel_v3.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 2] != list_column_1[2] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 2] == list_column_1[2]:
+                self.label_panel_v3.config(text = f"Key_3: Labeled by {player_second}")
+                self.label_panel_v3.config(bg = "red")
+                self.label_panel_v3.config(foreground="black")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 2] != list_column_1[2] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 2] != list_column_1[2]:
+                self.label_panel_v3.config(text = "Key_3: Unlabeled by both")
+                self.label_panel_v3.config(bg = "blue")
+                self.label_panel_v3.config(foreground="white")    
+            
+            if "None" in list_column_1[3] and "None" in list_column_2[3]:
+                self.label_panel_v4.config(text = "Unused")
+                self.label_panel_v4.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 3] == list_column_1[3] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 3] == list_column_1[3]:
+                self.label_panel_v4.config(text = "Key_4: Labeled by both")
+                self.label_panel_v4.config(bg = "green")
+                self.label_panel_v4.config(foreground="white")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 3] == list_column_1[3] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 3] != list_column_1[3]:
+                self.label_panel_v4.config(text = f"Key_4: Labeled by {player_first}")
+                self.label_panel_v4.config(bg = "red")
+                self.label_panel_v4.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 3] != list_column_1[3] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 3] == list_column_1[3]:
+                self.label_panel_v4.config(text = f"Key_4: Labeled by {player_second}")
+                self.label_panel_v4.config(bg = "red")
+                self.label_panel_v4.config(foreground="black")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 3] != list_column_1[3] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 3] != list_column_1[3]:
+                self.label_panel_v4.config(text = "Key_4: Unlabeled by both")
+                self.label_panel_v4.config(bg = "blue")
+                self.label_panel_v4.config(foreground="white")
+            
+            if "None" in list_column_1[4] and "None" in list_column_2[4]:
+                self.label_panel_v5.config(text = "Unused")
+                self.label_panel_v5.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 4] == list_column_1[4] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 4] == list_column_1[4]:
+                self.label_panel_v5.config(text = "Key_5: Labeled by both")
+                self.label_panel_v5.config(bg = "green")
+                self.label_panel_v5.config(foreground="white")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 4] == list_column_1[4] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 4] != list_column_1[4]:
+                self.label_panel_v5.config(text = f"Key_5: Labeled by {player_first}")
+                self.label_panel_v5.config(bg = "red")
+                self.label_panel_v5.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 4] != list_column_1[4] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 4] == list_column_1[4]:
+                self.label_panel_v5.config(text = f"Key_5: Labeled by {player_second}")
+                self.label_panel_v5.config(bg = "red")
+                self.label_panel_v5.config(foreground="black")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 4] != list_column_1[4] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 4] != list_column_1[4]:
+                self.label_panel_v5.config(text = "Key_5: Unlabeled by both")
+                self.label_panel_v5.config(bg = "blue")
+                self.label_panel_v5.config(foreground="white")
+            
+            if "None" in list_column_1[5] and "None" in list_column_2[5]:
+                self.label_panel_v6.config(text = "Unused")
+                self.label_panel_v6.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 5] == list_column_1[2] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 5] == list_column_1[5]:
+                self.label_panel_v6.config(text = "Key_6: Labeled by both")
+                self.label_panel_v6.config(bg = "green")
+                self.label_panel_v6.config(foreground="white")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 5] == list_column_1[5] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 5] != list_column_1[5]:
+                self.label_panel_v6.config(text = f"Key_6: Labeled by {player_first}")
+                self.label_panel_v6.config(bg = "red")
+                self.label_panel_v6.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 5] != list_column_1[5] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 5] == list_column_1[5]:
+                self.label_panel_v6.config(text = f"Key_6: Labeled by {player_second}")
+                self.label_panel_v6.config(bg = "red")
+                self.label_panel_v6.config(foreground="black")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 5] != list_column_1[5] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 5] != list_column_1[5]:
+                self.label_panel_v6.config(text = "Key_6: Unlabeled by both")
+                self.label_panel_v6.config(bg = "blue")
+                self.label_panel_v6.config(foreground="white")
+                
+            if "None" in list_column_1[6] and "None" in list_column_2[6]:
+                self.label_panel_v7.config(text = "Unused")
+                self.label_panel_v7.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 6] == list_column_1[6] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 6] == list_column_1[6]:
+                self.label_panel_v7.config(text = "Key_7: Labeled by both")
+                self.label_panel_v7.config(bg = "green")
+                self.label_panel_v7.config(foreground="white")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 6] == list_column_1[6] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 6] != list_column_1[6]:
+                self.label_panel_v7.config(text = f"Key_7: Labeled by {player_first}")
+                self.label_panel_v7.config(bg = "red")
+                self.label_panel_v7.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 6] != list_column_1[6] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 6] == list_column_1[6]:
+                self.label_panel_v7.config(text = f"Key_7: Labeled by {player_second}")
+                self.label_panel_v7.config(bg = "red")
+                self.label_panel_v7.config(foreground="black")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 6] != list_column_1[6] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 6] != list_column_1[6]:
+                self.label_panel_v7.config(text = "Key_7: Unlabeled by both")
+                self.label_panel_v7.config(bg = "blue")
+                self.label_panel_v7.config(foreground="white")
+            
+            if "None" in list_column_1[7] and "None" in list_column_2[7]:
+                self.label_panel_v8.config(text = "Unused")
+                self.label_panel_v8.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 7] == list_column_1[7] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 7] == list_column_1[7]:
+                self.label_panel_v8.config(text = "Key_8: Labeled by both")
+                self.label_panel_v8.config(bg = "green")
+                self.label_panel_v8.config(foreground="white")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 7] == list_column_1[7] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 7] != list_column_1[7]:
+                self.label_panel_v8.config(text = f"Key_8: Labeled by {player_first}")
+                self.label_panel_v8.config(bg = "red")
+                self.label_panel_v8.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 7] != list_column_1[7] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 7] == list_column_1[7]:
+                self.label_panel_v8.config(text = f"Key_8: Labeled by {player_second}")
+                self.label_panel_v8.config(bg = "red")
+                self.label_panel_v8.config(foreground="black")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 7] != list_column_1[7] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 7] != list_column_1[7]:
+                self.label_panel_v8.config(text = "Key_8: Unlabeled by both")
+                self.label_panel_v8.config(bg = "blue")
+                self.label_panel_v8.config(foreground="white")
+            
+            if "None" in list_column_1[8] and "None" in list_column_2[8]:
+                self.label_panel_v9.config(text = "Unused")
+                self.label_panel_v9.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 8] == list_column_1[8] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 8] == list_column_1[8]:
+                self.label_panel_v9.config(text = "Key_9: Labeled by both")
+                self.label_panel_v9.config(bg = "green")
+                self.label_panel_v9.config(foreground="white")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 8] == list_column_1[8] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 8] != list_column_1[8]:
+                self.label_panel_v9.config(text = f"Key_9: Labeled by {player_first}")
+                self.label_panel_v9.config(bg = "red")
+                self.label_panel_v9.config(foreground="black")
+                
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 8] != list_column_1[8] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 8] == list_column_1[8]:
+                self.label_panel_v9.config(text = f"Key_9: Labeled by {player_second}")
+                self.label_panel_v9.config(bg = "red")
+                self.label_panel_v9.config(foreground="black")
+            
+            elif df_loaded_first.iloc[list_of_times.index(closest_timestamp), 8] != list_column_1[8] and df_loaded_second.iloc[list_of_times.index(closest_timestamp), 8] != list_column_1[8]:
+                self.label_panel_v9.config(text = "Key_9: Unlabeled by both")
+                self.label_panel_v9.config(bg = "blue")
+                self.label_panel_v9.config(foreground="white")
+            
+            cv2.setTrackbarPos(trackbar_name, track_bar_panel, list_of_times.index(closest_timestamp) + 1)
+            
+    
+    def slider_operator(self, unused):
+            global trackbar_name, track_bar_panel, controler_slider
             timestamp_track = int(cv2.getTrackbarPos(trackbar_name, track_bar_panel))
             list_column_1 = list(df_loaded_first.columns)
             list_column_2 = list(df_loaded_second.columns)
@@ -2040,17 +2396,17 @@ class Real_time:
                 self.label_panel_v1.config(bg = "#8B8B83")
                 
             elif df_loaded_first.iloc[timestamp_track-1, 0] == list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] == list_column_1[0]:
-                self.label_panel_v1.config(text = "Key_1blue: Labeled by both")
-                self.label_panel_v1.config(bg = "blue")
+                self.label_panel_v1.config(text = "Key_1: Labeled by both")
+                self.label_panel_v1.config(bg = "green")
                 self.label_panel_v1.config(foreground="white")
             
             elif df_loaded_first.iloc[timestamp_track-1, 0] == list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] != list_column_1[0]:
-                self.label_panel_v1.config(text = "Key_1: Labeled by First")
+                self.label_panel_v1.config(text = f"Key_1: Labeled by {player_first}")
                 self.label_panel_v1.config(bg = "red")
                 self.label_panel_v1.config(foreground="black")
                 
             elif df_loaded_first.iloc[timestamp_track-1, 0] != list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] == list_column_1[0]:
-                self.label_panel_v1.config(text = "Key_1: Labeled by Second")
+                self.label_panel_v1.config(text = f"Key_1: Labeled by {player_second}")
                 self.label_panel_v1.config(bg = "red")
                 self.label_panel_v1.config(foreground="black")
                 
@@ -2064,28 +2420,198 @@ class Real_time:
                 self.label_panel_v2.config(bg = "#8B8B83")
             
             elif df_loaded_first.iloc[timestamp_track-1, 1] == list_column_1[1] and df_loaded_second.iloc[timestamp_track-1, 1] == list_column_1[1]:
-                self.label_panel_v2.config(text = "Key_1: Labeled by both")
-                self.label_panel_v2.config(bg = "blue")
+                self.label_panel_v2.config(text = "Key_2: Labeled by both")
+                self.label_panel_v2.config(bg = "green")
                 self.label_panel_v2.config(foreground="white")
             
             elif df_loaded_first.iloc[timestamp_track-1, 1] == list_column_1[1] and df_loaded_second.iloc[timestamp_track-1, 1] != list_column_1[1]:
-                self.label_panel_v2.config(text = "Key_2: Labeled by First")
+                self.label_panel_v2.config(text = f"Key_2: Labeled by {player_first}")
                 self.label_panel_v2.config(bg = "red")
                 self.label_panel_v2.config(foreground="black")
                 
             elif df_loaded_first.iloc[timestamp_track-1, 1] != list_column_1[1] and df_loaded_second.iloc[timestamp_track-1, 1] == list_column_1[1]:
-                self.label_panel_v2.config(text = "Key_2: Labeled by Second")
+                self.label_panel_v2.config(text = f"Key_2: Labeled by {player_second}")
                 self.label_panel_v2.config(bg = "red")
                 self.label_panel_v2.config(foreground="black")
             
             elif df_loaded_first.iloc[timestamp_track-1, 1] != list_column_1[1] and df_loaded_second.iloc[timestamp_track-1, 1] != list_column_1[1]:
-                self.label_panel_v2.config(text = "Key_1: Unlabeled by both")
+                self.label_panel_v2.config(text = "Key_2: Unlabeled by both")
                 self.label_panel_v2.config(bg = "blue")
                 self.label_panel_v2.config(foreground="white")
                 
+            if "None" in list_column_1[2] and "None" in list_column_2[2]:
+                self.label_panel_v3.config(text = "Unused")
+                self.label_panel_v3.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 2] == list_column_1[2] and df_loaded_second.iloc[timestamp_track-1, 2] == list_column_1[2]:
+                self.label_panel_v3.config(text = "Key_3: Labeled by both")
+                self.label_panel_v3.config(bg = "green")
+                self.label_panel_v3.config(foreground="white")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 2] == list_column_1[2] and df_loaded_second.iloc[timestamp_track-1, 2] != list_column_1[2]:
+                self.label_panel_v3.config(text = f"Key_3: Labeled by {player_first}")
+                self.label_panel_v3.config(bg = "red")
+                self.label_panel_v3.config(foreground="black")
+                
+            elif df_loaded_first.iloc[timestamp_track-1, 2] != list_column_1[2] and df_loaded_second.iloc[timestamp_track-1, 2] == list_column_1[2]:
+                self.label_panel_v3.config(text = f"Key_3: Labeled by {player_second}")
+                self.label_panel_v3.config(bg = "red")
+                self.label_panel_v3.config(foreground="black")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 2] != list_column_1[2] and df_loaded_second.iloc[timestamp_track-1, 2] != list_column_1[2]:
+                self.label_panel_v3.config(text = "Key_3: Unlabeled by both")
+                self.label_panel_v3.config(bg = "blue")
+                self.label_panel_v3.config(foreground="white")    
+            
+            if "None" in list_column_1[3] and "None" in list_column_2[3]:
+                self.label_panel_v4.config(text = "Unused")
+                self.label_panel_v4.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 3] == list_column_1[3] and df_loaded_second.iloc[timestamp_track-1, 3] == list_column_1[3]:
+                self.label_panel_v4.config(text = "Key_4: Labeled by both")
+                self.label_panel_v4.config(bg = "green")
+                self.label_panel_v4.config(foreground="white")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 3] == list_column_1[3] and df_loaded_second.iloc[timestamp_track-1, 3] != list_column_1[3]:
+                self.label_panel_v4.config(text = f"Key_4: Labeled by {player_first}")
+                self.label_panel_v4.config(bg = "red")
+                self.label_panel_v4.config(foreground="black")
+                
+            elif df_loaded_first.iloc[timestamp_track-1, 3] != list_column_1[3] and df_loaded_second.iloc[timestamp_track-1, 3] == list_column_1[3]:
+                self.label_panel_v4.config(text = f"Key_4: Labeled by {player_second}")
+                self.label_panel_v4.config(bg = "red")
+                self.label_panel_v4.config(foreground="black")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 3] != list_column_1[3] and df_loaded_second.iloc[timestamp_track-1, 3] != list_column_1[3]:
+                self.label_panel_v4.config(text = "Key_4: Unlabeled by both")
+                self.label_panel_v4.config(bg = "blue")
+                self.label_panel_v4.config(foreground="white")
+            
+            if "None" in list_column_1[4] and "None" in list_column_2[4]:
+                self.label_panel_v5.config(text = "Unused")
+                self.label_panel_v5.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 4] == list_column_1[4] and df_loaded_second.iloc[timestamp_track-1, 4] == list_column_1[4]:
+                self.label_panel_v5.config(text = "Key_5: Labeled by both")
+                self.label_panel_v5.config(bg = "green")
+                self.label_panel_v5.config(foreground="white")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 4] == list_column_1[4] and df_loaded_second.iloc[timestamp_track-1, 4] != list_column_1[4]:
+                self.label_panel_v5.config(text = f"Key_5: Labeled by {player_first}")
+                self.label_panel_v5.config(bg = "red")
+                self.label_panel_v5.config(foreground="black")
+                
+            elif df_loaded_first.iloc[timestamp_track-1, 4] != list_column_1[4] and df_loaded_second.iloc[timestamp_track-1, 4] == list_column_1[4]:
+                self.label_panel_v5.config(text = f"Key_5: Labeled by {player_second}")
+                self.label_panel_v5.config(bg = "red")
+                self.label_panel_v5.config(foreground="black")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 4] != list_column_1[4] and df_loaded_second.iloc[timestamp_track-1, 4] != list_column_1[4]:
+                self.label_panel_v5.config(text = "Key_5: Unlabeled by both")
+                self.label_panel_v5.config(bg = "blue")
+                self.label_panel_v5.config(foreground="white")
+            
+            if "None" in list_column_1[5] and "None" in list_column_2[5]:
+                self.label_panel_v6.config(text = "Unused")
+                self.label_panel_v6.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 5] == list_column_1[2] and df_loaded_second.iloc[timestamp_track-1, 5] == list_column_1[5]:
+                self.label_panel_v6.config(text = "Key_6: Labeled by both")
+                self.label_panel_v6.config(bg = "green")
+                self.label_panel_v6.config(foreground="white")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 5] == list_column_1[5] and df_loaded_second.iloc[timestamp_track-1, 5] != list_column_1[5]:
+                self.label_panel_v6.config(text = f"Key_6: Labeled by {player_first}")
+                self.label_panel_v6.config(bg = "red")
+                self.label_panel_v6.config(foreground="black")
+                
+            elif df_loaded_first.iloc[timestamp_track-1, 5] != list_column_1[5] and df_loaded_second.iloc[timestamp_track-1, 5] == list_column_1[5]:
+                self.label_panel_v6.config(text = f"Key_6: Labeled by {player_second}")
+                self.label_panel_v6.config(bg = "red")
+                self.label_panel_v6.config(foreground="black")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 5] != list_column_1[5] and df_loaded_second.iloc[timestamp_track-1, 5] != list_column_1[5]:
+                self.label_panel_v6.config(text = "Key_6: Unlabeled by both")
+                self.label_panel_v6.config(bg = "blue")
+                self.label_panel_v6.config(foreground="white")
+                
+            if "None" in list_column_1[6] and "None" in list_column_2[6]:
+                self.label_panel_v7.config(text = "Unused")
+                self.label_panel_v7.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 6] == list_column_1[6] and df_loaded_second.iloc[timestamp_track-1, 6] == list_column_1[6]:
+                self.label_panel_v7.config(text = "Key_7: Labeled by both")
+                self.label_panel_v7.config(bg = "green")
+                self.label_panel_v7.config(foreground="white")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 6] == list_column_1[6] and df_loaded_second.iloc[timestamp_track-1, 6] != list_column_1[6]:
+                self.label_panel_v7.config(text = f"Key_7: Labeled by {player_first}")
+                self.label_panel_v7.config(bg = "red")
+                self.label_panel_v7.config(foreground="black")
+                
+            elif df_loaded_first.iloc[timestamp_track-1, 6] != list_column_1[6] and df_loaded_second.iloc[timestamp_track-1, 6] == list_column_1[6]:
+                self.label_panel_v7.config(text = f"Key_7: Labeled by {player_second}")
+                self.label_panel_v7.config(bg = "red")
+                self.label_panel_v7.config(foreground="black")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 6] != list_column_1[6] and df_loaded_second.iloc[timestamp_track-1, 6] != list_column_1[6]:
+                self.label_panel_v7.config(text = "Key_7: Unlabeled by both")
+                self.label_panel_v7.config(bg = "blue")
+                self.label_panel_v7.config(foreground="white")
+            
+            if "None" in list_column_1[7] and "None" in list_column_2[7]:
+                self.label_panel_v8.config(text = "Unused")
+                self.label_panel_v8.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 7] == list_column_1[7] and df_loaded_second.iloc[timestamp_track-1, 7] == list_column_1[7]:
+                self.label_panel_v8.config(text = "Key_8: Labeled by both")
+                self.label_panel_v8.config(bg = "green")
+                self.label_panel_v8.config(foreground="white")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 7] == list_column_1[7] and df_loaded_second.iloc[timestamp_track-1, 7] != list_column_1[7]:
+                self.label_panel_v8.config(text = f"Key_8: Labeled by {player_first}")
+                self.label_panel_v8.config(bg = "red")
+                self.label_panel_v8.config(foreground="black")
+                
+            elif df_loaded_first.iloc[timestamp_track-1, 7] != list_column_1[7] and df_loaded_second.iloc[timestamp_track-1, 7] == list_column_1[7]:
+                self.label_panel_v8.config(text = f"Key_8: Labeled by {player_second}")
+                self.label_panel_v8.config(bg = "red")
+                self.label_panel_v8.config(foreground="black")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 7] != list_column_1[7] and df_loaded_second.iloc[timestamp_track-1, 7] != list_column_1[7]:
+                self.label_panel_v8.config(text = "Key_8: Unlabeled by both")
+                self.label_panel_v8.config(bg = "blue")
+                self.label_panel_v8.config(foreground="white")
+            
+            if "None" in list_column_1[8] and "None" in list_column_2[8]:
+                self.label_panel_v9.config(text = "Unused")
+                self.label_panel_v9.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 8] == list_column_1[8] and df_loaded_second.iloc[timestamp_track-1, 8] == list_column_1[8]:
+                self.label_panel_v9.config(text = "Key_9: Labeled by both")
+                self.label_panel_v9.config(bg = "green")
+                self.label_panel_v9.config(foreground="white")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 8] == list_column_1[8] and df_loaded_second.iloc[timestamp_track-1, 8] != list_column_1[8]:
+                self.label_panel_v9.config(text = f"Key_9: Labeled by {player_first}")
+                self.label_panel_v9.config(bg = "red")
+                self.label_panel_v9.config(foreground="black")
+                
+            elif df_loaded_first.iloc[timestamp_track-1, 8] != list_column_1[8] and df_loaded_second.iloc[timestamp_track-1, 8] == list_column_1[8]:
+                self.label_panel_v9.config(text = f"Key_9: Labeled by {player_second}")
+                self.label_panel_v9.config(bg = "red")
+                self.label_panel_v9.config(foreground="black")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 8] != list_column_1[8] and df_loaded_second.iloc[timestamp_track-1, 8] != list_column_1[8]:
+                self.label_panel_v9.config(text = "Key_9: Unlabeled by both")
+                self.label_panel_v9.config(bg = "blue")
+                self.label_panel_v9.config(foreground="white")
+            
             self.player_v3.set_time(int(df_loaded_first.iloc[timestamp_track-1,9]))
-            self.player_v3.play()
-
+            if controler_slider:
+                self.player_v3.play()
+                self.player_v3.pause()
+            controler_slider = True
 video_object = Application()
 video_object.root.mainloop()
 
