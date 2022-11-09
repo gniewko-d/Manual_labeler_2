@@ -1961,18 +1961,21 @@ class Start_video:
 class Real_time:
     
     def __init__(self):
-        global video_file, label_panel_v1_text_v1
+        global video_file, label_panel_v1_text_v1, trackbar_name, track_bar_panel
         self.newwindow_v2 = tk.Tk()
         self.newwindow_v3 = tk.Tk()
         self.Instance = vlc.Instance()
         self.player_v3 = self.Instance.media_player_new()
         media = self.Instance.media_new(video_file)
         self.player_v3.set_media(media)
+        self.len_df, _ = df_loaded_first.shape
+        self.desired_font = tk.font.Font(size = 16)
         
         track_bar_panel = "Track bar"
         trackbar_name = "Frame"
         cv2.namedWindow(track_bar_panel, cv2.WINDOW_NORMAL)
-        cv2.createTrackbar(trackbar_name, track_bar_panel, 1, self.len_df, self.slider_fun)
+        cv2.createTrackbar(trackbar_name, track_bar_panel, 1, self.len_df, self.slider_operator)
+        
         
         self.videopanel_v1 = tk.Frame(self.newwindow_v2, background="#116562") # for video
         self.canvas = tk.Canvas(self.videopanel_v1).pack(fill=tk.BOTH, expand=1)
@@ -1983,87 +1986,106 @@ class Real_time:
         
         self.player_v3.set_hwnd(self.videopanel_v1.winfo_id())
         
-        self.label_panel_v1 = tk.Label( self.labelspanel, text = "Label 1: None", background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v1 = tk.Label( self.labelspanel, text = "Label 1: None", background="black", foreground="green", width = 22, height = 12, bd = 0)
+        self.label_panel_v1["font"] = self.desired_font
         self.label_panel_v1.grid(row = 0, column = 0, padx=1, pady=1, sticky = tk.EW)
         
-        label_panel_v2_text = tk.StringVar()
-        label_panel_v2_text.set("Label 2: None")
-        self.label_panel_v2 = tk.Label( self.labelspanel, textvariable = label_panel_v2_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v2 = tk.Label( self.labelspanel, text = "Label 2: None", background="black", foreground="green", width = 22, height = 12, bd = 0)
+        self.label_panel_v2["font"] = self.desired_font
         self.label_panel_v2.grid(row = 0, column = 1, padx=1, pady=1, sticky = tk.EW)
         
-        label_panel_v3_text = tk.StringVar()
-        label_panel_v3_text.set("Label 3: None")
-        self.label_panel_v3 = tk.Label( self.labelspanel, textvariable = label_panel_v3_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v3 = tk.Label( self.labelspanel, text = "Label 3: None", background="black", foreground="green", width = 22, height = 12, bd = 0)
+        self.label_panel_v3["font"] = self.desired_font
         self.label_panel_v3.grid(row = 0, column = 2, padx=1, pady=1, sticky = tk.EW)
         
-        label_panel_v4_text = tk.StringVar()
-        label_panel_v4_text.set("Label 4: None")
-        self.label_panel_v4 = tk.Label( self.labelspanel, textvariable = label_panel_v4_text, background="red", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v4 = tk.Label( self.labelspanel, text = "Label 4: None", background="black", foreground="green", width = 22, height = 12, bd = 0)
+        self.label_panel_v4["font"] = self.desired_font
         self.label_panel_v4.grid(row = 1, column = 0, padx=1, pady=1)
         
-        label_panel_v5_text = tk.StringVar()
-        label_panel_v5_text.set("Label 5: None")
-        self.label_panel_v5 = tk.Label( self.labelspanel, textvariable = label_panel_v5_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v5 = tk.Label( self.labelspanel, text = "Label 5: None", background="black", foreground="green", width = 22, height = 12, bd = 0)
+        self.label_panel_v5["font"] = self.desired_font
         self.label_panel_v5.grid(row = 1, column = 1, padx=1, pady=1)
         
-        label_panel_v6_text = tk.StringVar()
-        label_panel_v6_text.set("Label 6: None")
-        self.label_panel_v6 = tk.Label( self.labelspanel, text = "ELO", background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v6 = tk.Label( self.labelspanel, text = "Label 6: None", background="black", foreground="green", width = 22, height = 12, bd = 0)
+        self.label_panel_v6["font"] = self.desired_font
         self.label_panel_v6.grid(row = 1, column = 2, padx=1, pady=1)
         
-        label_panel_v7_text = tk.StringVar()
-        label_panel_v7_text.set("Label 7: None")
-        self.label_panel_v7 = tk.Label( self.labelspanel, textvariable = label_panel_v7_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v7 = tk.Label( self.labelspanel, text = "Label 7: None", background="black", foreground="green", width = 22, height = 12, bd = 0)
+        self.label_panel_v7["font"] = self.desired_font
         self.label_panel_v7.grid(row = 2, column = 0, padx=1, pady=1)
         
-        label_panel_v8_text = tk.StringVar()
-        label_panel_v8_text.set("Label 8: None")
-        self.label_panel_v8 = tk.Label( self.labelspanel, textvariable = label_panel_v8_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v8 = tk.Label( self.labelspanel, text = "Label 8: None", background="black", foreground="green", width = 22, height = 12, bd = 0)
+        self.label_panel_v8["font"] = self.desired_font
         self.label_panel_v8.grid(row = 2, column = 1, padx=1, pady=1)
         
-        label_panel_v9_text = tk.StringVar()
-        label_panel_v9_text.set("Label 9: None")
-        self.label_panel_v9 = tk.Label( self.labelspanel, textvariable = label_panel_v9_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v9 = tk.Label( self.labelspanel, text = "Label 9: None", background="black", foreground="green", width = 22, height = 12, bd = 0)
+        self.label_panel_v9["font"] = self.desired_font
         self.label_panel_v9.grid(row = 2, column = 2, padx=1, pady=1)
         
         self.player_v3.play()
         #sleep(0.2)
         #self.player_v3.pause()
         #self.player_v3.set_time(0)
-        def df_helper(self):
-            global df_loaded_first, df_loaded_second
-            self.len_df, _ = df_loaded_first.shape
             
-            list_column_1 = list(df_loaded_first.columns)
-            index_list_column_1 = [i for i in range(len(list_column_1)) if "None" not in list_column_1[i]]
-            list_column_2 = list(df_loaded_second.columns)
-            index_list_column_2 = [i for i in range(len(list_column_2)) if "None" not in list_column_2[i]]
-            join_index_list = list(set(index_list_column_1 + index_list_column_2))
+            
         
-        def slider_operator(self):
+    def slider_operator(self, unused):
+            global trackbar_name, track_bar_panel
             timestamp_track = int(cv2.getTrackbarPos(trackbar_name, track_bar_panel))
             list_column_1 = list(df_loaded_first.columns)
             list_column_2 = list(df_loaded_second.columns)
             
-            if "None" in list_column_1[0] or "None" in list_column_2[0]:
+            if "None" in list_column_1[0] and "None" in list_column_2[0]:
                 self.label_panel_v1.config(text = "Unused")
                 self.label_panel_v1.config(bg = "#8B8B83")
-            
+                
             elif df_loaded_first.iloc[timestamp_track-1, 0] == list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] == list_column_1[0]:
-                self.label_panel_v1.config(text = "Key_1: Labeled by both")
-                self.label_panel_v1.config(bg = "green")
+                self.label_panel_v1.config(text = "Key_1blue: Labeled by both")
+                self.label_panel_v1.config(bg = "blue")
+                self.label_panel_v1.config(foreground="white")
             
             elif df_loaded_first.iloc[timestamp_track-1, 0] == list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] != list_column_1[0]:
                 self.label_panel_v1.config(text = "Key_1: Labeled by First")
                 self.label_panel_v1.config(bg = "red")
-            
+                self.label_panel_v1.config(foreground="black")
+                
             elif df_loaded_first.iloc[timestamp_track-1, 0] != list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] == list_column_1[0]:
-                self.label_panel_v1.config(text = "Key_1: Labeled by First")
+                self.label_panel_v1.config(text = "Key_1: Labeled by Second")
                 self.label_panel_v1.config(bg = "red")
+                self.label_panel_v1.config(foreground="black")
+                
+            elif df_loaded_first.iloc[timestamp_track-1, 0] != list_column_1[0] and df_loaded_second.iloc[timestamp_track-1, 0] != list_column_1[0]:
+                self.label_panel_v1.config(text = "Key_1: Unlabeled by both")
+                self.label_panel_v1.config(bg = "blue")
+                self.label_panel_v1.config(foreground="white")
+            
+            if "None" in list_column_1[1] and "None" in list_column_2[1]:
+                self.label_panel_v2.config(text = "Unused")
+                self.label_panel_v2.config(bg = "#8B8B83")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 1] == list_column_1[1] and df_loaded_second.iloc[timestamp_track-1, 1] == list_column_1[1]:
+                self.label_panel_v2.config(text = "Key_1: Labeled by both")
+                self.label_panel_v2.config(bg = "blue")
+                self.label_panel_v2.config(foreground="white")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 1] == list_column_1[1] and df_loaded_second.iloc[timestamp_track-1, 1] != list_column_1[1]:
+                self.label_panel_v2.config(text = "Key_2: Labeled by First")
+                self.label_panel_v2.config(bg = "red")
+                self.label_panel_v2.config(foreground="black")
+                
+            elif df_loaded_first.iloc[timestamp_track-1, 1] != list_column_1[1] and df_loaded_second.iloc[timestamp_track-1, 1] == list_column_1[1]:
+                self.label_panel_v2.config(text = "Key_2: Labeled by Second")
+                self.label_panel_v2.config(bg = "red")
+                self.label_panel_v2.config(foreground="black")
+            
+            elif df_loaded_first.iloc[timestamp_track-1, 1] != list_column_1[1] and df_loaded_second.iloc[timestamp_track-1, 1] != list_column_1[1]:
+                self.label_panel_v2.config(text = "Key_1: Unlabeled by both")
+                self.label_panel_v2.config(bg = "blue")
+                self.label_panel_v2.config(foreground="white")
+                
+            self.player_v3.set_time(int(df_loaded_first.iloc[timestamp_track-1,9]))
+            self.player_v3.play()
 
-
-
-#advert()
 video_object = Application()
 video_object.root.mainloop()
 
