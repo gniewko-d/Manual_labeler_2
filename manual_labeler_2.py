@@ -522,7 +522,8 @@ class Application:
             self.new_root_6 = tk.Toplevel(self.root, background= "black")
             self.new_root_6.title("Video screen")
             self.on_value = [i.get() for i in self.list_of_choosen if i.get() != "None"]
-            
+            self.start_frame = 0
+            self.stop_frame = 0
             self.videopanel_v1 = tk.Frame(self.new_root_6, background="#116562") # for video
             self.canvas = tk.Canvas(self.videopanel_v1).pack(fill=tk.BOTH, expand=1)
             self.videopanel_v1.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
@@ -551,10 +552,20 @@ class Application:
             self.dropdown_menu["menu"].config(fg = "green")
             self.dropdown_menu.config(bg = "black")
             self.dropdown_menu.config(fg = "green")
-            self.dropdown_menu.pack(fill=tk.BOTH, expand=0, side = tk.TOP)
+            self.dropdown_menu.pack(fill=tk.BOTH, expand=0, side = tk.LEFT)
             self.dropdown_menu["font"] = self.desired_font
             self.dropdown_menu["menu"]["font"] = self.desired_font
-                    
+            
+            self.text_third = f"Frames from {self.start_frame} to {self.stop_frame}"
+            self.current_frames = tk.Label(self.frame_otpions, height = 1, width=25, background="black", foreground="#FFFF00", anchor = tk.CENTER, relief = tk.RAISED)
+            self.current_frames["font"] = self.desired_font
+            self.current_frames.config(text = self.text_third)
+            self.current_frames.pack(fill=tk.BOTH, expand=0, side = tk.LEFT)
+            
+            self.delete_range = tk.Button(self.frame_otpions, text = "Delete", foreground="green", background= "black", command = self.generator_controler) 
+            self.delete_range["font"] = self.desired_font
+            self.delete_range.pack(fill=tk.BOTH, expand=0, side = tk.LEFT)
+            
             self.frame_next_button= tk.Frame(self.new_root_6, background="#116562")
             self.frame_next_button.pack(fill=tk.BOTH, expand=0, side = tk.TOP)
             
@@ -584,22 +595,43 @@ class Application:
             self.bindings_previous = self.new_root_6.bind("<a>", lambda event, player = self.player_v1, master = self.new_root_6: app.previous_frame(player, master))
             self.bindings_next = self.new_root_6.bind("<d>", lambda event, player = self.player_v1: app.next_frame(player))
             self.bindings_space = self.new_root_6.bind("<space>", lambda event, player = self.player_v1: app.button_pause_fun(player))
+            
         except ValueError:
             messagebox.showerror("Error box", "You inserted wrong value try using integers")
     
     def next_video_controler(self):
         self.break_point = 1
     
+    def delete_range(self):
+        
+        msgbox = tk.messagebox.askquestion ('Typical window','Do you want to specify range? If "no" will be clicked whole range will be deleted.',icon = 'warning')
+        if msgbox == "yes":
+            print("Dorobi się")
+        elif msgbox == "no":
+            try:
+                assert self.start_frame + self.stop_frame > 0
+                
+            except AssertionError:
+                messagebox.showerror("Error box", "No frame to delete")
+                
     def option_menu(self, selection):
         self.value = self.filter_time_dict.get(selection)
         self.value.append(self.value[-1] + 20000)
         self.generator_instance = self.generator_labels()
-    
+        self.selection = selection 
     def generator_controler(self):
-     global answer_scale, length_movie
+     global answer_scale, length_movie, df
      try:
             self.start_time, self.stop_time_v1 = next(self.generator_instance)
+            list_of_times = df["Frame time [ms]."].tolist()
+            closest_timestamp_start = min(list_of_times, key=lambda x:abs(x-self.start_time))
+            closest_timestamp_stop = min(list_of_times, key=lambda x:abs(x-self.stop_time_v1))
+            self.start_frame = list_of_times.index(closest_timestamp_start) + 1
+            self.stop_frame = list_of_times.index(closest_timestamp_stop) + 1
             self.stop_time_v1 /= 1000
+            self.text_third = f"Frames from {self.start_frame} to {self.stop_frame}"
+            self.current_frames.config(text = self.text_third)
+            
             if self.var2_controller:
                  self.start_time = 0 if self.start_time - answer_scale * 1000 <= 0 else self.start_time - answer_scale * 1000
                  self.stop_time_v1 = length_movie / 1000 if self.stop_time_v1 * 1000 + answer_scale * 1000 >= length_movie else self.stop_time_v1 + answer_scale 
@@ -628,7 +660,7 @@ class Application:
             self.changer = 1
      except AttributeError:
             messagebox.showerror("Error box", "First, choose label you want to watch!")
-            
+    
     def generator_labels(self):
             initial = 0
             n = 0
@@ -1992,7 +2024,7 @@ class Start_video:
                 label_panel_v9_text.set("Label 9: unlabel")
                 self.label_panel_v9.config(bg = "black")
         cv2.setTrackbarPos(trackbar_name, track_bar_panel, int(closest_timestamp_v2))
-    
+        self.active_window(self.master)
     def slider_fun(self, unused):
         global df
         timestamp_track = cv2.getTrackbarPos(trackbar_name, track_bar_panel)
