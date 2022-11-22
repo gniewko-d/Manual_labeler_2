@@ -1393,6 +1393,7 @@ class Start_video:
         self.master.configure(background='black')
         self.master.protocol("WM_DELETE_WINDOW", disable_event)
         self.player = player_v2
+        self.desired_font = tk.font.Font(size = 14)
         track_bar_panel = "Track bar"
         trackbar_name = "Time [ms]"
         window_checker = 1
@@ -1414,94 +1415,122 @@ class Start_video:
         self.canvas = tk.Canvas(self.videopanel).pack(fill=tk.BOTH, expand=1)
         self.videopanel.pack(fill=tk.BOTH, expand=1, side = tk.TOP)
         
+        self.main_frame_v3 = tk.Frame(self.master, background="#116562") #for controls
+        self.main_frame_v3.pack(side= tk.BOTTOM, fill=tk.NONE, expand=0)
+        
         self.main_frame_v2 = tk.Frame(self.master, background="#116562") #for controls
         self.main_frame_v2.pack(side= tk.BOTTOM, fill=tk.NONE, expand=0)
         
         self.button_pause = tk.Button(self.main_frame_v2, text = "Pause/PLay", background="black", foreground="green", width = 17)
+        self.button_pause["font"] = self.desired_font
         self.button_pause.bind("<Button-1>", lambda event, player = self.player: self.button_pause_fun(player))
         self.button_pause.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.button_next = tk.Button(self.main_frame_v2, text = "Next Frame", background="black", foreground="green", width = 17)
+        self.button_next["font"] = self.desired_font
         self.button_next.bind("<Button-1>", lambda event, player = self.player: self.next_frame(player))
         self.button_next.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.button_previous = tk.Button(self.main_frame_v2, text = "Prev. Frame", background="black", foreground="green", width = 17)
+        self.button_previous["font"] = self.desired_font
         self.button_previous.bind("<Button-1>", lambda event, player = self.player, master = self.master: self.previous_frame(player, master))
         self.button_previous.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
-        self.button_calibration = tk.Button(self.main_frame_v2, text = "Calibration", background="black", foreground="green", width = 17)
-        self.button_calibration.bind("<Button-1>", self.calibration)
-        self.button_calibration.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
-        
         label_panel_v1_text = tk.StringVar()
         label_panel_v1_text.set("Label 1: None")
-        self.label_panel_v1 = tk.Label( self.labelspanel, textvariable = label_panel_v1_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v1 = tk.Label( self.labelspanel, textvariable = label_panel_v1_text, background="black", foreground="green", width = 18, height = 7, bd = 0)
+        self.label_panel_v1["font"] = self.desired_font
         self.label_panel_v1.grid(row = 0, column = 0, padx=1, pady=1, sticky = tk.EW)
         
         label_panel_v2_text = tk.StringVar()
         label_panel_v2_text.set("Label 2: None")
-        self.label_panel_v2 = tk.Label( self.labelspanel, textvariable = label_panel_v2_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v2 = tk.Label( self.labelspanel, textvariable = label_panel_v2_text, background="black", foreground="green", width = 18, height = 7, bd = 0)
+        self.label_panel_v2["font"] = self.desired_font
         self.label_panel_v2.grid(row = 0, column = 1, padx=1, pady=1, sticky = tk.EW)
         
         label_panel_v3_text = tk.StringVar()
         label_panel_v3_text.set("Label 3: None")
-        self.label_panel_v3 = tk.Label( self.labelspanel, textvariable = label_panel_v3_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v3 = tk.Label( self.labelspanel, textvariable = label_panel_v3_text, background="black", foreground="green", width = 18, height = 7, bd = 0)
+        self.label_panel_v3["font"] = self.desired_font
         self.label_panel_v3.grid(row = 0, column = 2, padx=1, pady=1, sticky = tk.EW)
         
         label_panel_v4_text = tk.StringVar()
         label_panel_v4_text.set("Label 4: None")
-        self.label_panel_v4 = tk.Label( self.labelspanel, textvariable = label_panel_v4_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v4 = tk.Label( self.labelspanel, textvariable = label_panel_v4_text, background="black", foreground="green", width = 18, height = 7, bd = 0)
+        self.label_panel_v4["font"] = self.desired_font
         self.label_panel_v4.grid(row = 1, column = 0, padx=1, pady=1)
         
         label_panel_v5_text = tk.StringVar()
         label_panel_v5_text.set("Label 5: None")
-        self.label_panel_v5 = tk.Label( self.labelspanel, textvariable = label_panel_v5_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v5 = tk.Label( self.labelspanel, textvariable = label_panel_v5_text, background="black", foreground="green", width = 18, height = 7, bd = 0)
+        self.label_panel_v5["font"] = self.desired_font
         self.label_panel_v5.grid(row = 1, column = 1, padx=1, pady=1)
         
         label_panel_v6_text = tk.StringVar()
         label_panel_v6_text.set("Label 6: None")
-        self.label_panel_v6 = tk.Label( self.labelspanel, textvariable = label_panel_v6_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v6 = tk.Label( self.labelspanel, textvariable = label_panel_v6_text, background="black", foreground="green", width = 18, height = 7, bd = 0)
+        self.label_panel_v6["font"] = self.desired_font
         self.label_panel_v6.grid(row = 1, column = 2, padx=1, pady=1)
         
         label_panel_v7_text = tk.StringVar()
         label_panel_v7_text.set("Label 7: None")
-        self.label_panel_v7 = tk.Label( self.labelspanel, textvariable = label_panel_v7_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v7 = tk.Label( self.labelspanel, textvariable = label_panel_v7_text, background="black", foreground="green", width = 18, height = 7, bd = 0)
+        self.label_panel_v7["font"] = self.desired_font
         self.label_panel_v7.grid(row = 2, column = 0, padx=1, pady=1)
         
         label_panel_v8_text = tk.StringVar()
         label_panel_v8_text.set("Label 8: None")
-        self.label_panel_v8 = tk.Label( self.labelspanel, textvariable = label_panel_v8_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v8 = tk.Label( self.labelspanel, textvariable = label_panel_v8_text, background="black", foreground="green", width = 18, height = 7, bd = 0)
+        self.label_panel_v8["font"] = self.desired_font
         self.label_panel_v8.grid(row = 2, column = 1, padx=1, pady=1)
         
         label_panel_v9_text = tk.StringVar()
         label_panel_v9_text.set("Label 9: None")
-        self.label_panel_v9 = tk.Label( self.labelspanel, textvariable = label_panel_v9_text, background="black", foreground="green", width = 17, height = 7, bd = 0)
+        self.label_panel_v9 = tk.Label( self.labelspanel, textvariable = label_panel_v9_text, background="black", foreground="green", width = 18, height = 7, bd = 0)
+        self.label_panel_v9["font"] = self.desired_font
         self.label_panel_v9.grid(row = 2, column = 2, padx=1, pady=1)
         
         self.button_set_time = tk.Button(self.main_frame_v2, text = "Set time [click me] of video [ms]:", background="black", foreground="green", width = 24)
+        self.button_set_time["font"] = self.desired_font
         self.button_set_time.bind("<Button-1>", self.set_time_manually)
         self.button_set_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
         self.box_for_time = tk.Entry(self.main_frame_v2, width = 16, background="black", foreground="green", insertbackground = "green", relief = tk.RAISED)
         self.box_for_time.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+        self.box_for_time["font"] = self.desired_font
         self.box_for_time.bind("<Enter>", self.bindings_off)
         self.box_for_time.bind("<Leave>", lambda event: self.bindings_on_2())
         
-        self.audio_label = tk.Label(self.main_frame_v2,image= self.img, bg = "green", relief = tk.SUNKEN)
+        text = tk.StringVar()
+        text.set(f"Active label: {current_label}")
+        self.current_label_widget = tk.Label(self.main_frame_v3, textvariable = text, background="black", foreground="#FFFF00", width = 17, relief = tk.RAISED)
+        self.current_label_widget["font"] = self.desired_font
+        self.current_label_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+        
+        self.button_check_v1 = tk.Button(self.main_frame_v3, text = "Check_labeling", background="black", foreground="green", width = 17)
+        self.button_check_v1["font"] = self.desired_font
+        self.button_check_v1.bind("<Button-1>", lambda event: self.slider_fun_2())
+        self.button_check_v1.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
+        self.button_check_v1_binding = self.master.bind("<s>", lambda event: self.slider_fun_2())
+        
+        self.button_calibration = tk.Button(self.main_frame_v3, text = "Calibration", background="black", foreground="green", width = 17)
+        self.button_calibration["font"] = self.desired_font
+        self.button_calibration.bind("<Button-1>", self.calibration)
+        self.button_calibration.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+        
+        self.audio_label = tk.Label(self.main_frame_v3,image= self.img, bg = "green", relief = tk.SUNKEN)
+        self.audio_label["font"] = self.desired_font
         self.audio_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         self.audio_label.configure(foreground="green")
     
         self.var = tk.IntVar()
-        self.scale_audio = tk.Scale(self.main_frame_v2, from_ = 0, to=100, length=200, orient=tk.HORIZONTAL, command = self.audio_volume, variable=self.var, bg = "black", fg = "green", troughcolor = "green", bd = 0 , highlightthickness = 0, relief = tk.RAISED)
+        self.scale_audio = tk.Scale(self.main_frame_v3, from_ = 0, to=100, length=200, orient=tk.HORIZONTAL, command = self.audio_volume, variable=self.var, bg = "black", fg = "green", troughcolor = "green", bd = 0 , highlightthickness = 0, relief = tk.RAISED)
+        self.scale_audio["font"] = self.desired_font
         self.scale_audio.set(100)
         self.scale_audio.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         
-        text = tk.StringVar()
-        text.set(f"Active label: {current_label}")
-        self.current_label_widget = tk.Label(self.main_frame_v2, textvariable = text, background="black", foreground="#FFFF00", width = 17, relief = tk.RAISED)
-        self.current_label_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
-        
-        self.exit_v1 = tk.Button(self.main_frame_v2, text = "Exit", background="black", foreground="green", width = 24, command = self.close_gate_v2)
+        self.exit_v1 = tk.Button(self.main_frame_v3, text = "Exit", background="black", foreground="green", width = 24, command = self.close_gate_v2)
+        self.exit_v1["font"] = self.desired_font
         self.exit_v1.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         self.player.set_hwnd(self.videopanel.winfo_id())
         
@@ -1858,6 +1887,112 @@ class Start_video:
         else:
             pass
     
+    def slider_fun_2(self):
+        global df
+        time_frame = int(self.player.get_time())
+        closest_timestamp_v2 = min(list_of_times, key=lambda x:abs(x-time_frame))
+        
+
+        if label_list[0] == "None":
+            label_panel_v1_text.set("Label 1: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp_v2, label_list[0]].tolist()
+            if checker[0] == label_list[0]:
+                label_panel_v1_text.set(f"Label 1: {label_list[0]}")
+                self.label_panel_v1.config(bg = "blue")
+            else:
+                label_panel_v1_text.set("Label 1: unlabel")
+                self.label_panel_v1.config(bg = "black")
+        
+        if label_list[1] == "None":
+            label_panel_v2_text.set("Label 2: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp_v2, label_list[1]].tolist()
+            if checker[0] == label_list[1]:
+                label_panel_v2_text.set(f"Label 2: {label_list[1]}")
+                self.label_panel_v2.config(bg = "red")
+            else:
+                label_panel_v2_text.set("Label 2: unlabel")
+                self.label_panel_v2.config(bg = "black")
+        
+        if label_list[2] == "None":
+            label_panel_v3_text.set("Label 3: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp_v2, label_list[2]].tolist()
+            if checker[0] == label_list[2]:
+                label_panel_v3_text.set(f"Label 3: {label_list[2]}")
+                self.label_panel_v3.config(bg = "cyan")
+            else:
+                label_panel_v3_text.set("Label 3: unlabel")
+                self.label_panel_v3.config(bg = "black")
+        
+        if label_list[3] == "None":
+            label_panel_v4_text.set("Label 4: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp_v2, label_list[3]].tolist()
+            if checker[0] == label_list[3]:
+                label_panel_v4_text.set(f"Label 4: {label_list[3]}")
+                self.label_panel_v4.config(bg = "yellow")
+            else:
+                label_panel_v4_text.set("Label 4: unlabel")
+                self.label_panel_v4.config(bg = "black")
+        
+        if label_list[4] == "None":
+            label_panel_v5_text.set("Label 5: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp_v2, label_list[4]].tolist()
+            if checker[0] == label_list[4]:
+                label_panel_v5_text.set(f"Label 5: {label_list[4]}")
+                self.label_panel_v5.config(bg = "magenta")
+            else:
+                label_panel_v5_text.set("Label 5: unlabel")
+                self.label_panel_v5.config(bg = "black")
+        
+        if label_list[5] == "None":
+            label_panel_v6_text.set("Label 6: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp_v2, label_list[5]].tolist()
+            if checker[0] == label_list[5]:
+                label_panel_v6_text.set(f"Label 6: {label_list[5]}")
+                self.label_panel_v6.config(bg = "#8B8B23")
+            else:
+                label_panel_v6_text.set("Label 6: unlabel")
+                self.label_panel_v6.config(bg = "black")
+        
+        if label_list[6] == "None":
+            label_panel_v7_text.set("Label 7: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp_v2, label_list[6]].tolist()
+            if checker[0] == label_list[6]:
+                label_panel_v7_text.set(f"Label 7: {label_list[6]}")
+                self.label_panel_v7.config(bg = "#BCBC8F")
+            else:
+                label_panel_v7_text.set("Label 7: unlabel")
+                self.label_panel_v7.config(bg = "black")
+        
+        if label_list[7] == "None":
+            label_panel_v8_text.set("Label 8: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp_v2, label_list[7]].tolist()
+            if checker[0] == label_list[7]:
+                label_panel_v8_text.set(f"Label 8: {label_list[7]}")
+                self.label_panel_v8.config(bg = "#3A3A5F")
+            else:
+                label_panel_v8_text.set("Label 8: unlabel")
+                self.label_panel_v8.config(bg = "black")
+        
+        if label_list[8] == "None":
+            label_panel_v9_text.set("Label 9: unused")
+        else:
+            checker = df.loc[df["Frame time [ms]."] == closest_timestamp_v2, label_list[8]].tolist()
+            if checker[0] == label_list[8]:
+                label_panel_v9_text.set(f"Label 9: {label_list[8]}")
+                self.label_panel_v9.config(bg = "#CDCDB3")
+            else:
+                label_panel_v9_text.set("Label 9: unlabel")
+                self.label_panel_v9.config(bg = "black")
+        cv2.setTrackbarPos(trackbar_name, track_bar_panel, int(closest_timestamp_v2))
+    
     def slider_fun(self, unused):
         global df
         timestamp_track = cv2.getTrackbarPos(trackbar_name, track_bar_panel)
@@ -2068,6 +2203,8 @@ class Real_time:
         self.box_for_time_v1.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
         self.box_for_time_v1.bind("<Enter>", self.bindings_off)
         self.box_for_time_v1.bind("<Leave>", lambda event, master = self.newwindow_v2: self.active_window(master))
+        
+        
         
         self.exit_v2 = tk.Button(self.keypanel, text = "Exit", background="black", foreground="green", width = 24, command = self.close_gate_v2)
         self.exit_v2["font"] = self.desired_font
