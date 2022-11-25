@@ -19,6 +19,8 @@ import csv
 from datetime import date
 from sklearn.metrics import matthews_corrcoef
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from RangeSlider.RangeSlider import RangeSliderH
+
 
 def advert():
     root_v1 = tk.Tk()
@@ -562,7 +564,7 @@ class Application:
             self.current_frames.config(text = self.text_third)
             self.current_frames.pack(fill=tk.BOTH, expand=0, side = tk.LEFT)
             
-            self.delete_range = tk.Button(self.frame_otpions, text = "Delete", foreground="green", background= "black", command = self.generator_controler) 
+            self.delete_range = tk.Button(self.frame_otpions, text = "Unlabel", foreground="green", background= "black", command = self.delete_range) 
             self.delete_range["font"] = self.desired_font
             self.delete_range.pack(fill=tk.BOTH, expand=0, side = tk.LEFT)
             
@@ -603,14 +605,25 @@ class Application:
         self.break_point = 1
     
     def delete_range(self):
-        
-        msgbox = tk.messagebox.askquestion ('Typical window','Do you want to specify range? If "no" will be clicked whole range will be deleted.',icon = 'warning')
+        global df
+        msgbox = tk.messagebox.askquestion ('Typical window','Do you want to specify range? If "no" will be clicked whole range will be unlabeled.',icon = 'warning')
         if msgbox == "yes":
-            print("Dorobi się")
+            self.new_root_7 = tk.Toplevel(self.new_root_6, background= "black")
+            self.new_root_7.geometry('600x800')
+            self.vVar1 = tk.DoubleVar()   #bottom handle variable
+            self.vVar2 = tk.DoubleVar()
+            
+            self.vVar1.set(self.start_frame)
+            self.vVar2.set(self.stop_frame)
+            print(self.vVar1)
+            rs1 = RangeSliderH(self.new_root_7, [self.vVar1, self.vVar2], padX=17, min_val = self.vVar1, max_val= self.vVar2)
+            rs1.pack()
+            
         elif msgbox == "no":
             try:
                 assert self.start_frame + self.stop_frame > 0
-                
+                df.loc[self.start_frame:self.stop_frame, self.selection] = np.nan
+                messagebox.showinfo("Information box", "Range unlabeled")
             except AssertionError:
                 messagebox.showerror("Error box", "No frame to delete")
                 
