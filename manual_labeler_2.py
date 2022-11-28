@@ -609,14 +609,17 @@ class Application:
         msgbox = tk.messagebox.askquestion ('Typical window','Do you want to specify range? If "no" will be clicked whole range will be unlabeled.',icon = 'warning')
         if msgbox == "yes":
             self.new_root_7 = tk.Toplevel(self.new_root_6, background= "black")
-            self.new_root_7.geometry('600x800')
+            
             self.vVar1 = tk.DoubleVar()   #bottom handle variable
             self.vVar2 = tk.DoubleVar()
             
             self.vVar1.set(self.start_frame)
             self.vVar2.set(self.stop_frame)
-            print(self.vVar1)
-            rs1 = RangeSliderH(self.new_root_7, [self.vVar1, self.vVar2], padX=17, min_val = self.vVar1, max_val= self.vVar2)
+            
+            self.panel_v2 = tk.Frame(self.new_root_7, background="#116562")
+            self.panel_v2 .pack(fill=tk.BOTH, expand=1, side = tk.TOP)
+            
+            rs1 = RangeSliderH(self.panel_v2, [self.vVar1, self.vVar2], padX=50, min_val = self.start_frame, max_val= self.stop_frame, digit_precision = ".0f")
             rs1.pack()
             
         elif msgbox == "no":
