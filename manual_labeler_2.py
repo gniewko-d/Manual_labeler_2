@@ -619,9 +619,14 @@ class Application:
             self.panel_v2 = tk.Frame(self.new_root_7, background="#116562")
             self.panel_v2 .pack(fill=tk.BOTH, expand=1, side = tk.TOP)
             
-            rs1 = RangeSliderH(self.panel_v2, [self.vVar1, self.vVar2], padX=50, min_val = self.start_frame, max_val= self.stop_frame, digit_precision = ".0f")
-            rs1.pack()
             
+            rs1 = RangeSliderH(self.panel_v2, [self.vVar1, self.vVar2], padX=50, min_val = self.start_frame, max_val= self.stop_frame, digit_precision = ".0f")
+            rs1.pack(side=tk.TOP, fill=tk.BOTH, expand=0)
+            
+            sub_button = tk.Button(self.panel_v2, text = "Submit", background="black", foreground="green", width = 17)
+            sub_button["font"] = self.desired_font
+            sub_button.pack(fill=tk.BOTH, expand=1, side = tk.BOTTOM)
+        
         elif msgbox == "no":
             try:
                 assert self.start_frame + self.stop_frame > 0
