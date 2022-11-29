@@ -620,11 +620,12 @@ class Application:
             self.panel_v2 .pack(fill=tk.BOTH, expand=1, side = tk.TOP)
             
             
-            rs1 = RangeSliderH(self.panel_v2, [self.vVar1, self.vVar2], padX=50, min_val = self.start_frame, max_val= self.stop_frame, digit_precision = ".0f")
-            rs1.pack(side=tk.TOP, fill=tk.BOTH, expand=0)
+            self.rs1 = RangeSliderH(self.panel_v2, [self.vVar1, self.vVar2], padX=50, min_val = self.start_frame, max_val= self.stop_frame, digit_precision = ".0f", bgColor = "#357a38", bar_color_outer = "#000000", bar_color_inner = "#357a38", line_color = "#f30611")
+            self.rs1.pack(side=tk.TOP, fill=tk.BOTH, expand=0)
             
             sub_button = tk.Button(self.panel_v2, text = "Submit", background="black", foreground="green", width = 17)
             sub_button["font"] = self.desired_font
+            sub_button.bind("<Button-1>", lambda event : self.button_delete_range())
             sub_button.pack(fill=tk.BOTH, expand=1, side = tk.BOTTOM)
         
         elif msgbox == "no":
@@ -635,6 +636,9 @@ class Application:
             except AssertionError:
                 messagebox.showerror("Error box", "No frame to delete")
                 
+    def button_delete_range(self):
+            print(self.rs1.getValues())
+        
     def option_menu(self, selection):
         self.value = self.filter_time_dict.get(selection)
         self.value.append(self.value[-1] + 20000)
