@@ -616,6 +616,8 @@ class Application:
             self.vVar1.set(self.start_frame)
             self.vVar2.set(self.stop_frame)
             
+            self.vVar1.trace_add('write', self.doSomething)
+            
             self.panel_v2 = tk.Frame(self.new_root_7, background="#116562")
             self.panel_v2 .pack(fill=tk.BOTH, expand=1, side = tk.TOP)
             
@@ -637,8 +639,11 @@ class Application:
                 messagebox.showerror("Error box", "No frame to delete")
                 
     def button_delete_range(self):
-            print(self.rs1.getValues())
-        
+       a, b = self.rs1.getValues()
+       print("Before: ", self.rs1.getValues(), "After: ", round(a), round(b))
+    def doSomething(self,var, index, mode):
+        print ('I was called.')
+    
     def option_menu(self, selection):
         self.value = self.filter_time_dict.get(selection)
         self.value.append(self.value[-1] + 20000)
