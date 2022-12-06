@@ -378,6 +378,8 @@ class Application:
         tk_plot = FigureCanvasTkAgg(fig, self.new_root_v5)
         tk_plot.get_tk_widget().pack(fill=tk.BOTH)
         
+    def active_window(self, window):
+        window.after(1, lambda: window.focus_force())
     
     def paried_gen(self):
         global join_index_list_g, join_index_list
@@ -606,8 +608,21 @@ class Application:
     
     def delete_range(self):
         global df
+        print("WTF")
         msgbox = tk.messagebox.askquestion ('Typical window','Do you want to specify range? If "no" will be clicked whole range will be unlabeled.',icon = 'warning')
         if msgbox == "yes":
+            current_state = str(self.player_v1.get_state())
+            if current_state == "State.Playing":
+                self.player_v1.pause()
+            self.stop_time_v1 += 10000
+            self.media = self.Instance.media_new(video_file)
+            self.player_v1.set_media(self.media)
+            self.player_v1.set_hwnd(self.videopanel_v1.winfo_id())
+            self.media.add_option(f"stop-time={self.stop_time_v1}")
+            self.player_v1.play()
+            sleep(0.1)
+            self.player_v1.set_time(round(self.start_time))
+            
             self.new_root_7 = tk.Toplevel(self.new_root_6, background= "black")
             
             self.vVar1 = tk.DoubleVar()   #bottom handle variable
@@ -639,10 +654,15 @@ class Application:
                 messagebox.showerror("Error box", "No frame to delete")
                 
     def button_delete_range(self):
-       a, b = self.rs1.getValues()
-       print("Before: ", self.rs1.getValues(), "After: ", round(a), round(b))
+        a, b = self.rs1.getValues()
+        print("Before: ", self.rs1.getValues(), "After: ", round(a), round(b))
     def doSomething(self,var, index, mode):
-        print ('I was called.')
+        a, _ = self.rs1.getValues()
+        
+        self.player_v1.set_time(int(df.loc[df.index == round(a), "Frame time [ms]."]))
+        self.player_v1.play()
+        self.player_v1.pause()
+        self.active_window(self.new_root_6)
     
     def option_menu(self, selection):
         self.value = self.filter_time_dict.get(selection)
