@@ -55,6 +55,7 @@ player_first = 0
 player_second = 0
 save_mother_df_automatic = None
 controler_slider = True
+app = None
 class Application:
     def __init__(self):
         self.root = tk.Tk()
@@ -410,6 +411,7 @@ class Application:
             self.root_support.destroy()
         else:
             pass
+    
     def play_labeled_fun(self):
         if video_file == None or label_list == None or df_checker == False:
             messagebox.showerror("Error box", "Video unlabeled")
@@ -521,6 +523,11 @@ class Application:
 
     def get_play_labeled(self):
         try:    
+            global app
+            if not app:
+                self.start_app()
+                app.close_gate_v2()
+            
             self.time_filter = float(self.box_for_time_v1.get()) * 1000
             self.new_root_5.destroy()
             self.new_root_6 = tk.Toplevel(self.root, background= "black")
@@ -566,7 +573,8 @@ class Application:
             self.current_frames.config(text = self.text_third)
             self.current_frames.pack(fill=tk.BOTH, expand=0, side = tk.LEFT)
             
-            self.delete_range = tk.Button(self.frame_otpions, text = "Unlabel", foreground="green", background= "black", command = self.delete_range) 
+            self.delete_range = tk.Button(self.frame_otpions, text = "Unlabel", foreground="green", background= "black") 
+            self.delete_range.bind("<Button-1>", lambda event: self.delete_range_1())
             self.delete_range["font"] = self.desired_font
             self.delete_range.pack(fill=tk.BOTH, expand=0, side = tk.LEFT)
             
@@ -606,14 +614,13 @@ class Application:
     def next_video_controler(self):
         self.break_point = 1
     
-    def delete_range(self):
+    def delete_range_1(self):
         global df
-        print("WTF")
-        msgbox = tk.messagebox.askquestion ('Typical window','Do you want to specify range? If "no" will be clicked whole range will be unlabeled.',icon = 'warning')
-        if msgbox == "yes":
-            current_state = str(self.player_v1.get_state())
-            if current_state == "State.Playing":
-                self.player_v1.pause()
+        current_state = str(self.player_v1.get_state())
+        if current_state == "State.Playing":
+            self.player_v1.pause()
+        self.msgbox = tk.messagebox.askquestion ('Typical window','Do you want to specify range? If "no" will be clicked whole range will be unlabeled.',icon = 'warning')
+        if self.msgbox == "yes":
             self.stop_time_v1 += 10000
             self.media = self.Instance.media_new(video_file)
             self.player_v1.set_media(self.media)
@@ -622,7 +629,7 @@ class Application:
             self.player_v1.play()
             sleep(0.1)
             self.player_v1.set_time(round(self.start_time))
-            
+            self.player_v1.pause()
             self.new_root_7 = tk.Toplevel(self.new_root_6, background= "black")
             
             self.vVar1 = tk.DoubleVar()   #bottom handle variable
@@ -631,39 +638,82 @@ class Application:
             self.vVar1.set(self.start_frame)
             self.vVar2.set(self.stop_frame)
             
-            self.vVar1.trace_add('write', self.doSomething)
-            
             self.panel_v2 = tk.Frame(self.new_root_7, background="#116562")
             self.panel_v2 .pack(fill=tk.BOTH, expand=1, side = tk.TOP)
             
             
-            self.rs1 = RangeSliderH(self.panel_v2, [self.vVar1, self.vVar2], padX=50, min_val = self.start_frame, max_val= self.stop_frame, digit_precision = ".0f", bgColor = "#357a38", bar_color_outer = "#000000", bar_color_inner = "#357a38", line_color = "#f30611")
+            self.rs1 = RangeSliderH(self.panel_v2, [self.vVar1, self.vVar2], padX=50, min_val = self.start_frame, max_val= self.stop_frame, digit_precision = ".0f", bgColor = "#357a38", bar_color_outer = "#000000", bar_color_inner = "#357a38", line_color = "#000000")
             self.rs1.pack(side=tk.TOP, fill=tk.BOTH, expand=0)
             
-            sub_button = tk.Button(self.panel_v2, text = "Submit", background="black", foreground="green", width = 17)
+            self.aWriteTracerID = self.vVar1.trace_add('write', self.doSomething)
+            self.bWriteTracerID = self.vVar2.trace_add('write', self.doSomething_v1)
+            self.vVar2.trace_remove("write", self.bWriteTracerID)
+            
+            sub_button = tk.Button(self.panel_v2, text = "Cut", background="black", foreground="green", width = 17)
             sub_button["font"] = self.desired_font
             sub_button.bind("<Button-1>", lambda event : self.button_delete_range())
-            sub_button.pack(fill=tk.BOTH, expand=1, side = tk.BOTTOM)
-        
-        elif msgbox == "no":
+            sub_button.pack(fill=tk.BOTH, expand=1, side = tk.LEFT)
+            self.trace_left = tk.Button(self.panel_v2, text = "Left", background="blue", foreground="white", width = 17, command = self.left_slider)
+            self.trace_left["font"] = self.desired_font
+            self.trace_left.pack(fill=tk.BOTH, expand=1, side = tk.LEFT)
+            self.trace_left["state"] = "disabled"
+            
+            self.trace_right = tk.Button(self.panel_v2, text = "Right", background="red", foreground="white", width = 17, command = self.right_slider)
+            self.trace_right["font"] = self.desired_font
+            self.trace_right.pack(fill=tk.BOTH, expand=1, side = tk.LEFT)
+        elif self.msgbox == "no":
             try:
                 assert self.start_frame + self.stop_frame > 0
                 df.loc[self.start_frame:self.stop_frame, self.selection] = np.nan
                 messagebox.showinfo("Information box", "Range unlabeled")
             except AssertionError:
                 messagebox.showerror("Error box", "No frame to delete")
-                
+    def left_slider(self):
+        self.trace_left["state"] = "disabled"
+        self.trace_left.config(background="blue")
+        self.trace_right["state"] = "normal"
+        self.trace_right.config(background="red")
+        self.aWriteTracerID = self.vVar1.trace_add('write', self.doSomething)
+        self.vVar2.trace_remove("write", self.bWriteTracerID)
+        messagebox.showinfo("Information box", "Left slider activated")
+        
+    def right_slider(self):
+        self.trace_left["state"] = "normal"
+        self.trace_left.config(background="red")
+        self.trace_right["state"] = "disabled"
+        self.trace_right.config(background="blue")
+        self.bWriteTracerID = self.vVar2.trace_add('write', self.doSomething_v1)
+        
+        self.vVar1.trace_remove("write", self.aWriteTracerID)
+        messagebox.showinfo("Information box", "Right slider activated")
+        
     def button_delete_range(self):
         a, b = self.rs1.getValues()
-        print("Before: ", self.rs1.getValues(), "After: ", round(a), round(b))
-    def doSomething(self,var, index, mode):
-        a, _ = self.rs1.getValues()
-        
-        self.player_v1.set_time(int(df.loc[df.index == round(a), "Frame time [ms]."]))
-        self.player_v1.play()
-        self.player_v1.pause()
-        self.active_window(self.new_root_6)
+        self.range_basic = self.stop_frame - self.start_frame 
+        self.new_range = round(b) - round(a)
+        self.answer_1 = (self.range_basic - self.new_range) / self.range_basic * 100
+        df.loc[self.start_frame : round(a), self.selection] = np.nan
+        df.loc[round(b) : self.stop_frame, self.selection] = np.nan
+        messagebox.showinfo("Information box", f" Labeled range was cut by {round(self.answer_1, 2)} %")
     
+    def doSomething(self,var, index, mode):
+        if self.trace_left["state"] != "normal":
+            a, b = self.rs1.getValues()
+            self.player_v1.set_time(int(df.loc[df.index == round(a), "Frame time [ms]."]))
+            self.player_v1.play()
+            self.player_v1.pause()
+            self.active_window(self.new_root_6)
+        else:
+            messagebox.showerror("Error box", "Slider deactivated")
+    def doSomething_v1(self,var, index, mode):
+        if self.trace_right["state"] != "normal":
+            a, b = self.rs1.getValues()
+            self.player_v1.set_time(int(df.loc[df.index == round(b), "Frame time [ms]."]))
+            self.player_v1.play()
+            self.player_v1.pause()
+            self.active_window(self.new_root_6)
+        else:
+            messagebox.showerror("Error box", "Slider deactivated")
     def option_menu(self, selection):
         self.value = self.filter_time_dict.get(selection)
         self.value.append(self.value[-1] + 20000)
@@ -1288,7 +1338,18 @@ class Application:
         self.tabel_frame.pack(fill='both', expand=True)
         pt = Table(self.tabel_frame, dataframe=df)
         pt.show()
-        
+    
+    def start_app(self):
+        global app
+        self.root.state(newstate='iconic')
+        self.Instance = vlc.Instance()
+        self.player_v2 = self.Instance.media_player_new()
+        media = self.Instance.media_new(video_file)
+        self.player_v2.set_media(media)
+        #self.player_v2.set_hwnd(self.videopanel.winfo_id())
+        self.newwindow = tk.Toplevel(self.root)
+        app = Start_video(self.newwindow, self.player_v2)
+    
     def bridge_start_video(self):
         global df_checker, df, frame_duration, app
         if video_file == None:
@@ -1319,14 +1380,8 @@ class Application:
                 names_columns = df.columns.tolist()
                 names_columns[0:9]= label_list
                 df.columns = names_columns
-            self.root.state(newstate='iconic')
-            self.Instance = vlc.Instance()
-            self.player_v2 = self.Instance.media_player_new()
-            media = self.Instance.media_new(video_file)
-            self.player_v2.set_media(media)
-            #self.player_v2.set_hwnd(self.videopanel.winfo_id())
-            self.newwindow = tk.Toplevel(self.root)
-            app = Start_video(self.newwindow, self.player_v2)
+            
+            self.start_app()
 
 def disable_event():
     pass
@@ -1682,9 +1737,10 @@ class Start_video:
             second_time = player.get_time()
             time_jump = second_time - first_time
             player.set_time(back_up)
-            self.button_calibration["state"] = tk.DISABLED
-            self.button_calibration.update()
-            self.active_window(master)
+            if str(player) == "self.player":
+                self.button_calibration["state"] = tk.DISABLED
+                self.button_calibration.update()
+                self.active_window(master)
         else:
             back_one_frame = player.get_time()
             time_12 = back_one_frame - round(time_jump)
