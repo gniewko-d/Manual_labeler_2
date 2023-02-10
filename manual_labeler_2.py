@@ -148,6 +148,18 @@ class Application:
         self.save_labeled_frames["font"] = self.desired_font
         self.save_labeled_frames.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
+        self.fourth_frame_v3 =  tk.Frame(self.root, background="#116562", width=400, height = 60)
+        self.fourth_frame_v3.pack(side = tk.TOP, expand=True, fill='both')
+        self.fourth_frame_v3.pack_propagate(0)
+        
+        self.analyzie_label = tk.Button(self.fourth_frame_v3, text= "Analyze the data", command = start_vido3, background="black", foreground="green", width=25)
+        self.analyzie_label["font"] = self.desired_font
+        self.analyzie_label.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
+        
+        self.visualization_label = tk.Button(self.fourth_frame_v3, text= "Visualize the data", command = start_vido3, background="black", foreground="green", width=25)
+        self.visualization_label["font"] = self.desired_font
+        self.visualization_label.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
+        
         self.fourth_frame_v1 = tk.Frame(self.root, background="#116562", width=400, height = 60)
         self.fourth_frame_v1.pack(side = tk.TOP, expand=True, fill='both')
         self.fourth_frame_v1.pack_propagate(0)
@@ -172,6 +184,10 @@ class Application:
     def active_window(self, window):
         window.after(1, lambda: window.focus_force())
     
+    def analyzie_df(self):
+        if video_file == None or label_list == None or df_checker == False:
+            messagebox.showerror("Error box", "To see the result:\n 1. Upload the video \n 2. Submit any label \n 3. Label something")
+        else: 
     def compare_main(self):
         self.new_root_v2 = tk.Toplevel(self.root, background= "black")
         self.new_root_v2.title("Data_comparator")
@@ -2887,6 +2903,8 @@ class Real_time:
                 self.player_v3.play()
                 self.player_v3.pause()
             controler_slider = True
+
+#advert()
 video_object = Application()
 video_object.root.mainloop()
 
