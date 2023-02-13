@@ -56,6 +56,7 @@ player_second = 0
 save_mother_df_automatic = None
 controler_slider = True
 app = None
+
 class Application:
     def __init__(self):
         self.root = tk.Tk()
@@ -152,7 +153,7 @@ class Application:
         self.fourth_frame_v3.pack(side = tk.TOP, expand=True, fill='both')
         self.fourth_frame_v3.pack_propagate(0)
         
-        self.analyzie_label = tk.Button(self.fourth_frame_v3, text= "Analyze the data", command = start_vido3, background="black", foreground="green", width=25)
+        self.analyzie_label = tk.Button(self.fourth_frame_v3, text= "Analyze the data", command = self.analyzie_df, background="black", foreground="green", width=25)
         self.analyzie_label["font"] = self.desired_font
         self.analyzie_label.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
@@ -187,7 +188,125 @@ class Application:
     def analyzie_df(self):
         if video_file == None or label_list == None or df_checker == False:
             messagebox.showerror("Error box", "To see the result:\n 1. Upload the video \n 2. Submit any label \n 3. Label something")
-        else: 
+        else:
+            messagebox.showinfo("Information box", "Choose labels you interested to analyze")
+            self.new_root_5 = tk.Toplevel(self.root, background= "black")
+            self.new_root_5.title("Choose your labels")
+            filter_labels = [i for i in label_list if i != "None"]
+            self.list_of_choosen_2 = []
+            if not filter_labels:
+                messagebox.showerror("Error box", "Labels were not set")
+            else:
+                if label_list[0] != "None":
+                    self.frames_labeled_v1 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v1.pack(side = tk.TOP, expand=True, fill='both')
+                    var1 = tk.StringVar()
+                    var1.set("None")
+                    self.label_check_box_v1 = tk.Checkbutton(self.frames_labeled_v1, text = '1. ' + str(label_list[0]), variable=var1, onvalue=label_list[0], offvalue= "None", background="black", foreground="green", highlightcolor = "black")
+                    self.label_check_box_v1["font"] = self.desired_font
+                    self.label_check_box_v1.pack(side= tk.LEFT)
+                    self.list_of_choosen_2.append(var1)
+                
+                if label_list[1] != "None":
+                    self.frames_labeled_v2 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v2.pack(side = tk.TOP, expand=True, fill='both')
+                    var2 = tk.StringVar()
+                    var2.set("None")
+                    self.label_check_box_v2 = tk.Checkbutton(self.frames_labeled_v2, text = '2. ' + str(label_list[1]), variable=var2, onvalue=label_list[1], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v2["font"] = self.desired_font
+                    self.label_check_box_v2.pack(side= tk.LEFT)
+                    self.list_of_choosen_2.append(var2)
+                    
+                if label_list[2] != "None":
+                    self.frames_labeled_v3 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v3.pack(side = tk.TOP, expand=True, fill='both')
+                    var3 = tk.StringVar()
+                    var3.set("None")
+                    self.label_check_box_v3 = tk.Checkbutton(self.frames_labeled_v3, text = '3. ' + str(label_list[2]), variable=var3, onvalue=label_list[2], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v3["font"] = self.desired_font
+                    self.label_check_box_v3.pack(side= tk.LEFT)
+                    self.list_of_choosen_2.append(var3)
+                
+                if label_list[3] != "None":
+                    self.frames_labeled_v4 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v4.pack(side = tk.TOP, expand=True, fill='both')
+                    var4 = tk.StringVar()
+                    var4.set("None")
+                    self.label_check_box_v4 = tk.Checkbutton(self.frames_labeled_v4, text = '4. ' + str(label_list[3]), variable=var4, onvalue=label_list[3], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v4["font"] = self.desired_font
+                    self.label_check_box_v4.pack(side= tk.LEFT)
+                    self.list_of_choosen_2.append(var4)
+                
+                if label_list[4] != "None":
+                    self.frames_labeled_v5 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v5.pack(side = tk.TOP, expand=True, fill='both')
+                    var5 = tk.StringVar()
+                    var5.set("None")
+                    self.label_check_box_v5 = tk.Checkbutton(self.frames_labeled_v5, text = '5. ' + str(label_list[4]), variable=var5, onvalue=label_list[4], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v5["font"] = self.desired_font
+                    self.label_check_box_v5.pack(side= tk.LEFT)
+                    self.list_of_choosen_2.append(var5)
+                    
+                if label_list[5] != "None":
+                    self.frames_labeled_v6 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v6.pack(side = tk.TOP, expand=True, fill='both')
+                    var6 = tk.StringVar()
+                    var6.set("None")
+                    self.label_check_box_v6 = tk.Checkbutton(self.frames_labeled_v6, text = '6. ' + str(label_list[5]), variable=var6, onvalue=label_list[5], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v6["font"] = self.desired_font
+                    self.label_check_box_v6.pack(side= tk.LEFT)
+                    self.list_of_choosen_2.append(var6)
+                    
+                if label_list[6] != "None":
+                    self.frames_labeled_v7 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v7.pack(side = tk.TOP, expand=True, fill='both')
+                    var7 = tk.StringVar()
+                    var7.set("None")
+                    self.label_check_box_v7 = tk.Checkbutton(self.frames_labeled_v7, text = '7. ' + str(label_list[6]), variable=var7, onvalue=label_list[6], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v7["font"] = self.desired_font
+                    self.label_check_box_v7.pack(side= tk.LEFT)
+                    self.list_of_choosen_2.append(var7)
+                    
+                if label_list[7] != "None":
+                    self.frames_labeled_v8 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v8.pack(side = tk.TOP, expand=True, fill='both')
+                    var8 = tk.StringVar()
+                    var8.set("None")
+                    self.label_check_box_v8 = tk.Checkbutton(self.frames_labeled_v8, text = '8. ' + str(label_list[7]), variable=var8, onvalue=label_list[7], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v8["font"] = self.desired_font
+                    self.label_check_box_v8.pack(side= tk.LEFT)
+                    self.list_of_choosen_2.append(var8)
+                    
+                if label_list[8] != "None":
+                    self.frames_labeled_v9 = tk.Frame(self.new_root_5, background="black", width = 20)
+                    self.frames_labeled_v9.pack(side = tk.TOP, expand=True, fill='both')
+                    var9 = tk.StringVar()
+                    var9.set("None")
+                    self.label_check_box_v9 = tk.Checkbutton(self.frames_labeled_v9, text = '9. ' + str(label_list[8]), variable=var9, onvalue=label_list[8], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v9["font"] = self.desired_font
+                    self.label_check_box_v9.pack(side= tk.LEFT)
+                    self.list_of_choosen_2.append(var9)
+                
+                self.frames_v10 = tk.Frame(self.new_root_5, background="black")
+                self.frames_v10.pack(side = tk.TOP, expand=True, fill='both')
+                
+                self.label_time_box = tk.Label(self.frames_v10, text = "Minimum number of frames required for range", background="black", foreground="green")
+                self.label_time_box["font"] = self.desired_font
+                self.label_time_box.pack(side = tk.LEFT, expand=True, fill='both')
+                
+                self.box_for_time_v6= tk.Entry(self.frames_v10, width = 16, background="black", foreground="green", insertbackground = "green", )
+                self.box_for_time_v6.insert(tk.INSERT, "3")
+                self.box_for_time_v6["font"] = self.desired_font
+                self.box_for_time_v6.pack(side = tk.LEFT, expand=True, fill='both')
+                
+                self.frames_v11 = tk.Frame(self.new_root_5, background="black")
+                self.frames_v11.pack(side = tk.TOP, expand=True, fill='both')
+                
+                self.frames_labeled_submit = tk.Button(self.frames_v11, text = "Save", command = self.get_df, foreground="green", background= "black")
+                self.frames_labeled_submit["font"] = self.desired_font
+                self.frames_labeled_submit.pack(side = tk.TOP, expand=True, fill='both')
+            
+            
     def compare_main(self):
         self.new_root_v2 = tk.Toplevel(self.root, background= "black")
         self.new_root_v2.title("Data_comparator")
@@ -527,15 +646,34 @@ class Application:
                 self.label_time_box = tk.Label(self.frames_v10, text = "Minimal time of videos [s]:", background="black", foreground="green")
                 self.label_time_box.pack(side = tk.LEFT, expand=True, fill='both')
                 
-                self.box_for_time_v1 = tk.Entry(self.frames_v10, width = 16, background="black", foreground="green", insertbackground = "green", )
-                self.box_for_time_v1.insert(tk.INSERT, "1")
-                self.box_for_time_v1.pack(side = tk.LEFT, expand=True, fill='both')
+                self.box_for_time_v6 = tk.Entry(self.frames_v10, width = 16, background="black", foreground="green", insertbackground = "green", )
+                self.box_for_time_v6.insert(tk.INSERT, "1")
+                self.box_for_time_v6.pack(side = tk.LEFT, expand=True, fill='both')
                 
                 self.frames_v11 = tk.Frame(self.new_root_5, background="black")
                 self.frames_v11.pack(side = tk.TOP, expand=True, fill='both')
                 
                 self.frames_labeled_submit = tk.Button(self.frames_v11, text = "Save", command = self.get_play_labeled, foreground="green", background= "black")
                 self.frames_labeled_submit.pack(side = tk.TOP, expand=True, fill='both')
+    
+    def get_df(self):
+        global df, frame_duration
+        self.range_min_size = int(self.box_for_time_v6.get())
+        self.new_root_5.destroy()
+        self.columns_used = [i.get() for i in self.list_of_choosen_2 if i.get() != "None"]
+        
+        self.df_analyzie = pd.DataFrame(columns = ["No. Labeled", "% Labeled", "No. Range"], index = self.columns_used)
+        for j, i in enumerate(self.columns_used):
+            labeled_count = df.loc[:, i].value_counts()[0]
+            labeled_percent = round(labeled_count / len(df), 6)
+            label_time_total = round(frame_duration * labeled_count)
+            index_list = df.loc[df[i] == i, i].index.tolist()
+            index_list.insert(0, index_list[0] - 10)
+            index_list.append(index_list[-1] + 10)
+            index_list = [index_list[ii] for ii in range(1, len(index_list)-1) if not (index_list[ii] - index_list[ii-1] > 1 and index_list[ii] - index_list[ii+1] < -1)]
+            index_list.insert(0, index_list[0] - 10)
+            index_list.append(index_list[-1] + 10)
+            index_list = [index_list[iii] for iii in range(1, len(index_list)-1) if index_list[iii] - index_list[iii-1] > 1 or index_list[iii] - index_list[iii+1] < -1]
 
     def get_play_labeled(self):
         try:    
@@ -2907,4 +3045,3 @@ class Real_time:
 #advert()
 video_object = Application()
 video_object.root.mainloop()
-
