@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Feb 13 21:07:33 2023
+
+@author: malgo
+"""
+
 import threading
 import vlc
 from time import sleep
@@ -662,11 +669,13 @@ class Application:
         self.new_root_5.destroy()
         self.columns_used = [i.get() for i in self.list_of_choosen_2 if i.get() != "None"]
         
-        self.df_analyzie = pd.DataFrame(columns = ["No. Labeled", "% Labeled", "No. Range"], index = self.columns_used)
+        self.df_analyzie = pd.DataFrame(columns = ["No. Labeled", "% Labeled", "Labeled in time [ms]", "No. Ranges" , "Total no. frames in ranges", "Ranges total time"], index = self.columns_used)
         for j, i in enumerate(self.columns_used):
+            
             labeled_count = df.loc[:, i].value_counts()[0]
             labeled_percent = round(labeled_count / len(df), 6)
             label_time_total = round(frame_duration * labeled_count)
+            
             index_list = df.loc[df[i] == i, i].index.tolist()
             index_list.insert(0, index_list[0] - 10)
             index_list.append(index_list[-1] + 10)
@@ -674,7 +683,15 @@ class Application:
             index_list.insert(0, index_list[0] - 10)
             index_list.append(index_list[-1] + 10)
             index_list = [index_list[iii] for iii in range(1, len(index_list)-1) if index_list[iii] - index_list[iii-1] > 1 or index_list[iii] - index_list[iii+1] < -1]
-
+            index_list_tuple = [(index_list[o], index_list[o + 1]) for o in range(0, len(index_list), 2)]
+            
+            range_no = len(index_list_tuple)
+            range_total_frame = [a[1] - a[0] for a in index_list_tuple]
+            range_total_frame = sum(range_total_frame)
+            range_total_time = round(frame_duration * range_total_frame)
+            
+            range_time = [round((a[1] - a[0]) * frame_duration) for a in index_list_tuple]
+            print(range_time)
     def get_play_labeled(self):
         try:    
             global app
