@@ -662,36 +662,68 @@ class Application:
                 
                 self.frames_labeled_submit = tk.Button(self.frames_v11, text = "Save", command = self.get_play_labeled, foreground="green", background= "black")
                 self.frames_labeled_submit.pack(side = tk.TOP, expand=True, fill='both')
-    
+                    
     def get_df(self):
         global df, frame_duration
         self.range_min_size = int(self.box_for_time_v6.get())
         self.new_root_5.destroy()
         self.columns_used = [i.get() for i in self.list_of_choosen_2 if i.get() != "None"]
         
-        self.df_analyzie = pd.DataFrame(columns = ["No. Labeled", "% Labeled", "Labeled in time [ms]", "No. Ranges" , "Total no. frames in ranges", "Ranges total time"], index = self.columns_used)
+        self.df_analyzie = pd.DataFrame(columns = ["Label", "No. Labeled", "% Labeled", "Labeled in time [ms]", "No. Ranges" , "Total no. frames in ranges", "Ranges total time", "Each range time"], index = self.columns_used)
         for j, i in enumerate(self.columns_used):
+            check_for_nan = df.loc[:, i].notnull().values.any()
+            if  check_for_nan:
+                labeled_count = df.loc[:, i].value_counts()[0]
+                labeled_percent = round(labeled_count / len(df), 6)
+                label_time_total = round(frame_duration * labeled_count)
             
-            labeled_count = df.loc[:, i].value_counts()[0]
-            labeled_percent = round(labeled_count / len(df), 6)
-            label_time_total = round(frame_duration * labeled_count)
+                index_list = df.loc[df[i] == i, i].index.tolist()
+                index_list.insert(0, index_list[0] - 10)
+                index_list.append(index_list[-1] + 10)
+                index_list = [index_list[ii] for ii in range(1, len(index_list)-1) if not (index_list[ii] - index_list[ii-1] > 1 and index_list[ii] - index_list[ii+1] < -1)]
+                if index_list:
+                    index_list.insert(0, index_list[0] - 10)
+                    index_list.append(index_list[-1] + 10)
+                    index_list = [index_list[iii] for iii in range(1, len(index_list)-1) if index_list[iii] - index_list[iii-1] > 1 or index_list[iii] - index_list[iii+1] < -1]
+                    index_list_tuple = [(index_list[o], index_list[o + 1]) for o in range(0, len(index_list), 2)]
+                    index_list_tuple = [t for t in index_list_tuple if (t[1] - t[0] +1) >= self.range_min_size]
+
+                    range_no = len(index_list_tuple)
+                    range_total_frame = [a[1] - a[0] +1 for a in index_list_tuple]
+                    ranges_time = [round(h * frame_duration) for h in range_total_frame]
+                    range_total_frame = sum(range_total_frame)
+                    range_total_time = sum(ranges_time)
+                
+                
+                else:
+                    range_no = 0
+                    range_total_frame = 0
+                    range_total_time = 0
+                    ranges_time = 0
+                
+                list_to_append = [i ,labeled_count, labeled_percent, label_time_total, range_no, range_total_frame, range_total_time, ranges_time]
+                self.df_analyzie.iloc[j, :] = list_to_append
+            else:
+                list_to_append = [i, 0, 0, 0, 0, 0, 0, 0]
+                self.df_analyzie.iloc[j, :] = list_to_append
+        
             
-            index_list = df.loc[df[i] == i, i].index.tolist()
-            index_list.insert(0, index_list[0] - 10)
-            index_list.append(index_list[-1] + 10)
-            index_list = [index_list[ii] for ii in range(1, len(index_list)-1) if not (index_list[ii] - index_list[ii-1] > 1 and index_list[ii] - index_list[ii+1] < -1)]
-            index_list.insert(0, index_list[0] - 10)
-            index_list.append(index_list[-1] + 10)
-            index_list = [index_list[iii] for iii in range(1, len(index_list)-1) if index_list[iii] - index_list[iii-1] > 1 or index_list[iii] - index_list[iii+1] < -1]
-            index_list_tuple = [(index_list[o], index_list[o + 1]) for o in range(0, len(index_list), 2)]
+        self.new_root_8 = tk.Toplevel(self.root)
+        self.new_root_8.title("Analysis result")
+        self.tabel_frame_v2 = tk.Frame(self.new_root_8)
+        self.tabel_frame_v2.pack(fill='both', expand=True)
+        pt = Table(self.tabel_frame_v2, dataframe=self.df_analyzie)
+        pt.show()
+        msgbox = tk.messagebox.askquestion ('Information box','Do you want save the result of the analyzis?',icon = 'warning')
+        if msgbox == "yes":
+            video_title = video_file.split("\\")
+            video_title = video_title[-1].split(".")
+            save_file4 = None
+            save_file4 = easygui.diropenbox(msg = "Select folder for a save location", title = "Typical window")
             
-            range_no = len(index_list_tuple)
-            range_total_frame = [a[1] - a[0] for a in index_list_tuple]
-            range_total_frame = sum(range_total_frame)
-            range_total_time = round(frame_duration * range_total_frame)
-            
-            range_time = [round((a[1] - a[0]) * frame_duration) for a in index_list_tuple]
-            print(range_time)
+            self.df_analyzie.to_excel(save_file4 + "//" + video_title[0] +"_label_analysis" + ".xlsx")
+            if save_file4 != None:
+                messagebox.showinfo("Information box", "Data saved")
     def get_play_labeled(self):
         try:    
             global app
