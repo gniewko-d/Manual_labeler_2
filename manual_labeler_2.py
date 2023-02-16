@@ -63,6 +63,7 @@ player_second = 0
 save_mother_df_automatic = None
 controler_slider = True
 app = None
+df_cut = None
 
 class Application:
     def __init__(self):
@@ -73,10 +74,17 @@ class Application:
         
         self.var1 = tk.StringVar()
         self.var1.set("off")
+        
         self.var2 = tk.StringVar()
         self.var2.set("off")
+        
+        self.var3 = tk.StringVar()
+        self.var3.set("off")
+        
+        
         self.var1_controller = False
         self.var2_controller = False
+        self.var3_controller = False
         
         self.reupload_controler = 0
         self.desired_font = tk.font.Font(size = 16)
@@ -1085,8 +1093,13 @@ class Application:
         self.third_frame_v3 = tk.Frame(self.new_root, background="black")
         self.third_frame_v3.pack(expand=True, fill='both')
         
+        self.third_half_frame_v3 = tk.Frame(self.new_root, background="black")
+        self.third_half_frame_v3.pack(expand=True, fill='both')
+        
         self.fourth_frame_v2 = tk.Frame(self.new_root, background="black")
         self.fourth_frame_v2.pack(expand=True, fill='both')
+        
+        
         
         self.instruction = tk.Text(self.first_frame_v1, height = 23, width = 70)
         self.text_v1 = "Press on your keyboard:\n a = move one frame backward\n d = move one frame forward\n space = pause/resume the video\n z = slow down the video\n c = speed up the video\n x = video speed back to normal\n e = frame to which (without it) all the preceding ones will\n\t be appropriately marked (depends on labels name set by user).\n\t Start point is set by key 1-9\n key 1-9 = label current frame and jumpt to next one or\n\t set the beginning of the range.\n\t Next you can move to whatever frame (backward or forward)\n\t and there set the end of the range by key e.\n\t All frames within that range will be labeled\n g = delete last used label (Check active label) from current frame\n h = removes the last labelled range\n Extra seconds = If turn on, adds extra labelled frames (1s-10s), at the \n\t beginning, and end of labeled range but only during playback \n\t (Play labeled frames).\n" 
@@ -1122,10 +1135,22 @@ class Application:
         self.radio_BTN_saving_off_v1["font"] = self.desired_font
         self.radio_BTN_saving_off_v1.pack(side=tk.LEFT, padx=1, pady=1)
               
+        self.label_cut = tk.Label(self.third_half_frame_v3, text = "Drop frames:", foreground="green", background= "black")
+        self.label_cut["font"] = self.desired_font
+        self.label_cut.pack(side=tk.LEFT, padx=1, pady=1)
+        
+        self.radio_BTN_saving_on_v2 = tk.Radiobutton(self.third_half_frame_v3, bg = "black", fg = "green", text = "on", variable = self.var3, value = "on", highlightbackground = "black", selectcolor = "black")
+        self.radio_BTN_saving_on_v2["font"] = self.desired_font
+        self.radio_BTN_saving_on_v2.pack(side=tk.LEFT, padx=1, pady=1)
+        
+        self.radio_BTN_saving_off_v2 = tk.Radiobutton(self.third_half_frame_v3, bg = "black", fg = "green", text = "off", variable = self.var3, value = "off", selectcolor = "black")
+        self.radio_BTN_saving_off_v2["font"] = self.desired_font
+        self.radio_BTN_saving_off_v2.pack(side=tk.LEFT, padx=1, pady=1)
+        
         self.submit = tk.Button(self.fourth_frame_v2, text = "Submit", command = self.get_k_settings, foreground="green", background= "black")
         self.submit["font"] = self.desired_font
         self.submit.pack(side = tk.TOP, expand=True, fill='both', padx=1, pady=1)
-
+        
     def get_k_settings(self):
         global save_file3, radio_variable, save_mother_df_automatic, t
         if self.var1.get() == "on":
@@ -1172,7 +1197,122 @@ class Application:
         if self.var2.get() == "off":
             self.var2_controller = False
             messagebox.showinfo("Information box", "Extra time OFF")
+        if self.var3.get() == "on":
+            self.cut_df()
+        elif self.var3.get() == "off":
+            self.var3_controller = False
+            messagebox.showinfo("Information box", "Data cut OFF")
+    def cut_df(self):
+        self.new_root_9 = tk.Toplevel(self.new_root)
+        self.first_frame_v7 = tk.Frame(self.new_root_9, background="black")
+        self.first_frame_v7.pack(expand=True, fill='both')
+        
+        self.cut_label = tk.Button(self.first_frame_v7, text = "Cut based on label (first)", foreground="green", background= "black", command = self.cut_label_fun)
+        self.cut_label["font"] = self.desired_font
+        self.cut_label.pack(side=tk.TOP, padx=1, pady=1, expand=True, fill='both')
+        
+        self.cut_time = tk.Button(self.first_frame_v7, text = "Cut based on time", foreground="green", background= "black")
+        self.cut_time["font"] = self.desired_font
+        self.cut_time.pack(side=tk.TOP, padx=1, pady=1, expand=True, fill='both')
+    
+    def cut_label_fun(self):
+        if video_file == None or label_list == None or df_checker == False:
+            messagebox.showerror("Error box", "Video unlabeled")
+            self.new_root_9.destroy()
+        else:
+            self.new_root_10 = tk.Toplevel(self.new_root)
+            self.new_root_9.destroy()
+            self.var_column = tk.StringVar()
+            self.var_column.set("1m0_$3vFFeFD^^")
             
+            if label_list[0] != "None":
+                self.frames_labeled_v1 = tk.Frame(self.new_root_10, background="black", width = 20)
+                self.frames_labeled_v1.pack(side = tk.TOP, expand=True, fill='both')
+
+                self.label_check_box_v1 = tk.Radiobutton(self.frames_labeled_v1, text = '1. ' + str(label_list[0]), variable=self.var_column, background="black", foreground="green", value = label_list[0], command = self.cut_label_val, selectcolor = "black")
+                self.label_check_box_v1["font"] = self.desired_font
+                self.label_check_box_v1.pack(side= tk.LEFT)
+            
+            if label_list[1] != "None":
+                self.frames_labeled_v2 = tk.Frame(self.new_root_10, background="black", width = 20)
+                self.frames_labeled_v2.pack(side = tk.TOP, expand=True, fill='both')
+
+                self.label_check_box_v2 = tk.Radiobutton(self.frames_labeled_v2, text = '2. ' + str(label_list[1]), variable=self.var_column, background="black", foreground="green", highlightcolor = "black", value = label_list[1], command = self.cut_label_val, selectcolor = "black")
+                self.label_check_box_v2["font"] = self.desired_font
+                self.label_check_box_v2.pack(side= tk.LEFT)
+                
+            if label_list[2] != "None":
+                self.frames_labeled_v3 = tk.Frame(self.new_root_10, background="black", width = 20)
+                self.frames_labeled_v3.pack(side = tk.TOP, expand=True, fill='both')
+
+                self.label_check_box_v3 = tk.Radiobutton(self.frames_labeled_v3, text = '3. ' + str(label_list[2]), variable=self.var_column, background="black", foreground="green", highlightcolor = "black", value = label_list[2], command = self.cut_label_val, selectcolor = "black")
+                self.label_check_box_v3["font"] = self.desired_font
+                self.label_check_box_v3.pack(side= tk.LEFT)
+            
+            if label_list[3] != "None":
+                self.frames_labeled_v4 = tk.Frame(self.new_root_10, background="black", width = 20)
+                self.frames_labeled_v4.pack(side = tk.TOP, expand=True, fill='both')
+
+                self.label_check_box_v4 = tk.Radiobutton(self.frames_labeled_v4, text = '4. ' + str(label_list[3]), variable=self.var_column, background="black", foreground="green", highlightcolor = "black", value = label_list[3], command = self.cut_label_val, selectcolor = "black")
+                self.label_check_box_v4["font"] = self.desired_font
+                self.label_check_box_v4.pack(side= tk.LEFT)
+            
+            if label_list[4] != "None":
+                self.frames_labeled_v5 = tk.Frame(self.new_root_10, background="black", width = 20)
+                self.frames_labeled_v5.pack(side = tk.TOP, expand=True, fill='both')
+
+                self.label_check_box_v5 = tk.Radiobutton(self.frames_labeled_v5, text = '5. ' + str(label_list[4]), variable=self.var_column, background="black", foreground="green", highlightcolor = "black", value = label_list[4], command = self.cut_label_val, selectcolor = "black")
+                self.label_check_box_v5["font"] = self.desired_font
+                self.label_check_box_v5.pack(side= tk.LEFT)
+                
+            if label_list[5] != "None":
+                self.frames_labeled_v6 = tk.Frame(self.new_root_10, background="black", width = 20)
+                self.frames_labeled_v6.pack(side = tk.TOP, expand=True, fill='both')
+
+                self.label_check_box_v6 = tk.Radiobutton(self.frames_labeled_v6, text = '6. ' + str(label_list[5]), variable=self.var_column, background="black", foreground="green", highlightcolor = "black", value = label_list[5], command = self.cut_label_val, selectcolor = "black")
+                self.label_check_box_v6["font"] = self.desired_font
+                self.label_check_box_v6.pack(side= tk.LEFT)
+                
+            if label_list[6] != "None":
+                self.frames_labeled_v7 = tk.Frame(self.new_root_10, background="black", width = 20)
+                self.frames_labeled_v7.pack(side = tk.TOP, expand=True, fill='both')
+
+                self.label_check_box_v7 = tk.Radiobutton(self.frames_labeled_v7, text = '7. ' + str(label_list[6]), variable=self.var_column, background="black", foreground="green", highlightcolor = "black", value = label_list[6], command = self.cut_label_val, selectcolor = "black")
+                self.label_check_box_v7["font"] = self.desired_font
+                self.label_check_box_v7.pack(side= tk.LEFT)
+                                
+            if label_list[7] != "None":
+                self.frames_labeled_v8 = tk.Frame(self.new_root_10, background="black", width = 20)
+                self.frames_labeled_v8.pack(side = tk.TOP, expand=True, fill='both')
+
+                self.label_check_box_v8 = tk.Radiobutton(self.frames_labeled_v8, text = '8. ' + str(label_list[7]), variable=self.var_column, background="black", foreground="green", highlightcolor = "black", value = label_list[7], command = self.cut_label_val, selectcolor = "black")
+                self.label_check_box_v8["font"] = self.desired_font
+                self.label_check_box_v8.pack(side= tk.LEFT)
+                
+                
+            if label_list[8] != "None":
+                self.frames_labeled_v9 = tk.Frame(self.new_root_10, background="black", width = 20)
+                self.frames_labeled_v9.pack(side = tk.TOP, expand=True, fill='both')
+                
+                self.label_check_box_v9 = tk.Radiobutton(self.frames_labeled_v9, text = '9. ' + str(label_list[8]), variable=self.var_column, background="black", foreground="green", highlightcolor = "black", value = label_list[8], command = self.cut_label_val, selectcolor = "black")
+                self.label_check_box_v9["font"] = self.desired_font
+                self.label_check_box_v9.pack(side= tk.LEFT)
+                
+        
+    def cut_label_val(self):
+        global df, df_cut
+        templet_drop = self.var_column.get()
+        self.new_root_10.destroy()
+        if df.loc[:, templet_drop].notnull().values.any():
+            messagebox.showinfo("Information box", f"Data cut to {self.var_column.get()}")
+            self.var3_controller = True
+            self.row_templete = df.loc[:,templet_drop].first_valid_index()
+            self.new_root_9.destroy()
+            df_cut = df.iloc[self.row_templete:, :]
+        else:
+            messagebox.showerror("Error box", f"Non frame was found with label {templet_drop}")
+            self.new_root_9.destroy()
+        
     def get_scale_val(self):
         global answer_scale
         answer_scale = self.scale_widget.get()
@@ -1190,6 +1330,11 @@ class Application:
             self.var2.set("on")
         else:
             self.var2.set("off")
+        
+        if self.var3_controller:
+            self.var3.set("on")
+        else:
+            self.var3.set("off")
     def label_settings(self):
         global label_name
         self.new_root_2 = tk.Toplevel(self.root, background= "black")
@@ -1528,7 +1673,7 @@ class Application:
             messagebox.showinfo("Information box", "Do not change the content of created files")
 
     def draw_table(self):
-        global df, df_checker
+        global df, df_checker, df_cut
         
         if df_checker == False:
             messagebox.showerror("Error box", "To see your data frame first press start labeling")
@@ -1541,6 +1686,19 @@ class Application:
         self.tabel_frame.pack(fill='both', expand=True)
         pt = Table(self.tabel_frame, dataframe=df)
         pt.show()
+        if self.var3_controller:
+            
+            self.new_root_11 = tk.Toplevel(self.root)
+            self.new_root_11.title("Dropped data frame")
+            self.tabel_frame_v3 = tk.Frame(self.new_root_11)
+            self.tabel_frame_v3.pack(fill='both', expand=True)
+            
+            df_copy = df.copy(deep=True)
+            df_cut = df_copy.iloc[self.row_templete:, :]
+            df_cut["New frame time [ms]"] = df_copy.iloc[:df_cut.shape[0]+1, 9]
+            
+            pt_2 = Table(self.tabel_frame_v3, dataframe=df_cut)
+            pt_2.show()
     
     def start_app(self):
         global app
