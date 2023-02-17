@@ -67,6 +67,7 @@ df_cut = None
 
 class Application:
     def __init__(self):
+        global var3_controller
         self.root = tk.Tk()
         self.root.title("Manual Labeler")
         self.root.protocol("WM_DELETE_WINDOW", disable_event)
@@ -84,7 +85,7 @@ class Application:
         
         self.var1_controller = False
         self.var2_controller = False
-        self.var3_controller = False
+        var3_controller = False
         
         self.reupload_controler = 0
         self.desired_font = tk.font.Font(size = 16)
@@ -172,7 +173,7 @@ class Application:
         self.analyzie_label["font"] = self.desired_font
         self.analyzie_label.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
-        self.visualization_label = tk.Button(self.fourth_frame_v3, text= "Visualize the data", command = start_vido3, background="black", foreground="green", width=25)
+        self.visualization_label = tk.Button(self.fourth_frame_v3, text= "Visualize the data", command = print("to be done"), background="black", foreground="green", width=25)
         self.visualization_label["font"] = self.desired_font
         self.visualization_label.pack(side=tk.LEFT, padx=1, pady=1, expand=True, fill='both')
         
@@ -672,12 +673,12 @@ class Application:
                 self.frames_labeled_submit.pack(side = tk.TOP, expand=True, fill='both')
                     
     def get_df(self):
-        global df, frame_duration
+        global df, frame_duration, df_cut, var3_controller
         self.range_min_size = int(self.box_for_time_v6.get())
         self.new_root_5.destroy()
         self.columns_used = [i.get() for i in self.list_of_choosen_2 if i.get() != "None"]
         
-        self.df_analyzie = pd.DataFrame(columns = ["Label", "No. Labeled", "% Labeled", "Labeled in time [ms]", "No. Ranges" , "Total no. frames in ranges", "Ranges total time", "Each range time"], index = self.columns_used)
+        self.df_analyzie = pd.DataFrame(columns = ["Label", "No. Labeled", "% Labeled", "Labeled in time [ms]", "No. Ranges" , "Total no. frames in ranges", "Ranges total time", "Each range time [ms]"], index = self.columns_used)
         for j, i in enumerate(self.columns_used):
             check_for_nan = df.loc[:, i].notnull().values.any()
             if  check_for_nan:
@@ -715,13 +716,61 @@ class Application:
                 list_to_append = [i, 0, 0, 0, 0, 0, 0, 0]
                 self.df_analyzie.iloc[j, :] = list_to_append
         
+        if var3_controller == True:
+            self.df_analyzie_dropped = pd.DataFrame(columns = ["Label", "No. Labeled", "% Labeled", "Labeled in time [ms]", "No. Ranges" , "Total no. frames in ranges", "Ranges total time", "Each range time [ms]"], index = self.columns_used)
+            df_cut = self.cut_df_v1()
+            for j, i in enumerate(self.columns_used):
+                check_for_nan = df_cut.loc[:, i].notnull().values.any()
+                if  check_for_nan:
+                    labeled_count = df_cut.loc[:, i].value_counts()[0]
+                    labeled_percent = round(labeled_count / len(df_cut), 6)
+                    label_time_total = round(frame_duration * labeled_count)
+                    
+                    index_list = df_cut.loc[df_cut[i] == i, i].index.tolist()
+                    index_list.insert(0, index_list[0] - 10)
+                    index_list.append(index_list[-1] + 10)
+                    index_list = [index_list[ii] for ii in range(1, len(index_list)-1) if not (index_list[ii] - index_list[ii-1] > 1 and index_list[ii] - index_list[ii+1] < -1)]
+                    if index_list:
+                        index_list.insert(0, index_list[0] - 10)
+                        index_list.append(index_list[-1] + 10)
+                        index_list = [index_list[iii] for iii in range(1, len(index_list)-1) if index_list[iii] - index_list[iii-1] > 1 or index_list[iii] - index_list[iii+1] < -1]
+                        index_list_tuple = [(index_list[o], index_list[o + 1]) for o in range(0, len(index_list), 2)]
+                        index_list_tuple = [t for t in index_list_tuple if (t[1] - t[0] +1) >= self.range_min_size]
+
+                        range_no = len(index_list_tuple)
+                        range_total_frame = [a[1] - a[0] +1 for a in index_list_tuple]
+                        ranges_time = [round(h * frame_duration) for h in range_total_frame]
+                        range_total_frame = sum(range_total_frame)
+                        range_total_time = sum(ranges_time)
+                        
+                    else:
+                        range_no = 0
+                        range_total_frame = 0
+                        range_total_time = 0
+                        ranges_time = 0
+                    
+                    list_to_append = [i ,labeled_count, labeled_percent, label_time_total, range_no, range_total_frame, range_total_time, ranges_time]
+                    self.df_analyzie_dropped.iloc[j, :] = list_to_append
+                else:
+                    list_to_append = [i, 0, 0, 0, 0, 0, 0, 0]
+                    self.df_analyzie_dropped.iloc[j, :] = list_to_append
             
+        
         self.new_root_8 = tk.Toplevel(self.root)
         self.new_root_8.title("Analysis result")
         self.tabel_frame_v2 = tk.Frame(self.new_root_8)
         self.tabel_frame_v2.pack(fill='both', expand=True)
         pt = Table(self.tabel_frame_v2, dataframe=self.df_analyzie)
         pt.show()
+        if var3_controller == True:
+            self.new_root_12 = tk.Toplevel(self.root)
+            self.new_root_12.title("Analysis result_dropped")
+            self.tabel_frame_v4 = tk.Frame(self.new_root_12)
+            self.tabel_frame_v4.pack(fill='both', expand=True)
+            pt_3 = Table(self.tabel_frame_v4, dataframe=self.df_analyzie_dropped)
+            pt_3.show()
+        
+        
         msgbox = tk.messagebox.askquestion ('Information box','Do you want save the result of the analyzis?',icon = 'warning')
         if msgbox == "yes":
             video_title = video_file.split("\\")
@@ -729,6 +778,7 @@ class Application:
             save_file4 = None
             save_file4 = easygui.diropenbox(msg = "Select folder for a save location", title = "Typical window")
             
+            self.df_analyzie_dropped.to_excel(save_file4 + "//" + video_title[0] +"_label_analysis_dropped" + ".xlsx")
             self.df_analyzie.to_excel(save_file4 + "//" + video_title[0] +"_label_analysis" + ".xlsx")
             if save_file4 != None:
                 messagebox.showinfo("Information box", "Data saved")
@@ -1068,11 +1118,12 @@ class Application:
             messagebox.showerror("Error box", "Video was not loaded")
     
     def restart_systems(self):
-        global df_checker, label_list, label_name, radio_variable
+        global df_checker, label_list, label_name, radio_variable, var3_controller
         df_checker = False
         label_list = None
         label_name = [f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}"]
         self.var1_controller = False
+        var3_controller = False
         radio_variable = "off"
         if t != None:
             t.cancel()
@@ -1152,7 +1203,7 @@ class Application:
         self.submit.pack(side = tk.TOP, expand=True, fill='both', padx=1, pady=1)
         
     def get_k_settings(self):
-        global save_file3, radio_variable, save_mother_df_automatic, t
+        global save_file3, radio_variable, save_mother_df_automatic, t, var3_controller
         if self.var1.get() == "on":
             if video_file == None:
                 messagebox.showerror("Error box", "Upload the video first")
@@ -1200,7 +1251,7 @@ class Application:
         if self.var3.get() == "on":
             self.cut_df()
         elif self.var3.get() == "off":
-            self.var3_controller = False
+            var3_controller = False
             messagebox.showinfo("Information box", "Data cut OFF")
     def cut_df(self):
         self.new_root_9 = tk.Toplevel(self.new_root)
@@ -1300,19 +1351,27 @@ class Application:
                 
         
     def cut_label_val(self):
-        global df, df_cut
-        templet_drop = self.var_column.get()
+        global df, df_cut, var3_controller
+        self.templet_drop = self.var_column.get()
         self.new_root_10.destroy()
-        if df.loc[:, templet_drop].notnull().values.any():
+        if df.loc[:, self.templet_drop].notnull().values.any():
             messagebox.showinfo("Information box", f"Data cut to {self.var_column.get()}")
-            self.var3_controller = True
-            self.row_templete = df.loc[:,templet_drop].first_valid_index()
+            var3_controller = True
+            self.row_templete = df.loc[:,self.templet_drop].first_valid_index()
             self.new_root_9.destroy()
             df_cut = df.iloc[self.row_templete:, :]
         else:
-            messagebox.showerror("Error box", f"Non frame was found with label {templet_drop}")
+            messagebox.showerror("Error box", f"Non frame was found with label {self.templet_drop}")
             self.new_root_9.destroy()
-        
+    def cut_df_v1(self):
+        global df, df_cut
+        self.row_templete = df.loc[:,self.templet_drop].first_valid_index()
+        df_cut = df.iloc[self.row_templete:, :]
+        origin_values = df.iloc[:df_cut.shape[0], 9].tolist()
+        df_cut["New frame time [ms]"] = origin_values
+        return df_cut
+    
+    
     def get_scale_val(self):
         global answer_scale
         answer_scale = self.scale_widget.get()
@@ -1321,6 +1380,7 @@ class Application:
         messagebox.showinfo("Information box", f"Extra time : {answer_scale}")
         
     def var_checker(self):
+        global var3_controller
         if self.var1_controller:
             self.var1.set("on")
         else:
@@ -1331,7 +1391,7 @@ class Application:
         else:
             self.var2.set("off")
         
-        if self.var3_controller:
+        if var3_controller:
             self.var3.set("on")
         else:
             self.var3.set("off")
@@ -1673,7 +1733,7 @@ class Application:
             messagebox.showinfo("Information box", "Do not change the content of created files")
 
     def draw_table(self):
-        global df, df_checker, df_cut
+        global df, df_checker, df_cut, var3_controller
         
         if df_checker == False:
             messagebox.showerror("Error box", "To see your data frame first press start labeling")
@@ -1686,16 +1746,14 @@ class Application:
         self.tabel_frame.pack(fill='both', expand=True)
         pt = Table(self.tabel_frame, dataframe=df)
         pt.show()
-        if self.var3_controller:
+        if var3_controller:
             
             self.new_root_11 = tk.Toplevel(self.root)
             self.new_root_11.title("Dropped data frame")
             self.tabel_frame_v3 = tk.Frame(self.new_root_11)
             self.tabel_frame_v3.pack(fill='both', expand=True)
             
-            df_copy = df.copy(deep=True)
-            df_cut = df_copy.iloc[self.row_templete:, :]
-            df_cut["New frame time [ms]"] = df_copy.iloc[:df_cut.shape[0]+1, 9]
+            df_cut = self.cut_df_v1()
             
             pt_2 = Table(self.tabel_frame_v3, dataframe=df_cut)
             pt_2.show()
@@ -1829,7 +1887,7 @@ def dtype_checker(data, list_of_columns):
 
 
 def start_vido3():
-    global df, df_checker, video_title
+    global df, df_checker, video_title, app
     if video_file == None or label_list == None or df_checker == False:
         messagebox.showerror("Error box", "Before save current state:\n 1. Upload the video \n 2. Submit any label \n 3. Label something")
     else:
@@ -1845,6 +1903,10 @@ def start_vido3():
         today = str(date.today()).replace("-", "_")
         save_file_excel = save_file + "\\" + video_title[0] + "_" + today + '.xlsx'
         df.to_excel(save_file_excel)
+        if var3_controller == True:
+            save_file_excel_4 = save_file + "\\" + video_title[0] + "_" + today + "_dropped" '.xlsx'
+            df_cut = video_object.cut_df_v1()
+            df_cut.to_excel(save_file_excel_4)
         messagebox.showinfo("Information box", "Data saved successfully :):):)")
 
 
