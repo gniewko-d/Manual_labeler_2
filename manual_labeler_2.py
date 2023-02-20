@@ -67,7 +67,7 @@ df_cut = None
 
 class Application:
     def __init__(self):
-        global var3_controller
+        global var3_controller, var3_5_controller
         self.root = tk.Tk()
         self.root.title("Manual Labeler")
         self.root.protocol("WM_DELETE_WINDOW", disable_event)
@@ -86,6 +86,7 @@ class Application:
         self.var1_controller = False
         self.var2_controller = False
         var3_controller = False
+        var3_5_controller = False
         
         self.reupload_controler = 0
         self.desired_font = tk.font.Font(size = 16)
@@ -581,6 +582,7 @@ class Application:
                     var1 = tk.StringVar()
                     var1.set("None")
                     self.label_check_box_v1 = tk.Checkbutton(self.frames_labeled_v1, text = '1. ' + str(label_list[0]), variable=var1, onvalue=label_list[0], offvalue= "None", background="black", foreground="green", highlightcolor = "black")
+                    self.label_check_box_v1["font"] = self.desired_font
                     self.label_check_box_v1.pack(side= tk.LEFT)
                     self.list_of_choosen.append(var1)
                 
@@ -590,6 +592,7 @@ class Application:
                     var2 = tk.StringVar()
                     var2.set("None")
                     self.label_check_box_v2 = tk.Checkbutton(self.frames_labeled_v2, text = '2. ' + str(label_list[1]), variable=var2, onvalue=label_list[1], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v2["font"] = self.desired_font
                     self.label_check_box_v2.pack(side= tk.LEFT)
                     self.list_of_choosen.append(var2)
                     
@@ -599,6 +602,7 @@ class Application:
                     var3 = tk.StringVar()
                     var3.set("None")
                     self.label_check_box_v3 = tk.Checkbutton(self.frames_labeled_v3, text = '3. ' + str(label_list[2]), variable=var3, onvalue=label_list[2], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v3["font"] = self.desired_font
                     self.label_check_box_v3.pack(side= tk.LEFT)
                     self.list_of_choosen.append(var3)
                 
@@ -608,6 +612,7 @@ class Application:
                     var4 = tk.StringVar()
                     var4.set("None")
                     self.label_check_box_v4 = tk.Checkbutton(self.frames_labeled_v4, text = '4. ' + str(label_list[3]), variable=var4, onvalue=label_list[3], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v4["font"] = self.desired_font
                     self.label_check_box_v4.pack(side= tk.LEFT)
                     self.list_of_choosen.append(var4)
                 
@@ -617,6 +622,7 @@ class Application:
                     var5 = tk.StringVar()
                     var5.set("None")
                     self.label_check_box_v5 = tk.Checkbutton(self.frames_labeled_v5, text = '5. ' + str(label_list[4]), variable=var5, onvalue=label_list[4], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v5["font"] = self.desired_font
                     self.label_check_box_v5.pack(side= tk.LEFT)
                     self.list_of_choosen.append(var5)
                     
@@ -626,6 +632,7 @@ class Application:
                     var6 = tk.StringVar()
                     var6.set("None")
                     self.label_check_box_v6 = tk.Checkbutton(self.frames_labeled_v6, text = '6. ' + str(label_list[5]), variable=var6, onvalue=label_list[5], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v6["font"] = self.desired_font
                     self.label_check_box_v6.pack(side= tk.LEFT)
                     self.list_of_choosen.append(var6)
                     
@@ -635,6 +642,7 @@ class Application:
                     var7 = tk.StringVar()
                     var7.set("None")
                     self.label_check_box_v7 = tk.Checkbutton(self.frames_labeled_v7, text = '7. ' + str(label_list[6]), variable=var7, onvalue=label_list[6], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v7["font"] = self.desired_font
                     self.label_check_box_v7.pack(side= tk.LEFT)
                     self.list_of_choosen.append(var7)
                     
@@ -644,6 +652,7 @@ class Application:
                     var8 = tk.StringVar()
                     var8.set("None")
                     self.label_check_box_v8 = tk.Checkbutton(self.frames_labeled_v8, text = '8. ' + str(label_list[7]), variable=var8, onvalue=label_list[7], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v8["font"] = self.desired_font
                     self.label_check_box_v8.pack(side= tk.LEFT)
                     self.list_of_choosen.append(var8)
                     
@@ -653,6 +662,7 @@ class Application:
                     var9 = tk.StringVar()
                     var9.set("None")
                     self.label_check_box_v9 = tk.Checkbutton(self.frames_labeled_v9, text = '9. ' + str(label_list[8]), variable=var9, onvalue=label_list[8], offvalue="None", background="black", foreground="green")
+                    self.label_check_box_v9["font"] = self.desired_font
                     self.label_check_box_v9.pack(side= tk.LEFT)
                     self.list_of_choosen.append(var9)
                 
@@ -660,6 +670,7 @@ class Application:
                 self.frames_v10.pack(side = tk.TOP, expand=True, fill='both')
                 
                 self.label_time_box = tk.Label(self.frames_v10, text = "Minimal time of videos [s]:", background="black", foreground="green")
+                self.label_time_box["font"] = self.desired_font
                 self.label_time_box.pack(side = tk.LEFT, expand=True, fill='both')
                 
                 self.box_for_time_v6 = tk.Entry(self.frames_v10, width = 16, background="black", foreground="green", insertbackground = "green", )
@@ -670,6 +681,7 @@ class Application:
                 self.frames_v11.pack(side = tk.TOP, expand=True, fill='both')
                 
                 self.frames_labeled_submit = tk.Button(self.frames_v11, text = "Save", command = self.get_play_labeled, foreground="green", background= "black")
+                self.frames_labeled_submit["font"] = self.desired_font
                 self.frames_labeled_submit.pack(side = tk.TOP, expand=True, fill='both')
                     
     def get_df(self):
@@ -754,7 +766,44 @@ class Application:
                 else:
                     list_to_append = [i, 0, 0, 0, 0, 0, 0, 0]
                     self.df_analyzie_dropped.iloc[j, :] = list_to_append
-            
+        if var3_5_controller == True:
+            self.df_analyzie_dropped = pd.DataFrame(columns = ["Label", "No. Labeled", "% Labeled", "Labeled in time [ms]", "No. Ranges" , "Total no. frames in ranges", "Ranges total time", "Each range time [ms]"], index = self.columns_used)
+            df_cut = self.cut_df_v2()
+            for j, i in enumerate(self.columns_used):
+                check_for_nan = df_cut.loc[:, i].notnull().values.any()
+                if  check_for_nan:
+                    labeled_count = df_cut.loc[:, i].value_counts()[0]
+                    labeled_percent = round(labeled_count / len(df_cut), 6)
+                    label_time_total = round(frame_duration * labeled_count)
+                    
+                    index_list = df_cut.loc[df_cut[i] == i, i].index.tolist()
+                    index_list.insert(0, index_list[0] - 10)
+                    index_list.append(index_list[-1] + 10)
+                    index_list = [index_list[ii] for ii in range(1, len(index_list)-1) if not (index_list[ii] - index_list[ii-1] > 1 and index_list[ii] - index_list[ii+1] < -1)]
+                    if index_list:
+                        index_list.insert(0, index_list[0] - 10)
+                        index_list.append(index_list[-1] + 10)
+                        index_list = [index_list[iii] for iii in range(1, len(index_list)-1) if index_list[iii] - index_list[iii-1] > 1 or index_list[iii] - index_list[iii+1] < -1]
+                        index_list_tuple = [(index_list[o], index_list[o + 1]) for o in range(0, len(index_list), 2)]
+                        index_list_tuple = [t for t in index_list_tuple if (t[1] - t[0] +1) >= self.range_min_size]
+
+                        range_no = len(index_list_tuple)
+                        range_total_frame = [a[1] - a[0] +1 for a in index_list_tuple]
+                        ranges_time = [round(h * frame_duration) for h in range_total_frame]
+                        range_total_frame = sum(range_total_frame)
+                        range_total_time = sum(ranges_time)
+                        
+                    else:
+                        range_no = 0
+                        range_total_frame = 0
+                        range_total_time = 0
+                        ranges_time = 0
+                    
+                    list_to_append = [i ,labeled_count, labeled_percent, label_time_total, range_no, range_total_frame, range_total_time, ranges_time]
+                    self.df_analyzie_dropped.iloc[j, :] = list_to_append
+                else:
+                    list_to_append = [i, 0, 0, 0, 0, 0, 0, 0]
+                    self.df_analyzie_dropped.iloc[j, :] = list_to_append
         
         self.new_root_8 = tk.Toplevel(self.root)
         self.new_root_8.title("Analysis result")
@@ -762,7 +811,7 @@ class Application:
         self.tabel_frame_v2.pack(fill='both', expand=True)
         pt = Table(self.tabel_frame_v2, dataframe=self.df_analyzie)
         pt.show()
-        if var3_controller == True:
+        if var3_controller == True or var3_5_controller == True:
             self.new_root_12 = tk.Toplevel(self.root)
             self.new_root_12.title("Analysis result_dropped")
             self.tabel_frame_v4 = tk.Frame(self.new_root_12)
@@ -789,7 +838,7 @@ class Application:
                 self.start_app()
                 app.close_gate_v2()
             
-            self.time_filter = float(self.box_for_time_v1.get()) * 1000
+            self.time_filter = float(self.box_for_time_v6.get()) * 1000
             self.new_root_5.destroy()
             self.new_root_6 = tk.Toplevel(self.root, background= "black")
             self.new_root_6.title("Video screen")
@@ -1118,12 +1167,13 @@ class Application:
             messagebox.showerror("Error box", "Video was not loaded")
     
     def restart_systems(self):
-        global df_checker, label_list, label_name, radio_variable, var3_controller
+        global df_checker, label_list, label_name, radio_variable, var3_controller, var3_5_controller
         df_checker = False
         label_list = None
         label_name = [f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}",f"{None}"]
         self.var1_controller = False
         var3_controller = False
+        var3_5_controller = False
         radio_variable = "off"
         if t != None:
             t.cancel()
@@ -1203,7 +1253,7 @@ class Application:
         self.submit.pack(side = tk.TOP, expand=True, fill='both', padx=1, pady=1)
         
     def get_k_settings(self):
-        global save_file3, radio_variable, save_mother_df_automatic, t, var3_controller
+        global save_file3, radio_variable, save_mother_df_automatic, t, var3_controller, var3_5_controller
         if self.var1.get() == "on":
             if video_file == None:
                 messagebox.showerror("Error box", "Upload the video first")
@@ -1252,7 +1302,9 @@ class Application:
             self.cut_df()
         elif self.var3.get() == "off":
             var3_controller = False
+            var3_5_controller = False
             messagebox.showinfo("Information box", "Data cut OFF")
+    
     def cut_df(self):
         self.new_root_9 = tk.Toplevel(self.new_root)
         self.first_frame_v7 = tk.Frame(self.new_root_9, background="black")
@@ -1262,10 +1314,52 @@ class Application:
         self.cut_label["font"] = self.desired_font
         self.cut_label.pack(side=tk.TOP, padx=1, pady=1, expand=True, fill='both')
         
-        self.cut_time = tk.Button(self.first_frame_v7, text = "Cut based on time", foreground="green", background= "black")
+        self.cut_time = tk.Button(self.first_frame_v7, text = "Cut based on time", foreground="green", background= "black", command= self.cut_df_time)
         self.cut_time["font"] = self.desired_font
         self.cut_time.pack(side=tk.TOP, padx=1, pady=1, expand=True, fill='both')
     
+    def cut_df_time(self):
+        if video_file == None or label_list == None or df_checker == False:
+            messagebox.showerror("Error box", "Press ""Start Labeling"" before cutting the video")
+            self.new_root_9.destroy()
+        else:
+            self.new_root_9.destroy()
+            self.new_root_13 = tk.Toplevel(self.new_root)
+    
+            self.frame_start = tk.Frame(self.new_root_13, background="black", width = 20)
+            self.frame_start.pack(side = tk.TOP, expand=True, fill='both')
+            
+            self.label_star_cut = tk.Label(self.frame_start, text = "Cut from [ms]:", foreground="green", background= "black")
+            self.label_star_cut["font"] = self.desired_font
+            self.label_star_cut.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
+            
+            self.box_for_time_v7 = tk.Entry(self.frame_start, width = 16, background="black", foreground="#FF1493", insertbackground = "#FF1493", relief = tk.RAISED)
+            self.box_for_time_v7.insert(0, "0")
+            self.box_for_time_v7["font"] = self.desired_font
+            self.box_for_time_v7.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+            
+            self.submit_cut_time_frame = tk.Frame(self.new_root_13, background="black", width = 20)
+            self.submit_cut_time_frame.pack(side = tk.TOP, expand=True, fill='both')
+            
+            self.submit_cut_time_button = tk.Button(self.submit_cut_time_frame, text = "Submit", foreground="green", background= "black", command= self.cut_label_fun_time)
+            self.submit_cut_time_button["font"] = self.desired_font
+            self.submit_cut_time_button.pack(side=tk.LEFT, expand=True, fill='both', padx=1, pady=1)
+            
+    def cut_label_fun_time(self):
+        global df, var3_controller, var3_5_controller
+        cut_from = self.box_for_time_v7.get()
+        try:
+            cut_from = int(cut_from)
+        except ValueError:
+            messagebox.showerror("Error box", f"Warning! Incorrect value inserted. Your value: [{cut_from}] . Try with integers ")
+        finally:
+            self.templet_list_of_times = df["Frame time [ms]."].tolist()
+            self.real_cut_from = min(self.templet_list_of_times, key=lambda x:abs(x-cut_from))
+            self.real_cut_from = self.templet_list_of_times.index(self.real_cut_from) +1
+            df_cut = self.cut_df_v2()
+            var3_controller = False
+            var3_5_controller = True
+            messagebox.showinfo("Information box", f"Data cut to frame {self.real_cut_from}")
     def cut_label_fun(self):
         if video_file == None or label_list == None or df_checker == False:
             messagebox.showerror("Error box", "Video unlabeled")
@@ -1351,18 +1445,21 @@ class Application:
                 
         
     def cut_label_val(self):
-        global df, df_cut, var3_controller
+        global df, df_cut, var3_controller, var3_5_controller
         self.templet_drop = self.var_column.get()
         self.new_root_10.destroy()
         if df.loc[:, self.templet_drop].notnull().values.any():
             messagebox.showinfo("Information box", f"Data cut to {self.var_column.get()}")
             var3_controller = True
+            var3_5_controller = False
             self.row_templete = df.loc[:,self.templet_drop].first_valid_index()
             self.new_root_9.destroy()
             df_cut = df.iloc[self.row_templete:, :]
+            
         else:
             messagebox.showerror("Error box", f"Non frame was found with label {self.templet_drop}")
             self.new_root_9.destroy()
+    
     def cut_df_v1(self):
         global df, df_cut
         self.row_templete = df.loc[:,self.templet_drop].first_valid_index()
@@ -1371,6 +1468,12 @@ class Application:
         df_cut["New frame time [ms]"] = origin_values
         return df_cut
     
+    def cut_df_v2(self):
+        global df, df_cut
+        df_cut = df.iloc[self.real_cut_from:, :]
+        origin_values = df.iloc[:df_cut.shape[0], 9].tolist()
+        df_cut["New frame time [ms]"] = origin_values
+        return df_cut
     
     def get_scale_val(self):
         global answer_scale
@@ -1391,10 +1494,12 @@ class Application:
         else:
             self.var2.set("off")
         
-        if var3_controller:
+        if var3_controller or var3_5_controller:
             self.var3.set("on")
         else:
             self.var3.set("off")
+        
+            
     def label_settings(self):
         global label_name
         self.new_root_2 = tk.Toplevel(self.root, background= "black")
@@ -1757,6 +1862,17 @@ class Application:
             
             pt_2 = Table(self.tabel_frame_v3, dataframe=df_cut)
             pt_2.show()
+        
+        if var3_5_controller:
+            self.new_root_11 = tk.Toplevel(self.root)
+            self.new_root_11.title("Dropped data frame")
+            self.tabel_frame_v3 = tk.Frame(self.new_root_11)
+            self.tabel_frame_v3.pack(fill='both', expand=True)
+            
+            df_cut = self.cut_df_v2()
+            
+            pt_2 = Table(self.tabel_frame_v3, dataframe=df_cut)
+            pt_2.show()
     
     def start_app(self):
         global app
@@ -1907,6 +2023,11 @@ def start_vido3():
             save_file_excel_4 = save_file + "\\" + video_title[0] + "_" + today + "_dropped" '.xlsx'
             df_cut = video_object.cut_df_v1()
             df_cut.to_excel(save_file_excel_4)
+        if var3_5_controller == True:
+            save_file_excel_4 = save_file + "\\" + video_title[0] + "_" + today + "_dropped" '.xlsx'
+            df_cut = video_object.cut_df_v2()
+            df_cut.to_excel(save_file_excel_4)
+        
         messagebox.showinfo("Information box", "Data saved successfully :):):)")
 
 
